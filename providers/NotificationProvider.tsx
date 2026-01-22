@@ -50,7 +50,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
             projectId,
         });
         setExpoPushToken(token);
-        // console.log("token", token);
+        console.log("token", token);
 
         // Send the token to your backend for notification delivery
         await notificationsService.savePushToken(token);
@@ -60,6 +60,10 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
         receivedNotification: Notifications.Notification | null,
     ) => {
         if (receivedNotification) {
+            console.log(
+                "receivedNotification",
+                JSON.stringify(receivedNotification, null, 2),
+            );
             setNotification(receivedNotification);
 
             // Do NOT navigate here, only update state
@@ -74,6 +78,10 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
 
         const notificationListener =
             Notifications.addNotificationReceivedListener((notification) => {
+                console.log(
+                    "notificationListener",
+                    JSON.stringify(notification, null, 2),
+                );
                 handleNotification(notification);
             });
 

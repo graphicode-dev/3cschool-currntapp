@@ -12,15 +12,13 @@ function Providers({ children }: { children: React.ReactNode }) {
     const colorScheme = useColorScheme();
 
     return (
-        <NotificationProvider>
-            <Provider store={store}>
-                <ThemeProvider
-                    value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-                >
-                    {children}
-                </ThemeProvider>
-            </Provider>
-        </NotificationProvider>
+        <Provider store={store}>
+            <ThemeProvider
+                value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+            >
+                <NotificationProvider>{children}</NotificationProvider>
+            </ThemeProvider>
+        </Provider>
     );
 }
 export default Providers;

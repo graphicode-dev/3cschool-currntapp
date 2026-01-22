@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { notificationsService } from "@/services/notificationsService";
 import { useAppSelector } from "@/store";
 import { selectAuth } from "@/store/slices/authSlice";

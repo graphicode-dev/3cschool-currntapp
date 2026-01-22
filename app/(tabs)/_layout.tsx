@@ -3,7 +3,6 @@ import { Tabs } from "expo-router";
 import React, { useEffect } from "react";
 
 import { HapticTab } from "@/components/haptic-tab";
-import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useAppDispatch, useAppSelector } from "@/store";
 import {
     fetchUnreadCount,
@@ -11,7 +10,6 @@ import {
 } from "@/store/slices/notificationsSlice";
 
 export default function TabLayout() {
-    const colorScheme = useColorScheme();
     const dispatch = useAppDispatch();
     const { unreadCount } = useAppSelector(selectNotifications);
 
@@ -98,18 +96,6 @@ export default function TabLayout() {
                             color={color}
                         />
                     ),
-                }}
-            />
-            <Tabs.Screen
-                name="index"
-                options={{
-                    href: null,
-                }}
-            />
-            <Tabs.Screen
-                name="explore"
-                options={{
-                    href: null,
                 }}
             />
         </Tabs>

@@ -1,7 +1,9 @@
 /* eslint-disable react-hooks/exhaustive-deps */
+import Toast from "@/components/Toast";
 import { notificationsService } from "@/services/notificationsService";
-import { useAppSelector } from "@/store";
+import { useAppDispatch, useAppSelector } from "@/store";
 import { selectAuth } from "@/store/slices/authSlice";
+import { fetchUnreadCount } from "@/store/slices/notificationsSlice";
 import Constants from "expo-constants";
 import * as Notifications from "expo-notifications";
 import React, { createContext, useContext, useEffect, useState } from "react";
@@ -19,6 +21,7 @@ const NotificationContext = createContext<NotificationContextType | undefined>(
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
     children,
 }) => {
+    const dispatch = useAppDispatch();
     const { user } = useAppSelector(selectAuth);
     const projectId =
         Constants?.expoConfig?.extra?.eas?.projectId ??
@@ -26,6 +29,11 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
     const [expoPushToken, setExpoPushToken] = useState<string | null>(null);
     const [notification, setNotification] =
         useState<Notifications.Notification | null>(null);
+    const [toastVisible, setToastVisible] = useState(false);
+    const [toastData, setToastData] = useState<{
+        title: string;
+        message?: string;
+    } | null>(null);
 
     // Register for push notifications
     const registerForPushNotifications = async () => {
@@ -66,6 +74,17 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
             );
             setNotification(receivedNotification);
 
+            // Refresh unread count when a push notification is received
+            dispatch(fetchUnreadCount());
+
+            // Show toast notification
+            const title =
+                receivedNotification.request.content.title ||
+                "New Notification";
+            const body = receivedNotification.request.content.body || undefined;
+            setToastData({ title, message: body });
+            setToastVisible(true);
+
             // Do NOT navigate here, only update state
             setTimeout(() => {
                 setNotification(null);
@@ -100,6 +119,13 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
             }}
         >
             {children}
+            <Toast
+                visible={toastVisible}
+                title={toastData?.title || ""}
+                message={toastData?.message}
+                type="info"
+                onDismiss={() => setToastVisible(false)}
+            />
         </NotificationContext.Provider>
     );
 };

@@ -2,16 +2,18 @@ import { configureStore } from "@reduxjs/toolkit";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import authReducer from "./slices/authSlice";
 import groupsReducer from "./slices/groupsSlice";
+import notificationsReducer from "./slices/notificationsSlice";
 
 export const store = configureStore({
-  reducer: {
-    auth: authReducer,
-    groups: groupsReducer,
-  },
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware({
-      serializableCheck: false,
-    }),
+    reducer: {
+        auth: authReducer,
+        groups: groupsReducer,
+        notifications: notificationsReducer,
+    },
+    middleware: (getDefaultMiddleware) =>
+        getDefaultMiddleware({
+            serializableCheck: false,
+        }),
 });
 
 export type RootState = ReturnType<typeof store.getState>;

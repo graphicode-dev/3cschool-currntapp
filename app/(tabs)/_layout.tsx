@@ -1,83 +1,117 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
-import React from "react";
+import React, { useEffect } from "react";
 
 import { HapticTab } from "@/components/haptic-tab";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { useAppDispatch, useAppSelector } from "@/store";
+import {
+    fetchUnreadCount,
+    selectNotifications,
+} from "@/store/slices/notificationsSlice";
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+    const colorScheme = useColorScheme();
+    const dispatch = useAppDispatch();
+    const { unreadCount } = useAppSelector(selectNotifications);
 
-  return (
-    <Tabs
-      initialRouteName="chats"
-      screenOptions={{
-        tabBarActiveTintColor: "#00aeed",
-        tabBarInactiveTintColor: "#9ca3af",
-        headerShown: false,
-        tabBarButton: HapticTab,
-        tabBarStyle: {
-          backgroundColor: "#ffffff",
-          borderTopWidth: 1,
-          borderTopColor: "#e5e7eb",
-          height: 78,
-          paddingTop: 8,
-          paddingBottom: 20,
-        },
-        tabBarLabelStyle: {
-          fontSize: 14,
-          fontWeight: "400",
-        },
-      }}
-    >
-      <Tabs.Screen
-        name="chats"
-        options={{
-          title: "Groups",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="people-outline" size={24} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="tickets"
-        options={{
-          title: "Ticket",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="ticket-outline" size={24} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="notifications"
-        options={{
-          title: "Notifications",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="notifications-outline" size={24} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: "Profile",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person-outline" size={24} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="index"
-        options={{
-          href: null,
-        }}
-      />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          href: null,
-        }}
-      />
-    </Tabs>
-  );
+    useEffect(() => {
+        dispatch(fetchUnreadCount());
+    }, [dispatch]);
+
+    return (
+        <Tabs
+            initialRouteName="chats"
+            screenOptions={{
+                tabBarActiveTintColor: "#00aeed",
+                tabBarInactiveTintColor: "#9ca3af",
+                headerShown: false,
+                tabBarButton: HapticTab,
+                tabBarStyle: {
+                    backgroundColor: "#ffffff",
+                    borderTopWidth: 1,
+                    borderTopColor: "#e5e7eb",
+                    height: 78,
+                    paddingTop: 8,
+                    paddingBottom: 20,
+                },
+                tabBarLabelStyle: {
+                    fontSize: 14,
+                    fontWeight: "400",
+                },
+            }}
+        >
+            <Tabs.Screen
+                name="chats"
+                options={{
+                    title: "Groups",
+                    tabBarIcon: ({ color, size }) => (
+                        <Ionicons
+                            name="people-outline"
+                            size={24}
+                            color={color}
+                        />
+                    ),
+                }}
+            />
+            <Tabs.Screen
+                name="tickets"
+                options={{
+                    title: "Ticket",
+                    tabBarIcon: ({ color, size }) => (
+                        <Ionicons
+                            name="ticket-outline"
+                            size={24}
+                            color={color}
+                        />
+                    ),
+                }}
+            />
+            <Tabs.Screen
+                name="notifications"
+                options={{
+                    title: "Notifications",
+                    tabBarIcon: ({ color, size }) => (
+                        <Ionicons
+                            name="notifications-outline"
+                            size={24}
+                            color={color}
+                        />
+                    ),
+                    tabBarBadge: unreadCount > 0 ? unreadCount : undefined,
+                    tabBarBadgeStyle: {
+                        backgroundColor: "#dc2626",
+                        fontSize: 10,
+                        minWidth: 18,
+                        height: 18,
+                    },
+                }}
+            />
+            <Tabs.Screen
+                name="profile"
+                options={{
+                    title: "Profile",
+                    tabBarIcon: ({ color, size }) => (
+                        <Ionicons
+                            name="person-outline"
+                            size={24}
+                            color={color}
+                        />
+                    ),
+                }}
+            />
+            <Tabs.Screen
+                name="index"
+                options={{
+                    href: null,
+                }}
+            />
+            <Tabs.Screen
+                name="explore"
+                options={{
+                    href: null,
+                }}
+            />
+        </Tabs>
+    );
 }

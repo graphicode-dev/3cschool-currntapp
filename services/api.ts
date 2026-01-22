@@ -59,6 +59,8 @@ class ApiService {
                 throw error;
             }
 
+            console.log(JSON.stringify(data, null, 2));
+
             return data as ApiResponse<T>;
         } catch (error) {
             if ((error as ApiError).code) {

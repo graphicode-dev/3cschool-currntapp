@@ -6,6 +6,7 @@ import {
     ThemeProvider,
 } from "@react-navigation/native";
 import { Provider } from "react-redux";
+import { AuthGate } from "./AuthGate";
 import { NotificationProvider } from "./NotificationProvider";
 
 function Providers({ children }: { children: React.ReactNode }) {
@@ -16,7 +17,9 @@ function Providers({ children }: { children: React.ReactNode }) {
             <ThemeProvider
                 value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
             >
-                <NotificationProvider>{children}</NotificationProvider>
+                <AuthGate>
+                    <NotificationProvider>{children}</NotificationProvider>
+                </AuthGate>
             </ThemeProvider>
         </Provider>
     );

@@ -1,48 +1,69 @@
 {
-  "expo": {
-    "name": "myApp",
-    "slug": "myApp",
-    "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
-    "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
-    "ios": {
-      "supportsTablet": true
-    },
-    "android": {
-      "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
-      },
-      "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
-    },
-    "web": {
-      "output": "static",
-      "favicon": "./assets/images/favicon.png"
-    },
-    "plugins": [
-      "expo-router",
-      [
-        "expo-splash-screen",
-        {
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
-          "dark": {
-            "backgroundColor": "#000000"
-          }
-        }
-      ]
-    ],
-    "experiments": {
-      "typedRoutes": true,
-      "reactCompiler": true
+    "expo": {
+        "scheme": "3c",
+        "platforms": ["ios", "android"],
+        "name": "3c",
+        "slug": "3c",
+        "version": "1.0.0",
+        "orientation": "portrait",
+        "icon": "./assets/icon/android-adaptive-icon.png",
+        "userInterfaceStyle": "automatic",
+        "newArchEnabled": true,
+        "notification": {
+            "icon": "./assets/icon/notification.png",
+            "color": "#ffffff"
+        },
+        "ios": {
+            "supportsTablet": true,
+            "icon": {
+                "dark": "./assets/icon/ios-adaptive-dark-icon.png",
+                "light": "./assets/icon/ios-adaptive-light-icon.png"
+            }
+        },
+        "android": {
+            "adaptiveIcon": {
+                "backgroundColor": "#E6F4FE",
+                "foregroundImage": "./assets/icon/android-adaptive-icon.png"
+            },
+            "permissions": ["NOTIFICATIONS"],
+            "googleServicesFile": "./google-services.json",
+            "edgeToEdgeEnabled": true,
+            "predictiveBackGestureEnabled": false,
+            "package": "app.c3school.current"
+        },
+        "plugins": [
+            "expo-router",
+            [
+                "expo-splash-screen",
+                {
+                    "image": "./assets/icon/splash-icon.png",
+                    "imageWidth": 200,
+                    "resizeMode": "contain",
+                    "backgroundColor": "#ffffff",
+                    "dark": {
+                        "backgroundColor": "#000000"
+                    }
+                }
+            ],
+            [
+                "expo-notifications",
+                {
+                    "icon": "./assets/icons/android-notification.png",
+                    "color": "#ffffff"
+                }
+            ]
+        ],
+        "experiments": {
+            "typedRoutes": true,
+            "reactCompiler": true
+        },
+        "extra": {
+            "router": {},
+            "eas": {
+                "projectId": "9fa16be6-9e25-49af-b344-9dc9b15f376e"
+            },
+            "apiUrl": "https://3cschool.net/api"
+        },
+        "owner": "graphicode"
     }
-  }
 }

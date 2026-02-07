@@ -31,11 +31,19 @@ class ApiService {
     ): Promise<ApiResponse<T>> {
         const url = `${BASE_URL}${endpoint}`;
 
+        const isFormDataBody =
+            typeof FormData !== "undefined" && options.body instanceof FormData;
+
         const headers: HeadersInit = {
-            "Content-Type": "application/json",
             Accept: "application/json",
             ...options.headers,
         };
+
+        if (!isFormDataBody) {
+            (headers as Record<string, string>)["Content-Type"] =
+                (headers as Record<string, string>)["Content-Type"] ||
+                "application/json";
+        }
 
         if (this.token) {
             (headers as Record<string, string>)["Authorization"] =
@@ -85,6 +93,16 @@ class ApiService {
         return this.request<T>(endpoint, {
             method: "POST",
             body: JSON.stringify(body),
+        });
+    }
+
+    async postFormData<T>(
+        endpoint: string,
+        formData: FormData,
+    ): Promise<ApiResponse<T>> {
+        return this.request<T>(endpoint, {
+            method: "POST",
+            body: formData,
         });
     }
 

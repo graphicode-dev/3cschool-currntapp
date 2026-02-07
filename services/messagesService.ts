@@ -14,6 +14,10 @@ export interface Message {
   course_group_id: number;
   type: string;
   message: string;
+  attachment_path?: string | null;
+  attachment_name?: string | null;
+  attachment_type?: string | null;
+  attachment_size?: number | null;
   read_at: string | null;
   created_at: string;
   updated_at: string;
@@ -22,6 +26,12 @@ export interface Message {
 
 export interface SendMessageRequest {
   message: string;
+}
+
+export interface AttachmentInput {
+  uri: string;
+  name: string;
+  mimeType?: string;
 }
 
 export interface Pagination {
@@ -59,10 +69,32 @@ export const messagesService = {
   async sendMessage(
     groupId: number,
     userId: number,
-    message: string,
+    message?: string,
+    attachment?: AttachmentInput,
   ): Promise<ApiResponse<Message>> {
+    if (attachment) {
+      const formData = new FormData();
+      if (message && message.trim().length > 0) {
+        formData.append("message", message.trim());
+      }
+
+      formData.append(
+        "attachment",
+        {
+          uri: attachment.uri,
+          name: attachment.name,
+          type: attachment.mimeType || "application/octet-stream",
+        } as any,
+      );
+
+      return api.postFormData<Message>(
+        `/groups/${groupId}/messages/${userId}`,
+        formData,
+      );
+    }
+
     return api.post<Message>(`/groups/${groupId}/messages/${userId}`, {
-      message,
+      message: message || "",
     });
   },
 

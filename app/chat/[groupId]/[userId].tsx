@@ -1,27 +1,40 @@
 import {
-  Message,
-  messagesService,
-  Pagination,
+    Message,
+    messagesService,
+    Pagination,
 } from "@/services/messagesService";
 import { useAppSelector } from "@/store";
 import { Ionicons } from "@expo/vector-icons";
+import * as Clipboard from "expo-clipboard";
+import * as DocumentPicker from "expo-document-picker";
+import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
-  ActivityIndicator,
-  FlatList,
-  KeyboardAvoidingView,
-  Platform,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    FlatList,
+    KeyboardAvoidingView,
+    Linking,
+    Platform,
+    Pressable,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const BASE_URL = "https://3cschool.net";
+
+type SelectedAttachment = {
+    uri: string;
+    name: string;
+    mimeType?: string;
+    size?: number;
+};
 
 interface DisplayMessage {
     id: string;
@@ -29,6 +42,8 @@ interface DisplayMessage {
     sender?: string;
     senderAvatar?: string | null;
     text: string;
+    attachmentUrl?: string | null;
+    attachmentName?: string | null;
     time?: string;
     isRead?: boolean;
 }
@@ -77,8 +92,75 @@ function SystemMessage({ text }: { text: string }) {
     );
 }
 
+function normalizeUrl(raw: string) {
+    if (/^https?:\/\//i.test(raw)) return raw;
+    return `https://${raw}`;
+}
+
+function normalizePhone(raw: string) {
+    // Remove all non-digit characters except leading +
+    const cleaned = raw.replace(/[^\d+]/g, "");
+    return `tel:${cleaned}`;
+}
+
+function renderTextWithLinks(text: string) {
+    // Combined regex for URLs and phone numbers
+    const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+|[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}[^\s]*)/;
+    const phoneRegex = /(\+?\d[\d\s\-().]{7,}\d)/;
+    const combinedRegex = new RegExp(
+        `${urlRegex.source}|${phoneRegex.source}`,
+        "g"
+    );
+
+    const parts = text.split(combinedRegex);
+
+    return parts
+        .filter((p) => p && p.length > 0)
+        .map((part, idx) => {
+            // Check if it's a URL
+            const isUrl = urlRegex.test(part);
+            // Check if it's a phone number (at least 8 digits)
+            const digitCount = (part.match(/\d/g) || []).length;
+            const isPhone = phoneRegex.test(part) && digitCount >= 8;
+
+            if (!isUrl && !isPhone) {
+                return <Text key={`t-${idx}`}>{part}</Text>;
+            }
+
+            if (isPhone) {
+                return (
+                    <Text
+                        key={`p-${idx}`}
+                        style={styles.linkText}
+                        onPress={() => Linking.openURL(normalizePhone(part))}
+                    >
+                        {part}
+                    </Text>
+                );
+            }
+
+            const url = normalizeUrl(part);
+            return (
+                <Text
+                    key={`u-${idx}`}
+                    style={styles.linkText}
+                    onPress={() => Linking.openURL(url)}
+                >
+                    {part}
+                </Text>
+            );
+        });
+}
+
 function MessageBubble({ message }: { message: DisplayMessage }) {
     const isSent = message.type === "sent";
+    const hasText = (message.text || "").trim().length > 0;
+
+    const handleCopy = async () => {
+        if (!message.text) return;
+        await Clipboard.setStringAsync(message.text);
+        Alert.alert("Copied", "Message copied to clipboard");
+    };
 
     return (
         <View
@@ -90,21 +172,54 @@ function MessageBubble({ message }: { message: DisplayMessage }) {
             {!isSent && message.sender && (
                 <Text style={styles.senderName}>{message.sender}</Text>
             )}
-            <View
+            <Pressable
+                onLongPress={handleCopy}
+                delayLongPress={350}
                 style={[
                     styles.messageBubble,
                     isSent ? styles.sentBubble : styles.receivedBubble,
                 ]}
             >
-                <Text
-                    style={[
-                        styles.messageText,
-                        isSent && styles.sentMessageText,
-                    ]}
-                >
-                    {message.text}
-                </Text>
-            </View>
+                {hasText && (
+                    <Text
+                        style={[
+                            styles.messageText,
+                            isSent && styles.sentMessageText,
+                        ]}
+                    >
+                        {renderTextWithLinks(message.text)}
+                    </Text>
+                )}
+
+                {!!message.attachmentUrl && (
+                    <TouchableOpacity
+                        style={[
+                            styles.attachmentRow,
+                            !hasText ? styles.attachmentRowNoText : null,
+                            isSent
+                                ? styles.sentAttachmentRow
+                                : styles.receivedAttachmentRow,
+                        ]}
+                        onPress={() => Linking.openURL(message.attachmentUrl!)}
+                        activeOpacity={0.8}
+                    >
+                        <Ionicons
+                            name="attach"
+                            size={16}
+                            color={isSent ? "#ffffff" : "#111827"}
+                        />
+                        <Text
+                            style={[
+                                styles.attachmentText,
+                                isSent ? styles.sentAttachmentText : null,
+                            ]}
+                            numberOfLines={1}
+                        >
+                            {message.attachmentName || "Attachment"}
+                        </Text>
+                    </TouchableOpacity>
+                )}
+            </Pressable>
             {message.time && (
                 <Text
                     style={[
@@ -121,15 +236,19 @@ function MessageBubble({ message }: { message: DisplayMessage }) {
 
 export default function PrivateChatScreen() {
     const router = useRouter();
-    const { groupId, userId, userName, userAvatar } = useLocalSearchParams<{
+    const { groupId, userId, userName, userAvatar, userMobile } = useLocalSearchParams<{
         groupId: string;
         userId: string;
         userName?: string;
         userAvatar?: string;
+        userMobile?: string;
     }>();
     const { user } = useAppSelector((state) => state.auth);
     const [messages, setMessages] = useState<DisplayMessage[]>([]);
     const [messageText, setMessageText] = useState("");
+    const [selectedAttachment, setSelectedAttachment] = useState<
+        SelectedAttachment | null
+    >(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
     const [isSending, setIsSending] = useState(false);
@@ -155,6 +274,10 @@ export default function PrivateChatScreen() {
                         : null
                     : null,
             text: msg.message,
+            attachmentUrl: msg.attachment_path
+                ? `${BASE_URL}/${msg.attachment_path}`
+                : null,
+            attachmentName: msg.attachment_name || null,
             time: formatTime(msg.created_at),
             isRead: msg.read_at !== null,
         }),
@@ -259,11 +382,41 @@ export default function PrivateChatScreen() {
         fetchMessages(currentPage + 1, true);
     }, [isLoadingMore, pagination, currentPage, fetchMessages]);
 
+    const handlePickAttachment = async () => {
+        try {
+            const result = await DocumentPicker.getDocumentAsync({
+                copyToCacheDirectory: false,
+                multiple: false,
+            });
+
+            if (result.canceled) return;
+
+            const asset = result.assets?.[0];
+            if (!asset) return;
+
+            setSelectedAttachment({
+                uri: asset.uri,
+                name: asset.name,
+                mimeType: asset.mimeType,
+                size: asset.size,
+            });
+        } catch {
+            Alert.alert("Error", "Failed to pick attachment");
+        }
+    };
+
     const handleSend = async () => {
-        if (!messageText.trim() || isSending || !groupId || !userId) return;
+        if (isSending || !groupId || !userId) return;
 
         const trimmedMessage = messageText.trim();
+        const hasText = trimmedMessage.length > 0;
+        const hasAttachment = !!selectedAttachment;
+
+        if (!hasText && !hasAttachment) return;
+
+        const attachmentToSend = selectedAttachment;
         setMessageText("");
+        setSelectedAttachment(null);
         setIsSending(true);
 
         // Optimistically add the message at the beginning (newest first for inverted list)
@@ -273,6 +426,8 @@ export default function PrivateChatScreen() {
             type: "sent",
             text: trimmedMessage,
             time: formatTime(new Date().toISOString()),
+            attachmentUrl: null,
+            attachmentName: attachmentToSend ? attachmentToSend.name : null,
         };
         setMessages((prev) => [optimisticMessage, ...prev]);
 
@@ -280,7 +435,14 @@ export default function PrivateChatScreen() {
             const response = await messagesService.sendMessage(
                 Number(groupId),
                 Number(userId),
-                trimmedMessage,
+                hasText ? trimmedMessage : undefined,
+                attachmentToSend
+                    ? {
+                          uri: attachmentToSend.uri,
+                          name: attachmentToSend.name,
+                          mimeType: attachmentToSend.mimeType,
+                      }
+                    : undefined,
             );
 
             if (response.data) {
@@ -288,13 +450,7 @@ export default function PrivateChatScreen() {
                 setMessages((prev) =>
                     prev.map((msg) =>
                         msg.id === tempId
-                            ? {
-                                  id: response.data.id.toString(),
-                                  type: "sent",
-                                  text: response.data.message,
-                                  time: formatTime(response.data.created_at),
-                                  isRead: response.data.read_at !== null,
-                              }
+                            ? mapMessageToDisplay(response.data)
                             : msg,
                     ),
                 );
@@ -302,7 +458,8 @@ export default function PrivateChatScreen() {
         } catch (err: any) {
             // Remove optimistic message on error
             setMessages((prev) => prev.filter((msg) => msg.id !== tempId));
-            setMessageText(trimmedMessage); // Restore the message
+            setMessageText(trimmedMessage);
+            setSelectedAttachment(attachmentToSend);
             setError(err.message || "Failed to send message");
         } finally {
             setIsSending(false);
@@ -393,12 +550,28 @@ export default function PrivateChatScreen() {
                     </View>
                 </View>
 
-                <TouchableOpacity style={styles.menuButton}>
-                    <Ionicons
-                        name="ellipsis-vertical"
-                        size={24}
-                        color="#111827"
-                    />
+                <TouchableOpacity
+                    style={styles.ringButton}
+                    onPress={async () => {
+                        if (isSending) return;
+                        // Vibrate immediately for feedback
+                        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                        try {
+                            await messagesService.sendMessage(
+                                Number(groupId),
+                                Number(userId),
+                                "🔔 Ring!",
+                            );
+                            // Vibrate again on success
+                            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                        } catch (err: any) {
+                            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+                            Alert.alert("Error", err.message || "Failed to send ring");
+                        }
+                    }}
+                    disabled={isSending}
+                >
+                    <Ionicons name="notifications" size={22} color="#f59e0b" />
                 </TouchableOpacity>
             </View>
 
@@ -464,9 +637,33 @@ export default function PrivateChatScreen() {
                     }
                 />
 
+                {!!selectedAttachment && (
+                    <View style={styles.attachmentPreviewRow}>
+                        <View style={styles.attachmentPreviewChip}>
+                            <Ionicons name="document" size={16} color="#111827" />
+                            <Text
+                                style={styles.attachmentPreviewText}
+                                numberOfLines={1}
+                            >
+                                {selectedAttachment.name}
+                            </Text>
+                        </View>
+                        <TouchableOpacity
+                            style={styles.attachmentRemoveButton}
+                            onPress={() => setSelectedAttachment(null)}
+                        >
+                            <Ionicons name="close" size={18} color="#6b7280" />
+                        </TouchableOpacity>
+                    </View>
+                )}
+
                 {/* Input Area */}
                 <View style={styles.inputArea}>
-                    <TouchableOpacity style={styles.attachButton}>
+                    <TouchableOpacity
+                        style={styles.attachButton}
+                        onPress={handlePickAttachment}
+                        disabled={isSending}
+                    >
                         <Ionicons name="attach" size={24} color="#6b7280" />
                     </TouchableOpacity>
 
@@ -485,12 +682,16 @@ export default function PrivateChatScreen() {
                     <TouchableOpacity
                         style={[
                             styles.sendButton,
-                            messageText.trim() && !isSending
+                            (messageText.trim() || selectedAttachment) &&
+                            !isSending
                                 ? styles.sendButtonActive
                                 : null,
                         ]}
                         onPress={handleSend}
-                        disabled={!messageText.trim() || isSending}
+                        disabled={
+                            (!messageText.trim() && !selectedAttachment) ||
+                            isSending
+                        }
                     >
                         {isSending ? (
                             <ActivityIndicator size="small" color="#ffffff" />
@@ -565,6 +766,14 @@ const styles = StyleSheet.create({
         fontWeight: "400",
         color: "#22c55e",
         lineHeight: 16,
+    },
+    ringButton: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: "#fef3c7",
+        alignItems: "center",
+        justifyContent: "center",
     },
     menuButton: {
         padding: 4,
@@ -668,10 +877,44 @@ const styles = StyleSheet.create({
         borderBottomRightRadius: 16,
     },
     messageText: {
-        fontSize: 14,
+        fontSize: 16,
         fontWeight: "400",
         color: "#111827",
         lineHeight: 22,
+    },
+    attachmentRow: {
+        marginTop: 10,
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 8,
+        paddingTop: 10,
+        borderTopWidth: 1,
+    },
+    attachmentRowNoText: {
+        marginTop: 0,
+        paddingTop: 0,
+        borderTopWidth: 0,
+    },
+    sentAttachmentRow: {
+        borderTopColor: "rgba(255,255,255,0.2)",
+    },
+    receivedAttachmentRow: {
+        borderTopColor: "rgba(17,24,39,0.08)",
+    },
+    attachmentText: {
+        flex: 1,
+        fontSize: 13,
+        fontWeight: "600",
+        color: "#111827",
+        textDecorationLine: "underline",
+    },
+    sentAttachmentText: {
+        color: "#ffffff",
+    },
+    linkText: {
+        color: "#2563eb",
+        textDecorationLine: "underline",
+        fontWeight: "600",
     },
     sentMessageText: {
         color: "#ffffff",
@@ -723,6 +966,46 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: "#9ca3af",
         textAlign: "center",
+    },
+    attachmentPreviewRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        paddingHorizontal: 16,
+        paddingTop: 10,
+        paddingBottom: 6,
+        backgroundColor: "#ffffff",
+        borderTopWidth: 1,
+        borderTopColor: "#e5e7eb",
+    },
+    attachmentPreviewChip: {
+        flex: 1,
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 8,
+        paddingHorizontal: 12,
+        paddingVertical: 10,
+        backgroundColor: "#f9fafb",
+        borderWidth: 1,
+        borderColor: "#e5e7eb",
+        borderRadius: 12,
+    },
+    attachmentPreviewText: {
+        flex: 1,
+        fontSize: 13,
+        fontWeight: "600",
+        color: "#111827",
+    },
+    attachmentRemoveButton: {
+        marginLeft: 8,
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "#f3f4f6",
+        borderWidth: 1,
+        borderColor: "#e5e7eb",
     },
     inputArea: {
         flexDirection: "row",

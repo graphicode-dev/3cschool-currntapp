@@ -1,6 +1,7 @@
 import {
     Group,
     GroupDetailsData,
+    GroupSessionsData,
     groupsService,
 } from "@/services/groupsService";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
@@ -8,16 +9,20 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 interface GroupsState {
   groups: Group[];
   groupDetails: GroupDetailsData | null;
+  groupSessions: GroupSessionsData | null;
   isLoading: boolean;
   isLoadingDetails: boolean;
+  isLoadingSessions: boolean;
   error: string | null;
 }
 
 const initialState: GroupsState = {
   groups: [],
   groupDetails: null,
+  groupSessions: null,
   isLoading: false,
   isLoadingDetails: false,
+  isLoadingSessions: false,
   error: null,
 };
 
@@ -47,6 +52,19 @@ export const fetchGroupDetails = createAsyncThunk(
   },
 );
 
+// Async thunk to fetch group sessions
+export const fetchGroupSessions = createAsyncThunk(
+  "groups/fetchGroupSessions",
+  async (id: number, { rejectWithValue }) => {
+    try {
+      const response = await groupsService.getGroupSessions(id);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.message || "Failed to fetch group sessions");
+    }
+  },
+);
+
 const groupsSlice = createSlice({
   name: "groups",
   initialState,
@@ -56,6 +74,9 @@ const groupsSlice = createSlice({
     },
     clearGroupDetails: (state) => {
       state.groupDetails = null;
+    },
+    clearGroupSessions: (state) => {
+      state.groupSessions = null;
     },
   },
   extraReducers: (builder) => {
@@ -85,9 +106,23 @@ const groupsSlice = createSlice({
       .addCase(fetchGroupDetails.rejected, (state, action) => {
         state.isLoadingDetails = false;
         state.error = action.payload as string;
+      })
+      // Fetch group sessions
+      .addCase(fetchGroupSessions.pending, (state) => {
+        state.isLoadingSessions = true;
+        state.error = null;
+      })
+      .addCase(fetchGroupSessions.fulfilled, (state, action) => {
+        state.isLoadingSessions = false;
+        state.groupSessions = action.payload || null;
+      })
+      .addCase(fetchGroupSessions.rejected, (state, action) => {
+        state.isLoadingSessions = false;
+        state.error = action.payload as string;
       });
   },
 });
 
-export const { clearError, clearGroupDetails } = groupsSlice.actions;
+export const { clearError, clearGroupDetails, clearGroupSessions } =
+  groupsSlice.actions;
 export default groupsSlice.reducer;

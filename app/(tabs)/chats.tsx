@@ -209,6 +209,22 @@ function GroupCard({
                         <Text style={styles.demoBadgeText}>DEMO</Text>
                     </View>
                 )}
+
+                {/* Hint Labels */}
+                <View style={styles.actionButtonsRow}>
+                    <View style={styles.actionButton}>
+                        <Ionicons name={isTeacher ? "people-outline" : "help-circle-outline"} size={16} color="#00aeed" />
+                        <Text style={styles.actionButtonText}>{isTeacher ? "Chat Students" : "Ask Instructor"}</Text>
+                    </View>
+                    <View style={styles.actionButton}>
+                        <Ionicons name="calendar-outline" size={16} color="#00aeed" />
+                        <Text style={styles.actionButtonText}>Schedule</Text>
+                    </View>
+                    <View style={styles.actionButton}>
+                        <Ionicons name="chatbubbles-outline" size={16} color="#00aeed" />
+                        <Text style={styles.actionButtonText}>Chat Group</Text>
+                    </View>
+                </View>
             </View>
         </TouchableOpacity>
     );
@@ -566,5 +582,30 @@ const styles = StyleSheet.create({
         backgroundColor: "#e6f7fd",
         justifyContent: "center",
         alignItems: "center",
+    },
+    actionButtonsRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        marginTop: 12,
+        paddingTop: 12,
+        borderTopWidth: 1,
+        borderTopColor: "#e5e7eb",
+        gap: 8,
+    },
+    actionButton: {
+        flex: 1,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 4,
+        paddingVertical: 8,
+        paddingHorizontal: 4,
+        backgroundColor: "#f0f9ff",
+        borderRadius: 8,
+    },
+    actionButtonText: {
+        fontSize: 11,
+        fontWeight: "600",
+        color: "#00aeed",
     },
 });

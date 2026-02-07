@@ -1,10 +1,14 @@
 import { Ionicons } from "@expo/vector-icons";
+import * as Clipboard from "expo-clipboard";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
+    Alert,
     FlatList,
     KeyboardAvoidingView,
+    Linking,
     Platform,
+    Pressable,
     StyleSheet,
     Text,
     TextInput,
@@ -78,8 +82,74 @@ function SystemMessage({ text }: { text: string }) {
     );
 }
 
+function normalizeUrl(raw: string) {
+    if (/^https?:\/\//i.test(raw)) return raw;
+    return `https://${raw}`;
+}
+
+function normalizePhone(raw: string) {
+    // Remove all non-digit characters except leading +
+    const cleaned = raw.replace(/[^\d+]/g, "");
+    return `tel:${cleaned}`;
+}
+
+function renderTextWithLinks(text: string) {
+    // Combined regex for URLs and phone numbers
+    const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+|[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}[^\s]*)/;
+    const phoneRegex = /(\+?\d[\d\s\-().]{7,}\d)/;
+    const combinedRegex = new RegExp(
+        `${urlRegex.source}|${phoneRegex.source}`,
+        "g"
+    );
+
+    const parts = text.split(combinedRegex);
+
+    return parts
+        .filter((p) => p && p.length > 0)
+        .map((part, idx) => {
+            // Check if it's a URL
+            const isUrl = urlRegex.test(part);
+            // Check if it's a phone number (at least 8 digits)
+            const digitCount = (part.match(/\d/g) || []).length;
+            const isPhone = phoneRegex.test(part) && digitCount >= 8;
+
+            if (!isUrl && !isPhone) {
+                return <Text key={`t-${idx}`}>{part}</Text>;
+            }
+
+            if (isPhone) {
+                return (
+                    <Text
+                        key={`p-${idx}`}
+                        style={styles.linkText}
+                        onPress={() => Linking.openURL(normalizePhone(part))}
+                    >
+                        {part}
+                    </Text>
+                );
+            }
+
+            const url = normalizeUrl(part);
+            return (
+                <Text
+                    key={`u-${idx}`}
+                    style={styles.linkText}
+                    onPress={() => Linking.openURL(url)}
+                >
+                    {part}
+                </Text>
+            );
+        });
+}
+
 function MessageBubble({ message }: { message: Message }) {
     const isSent = message.type === "sent";
+
+    const handleCopy = async () => {
+        if (!message.text) return;
+        await Clipboard.setStringAsync(message.text);
+        Alert.alert("Copied", "Message copied to clipboard");
+    };
 
     return (
         <View
@@ -91,14 +161,16 @@ function MessageBubble({ message }: { message: Message }) {
             {!isSent && message.sender && (
                 <Text style={styles.senderName}>{message.sender}</Text>
             )}
-            <View
+            <Pressable
+                onLongPress={handleCopy}
+                delayLongPress={350}
                 style={[
                     styles.messageBubble,
                     isSent ? styles.sentBubble : styles.receivedBubble,
                 ]}
             >
-                <Text style={styles.messageText}>{message.text}</Text>
-            </View>
+                <Text style={styles.messageText}>{renderTextWithLinks(message.text)}</Text>
+            </Pressable>
             {message.time && (
                 <Text
                     style={[
@@ -349,10 +421,15 @@ const styles = StyleSheet.create({
         borderBottomRightRadius: 16,
     },
     messageText: {
-        fontSize: 14,
+        fontSize: 16,
         fontWeight: "400",
         color: "#111827",
         lineHeight: 22,
+    },
+    linkText: {
+        color: "#2563eb",
+        textDecorationLine: "underline",
+        fontWeight: "600",
     },
     messageTime: {
         fontSize: 12,

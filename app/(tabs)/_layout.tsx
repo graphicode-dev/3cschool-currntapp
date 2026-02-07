@@ -55,10 +55,10 @@ export default function TabLayout() {
             <Tabs.Screen
                 name="tickets"
                 options={{
-                    title: "Ticket",
+                    title: "Support",
                     tabBarIcon: ({ color, size }) => (
                         <Ionicons
-                            name="ticket-outline"
+                            name="headset-outline"
                             size={24}
                             color={color}
                         />

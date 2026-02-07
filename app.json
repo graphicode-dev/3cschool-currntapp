@@ -1,12 +1,15 @@
 {
   "expo": {
     "scheme": "threec",
-    "platforms": ["ios", "android"],
+    "platforms": [
+      "ios",
+      "android"
+    ],
     "name": "3c",
     "slug": "3c",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
-    "icon": "./assets/icon/android-adaptive-icon.png",
+    "icon": "./assets/icon/ios-adaptive-light-icon.png",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "notification": {
@@ -15,9 +18,14 @@
     },
     "ios": {
       "supportsTablet": true,
+      "bundleIdentifier": "com.c3school.app",
+      "buildNumber": "3",
       "icon": {
         "dark": "./assets/icon/ios-adaptive-dark-icon.png",
         "light": "./assets/icon/ios-adaptive-light-icon.png"
+      },
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -25,11 +33,13 @@
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/icon/android-adaptive-icon.png"
       },
-      "permissions": ["NOTIFICATIONS"],
+      "permissions": [
+        "NOTIFICATIONS"
+      ],
       "googleServicesFile": "./google-services.json",
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "app.c3school.current"
+      "package": "com.c3school.app"
     },
     "plugins": [
       "expo-router",

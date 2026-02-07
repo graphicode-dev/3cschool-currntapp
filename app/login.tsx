@@ -34,7 +34,7 @@ export default function LoginScreen() {
     // Navigate when authenticated
     useEffect(() => {
         if (isAuthenticated) {
-            router.replace("/(tabs)/chats");
+            router.replace("/welcome");
         }
     }, [isAuthenticated, router]);
 

@@ -40,8 +40,8 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
         const inAuthGroup = segments[0] === "login";
 
         if (isAuthenticated && inAuthGroup) {
-            // User is authenticated but on login screen, redirect to main app
-            router.replace("/(tabs)/chats");
+            // User is authenticated but on login screen, redirect to welcome screen
+            router.replace("/welcome");
         } else if (!isAuthenticated && !inAuthGroup) {
             // User is not authenticated and not on login screen, redirect to login
             router.replace("/login");

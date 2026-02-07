@@ -3,7 +3,9 @@ import { messagesService } from "@/services/messagesService";
 import { useAppDispatch, useAppSelector } from "@/store";
 import {
     clearGroupDetails,
+    clearGroupSessions,
     fetchGroupDetails,
+    fetchGroupSessions,
 } from "@/store/slices/groupsSlice";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
@@ -121,6 +123,19 @@ interface MemberDisplay {
     status?: string;
     unread_count?: number;
     last_message?: string | null;
+}
+
+function formatSessionDate(value: string | null) {
+    if (!value) return "TBD";
+    const normalized = value.replace(" ", "T");
+    const d = new Date(normalized);
+    if (Number.isNaN(d.getTime())) return value;
+    return d.toLocaleDateString();
+}
+
+function formatSessionTime(value: string | null) {
+    if (!value) return "";
+    return value.slice(0, 5);
 }
 
 function getInitials(name: string): string {
@@ -275,10 +290,11 @@ export default function GroupMembersScreen() {
     const router = useRouter();
     const { id } = useLocalSearchParams();
     const dispatch = useAppDispatch();
-    const { groupDetails, isLoadingDetails, error } = useAppSelector(
+    const { groupDetails, groupSessions, isLoadingDetails, isLoadingSessions, error } = useAppSelector(
         (state) => state.groups,
     );
     const { user } = useAppSelector((state) => state.auth);
+    const [activeTab, setActiveTab] = useState<"sessions" | "chat">("sessions");
     const [showBroadcastModal, setShowBroadcastModal] = useState(false);
     const [broadcastMessage, setBroadcastMessage] = useState("");
     const [isSendingBroadcast, setIsSendingBroadcast] = useState(false);
@@ -286,9 +302,11 @@ export default function GroupMembersScreen() {
     useEffect(() => {
         if (id) {
             dispatch(fetchGroupDetails(Number(id)));
+            dispatch(fetchGroupSessions(Number(id)));
         }
         return () => {
             dispatch(clearGroupDetails());
+            dispatch(clearGroupSessions());
         };
     }, [id, dispatch]);
 
@@ -305,12 +323,16 @@ export default function GroupMembersScreen() {
         ? groupDetails.students.map(mapStudentToMember)
         : [];
 
+    const sessions = groupSessions?.sessions ?? [];
+    const groupName = groupSessions?.group?.name ?? "";
+
     const handleMemberPress = (member: MemberDisplay) => {
         router.push({
             pathname: `/chat/${id}/${member.id}`,
             params: {
                 userName: member.name,
                 userAvatar: member.avatar || "",
+                userMobile: member.mobile || "",
             },
         } as any);
     };
@@ -429,11 +451,251 @@ export default function GroupMembersScreen() {
                 renderItem={null}
                 ListHeaderComponent={
                     <>
+                        <View style={styles.tabsContainer}>
+                            <View style={styles.tabsPill}>
+                                <TouchableOpacity
+                                    style={[
+                                        styles.tabButton,
+                                        activeTab === "sessions" && styles.tabButtonActive,
+                                    ]}
+                                    onPress={() => setActiveTab("sessions")}
+                                    activeOpacity={0.8}
+                                >
+                                    <Ionicons
+                                        name="calendar-outline"
+                                        size={16}
+                                        color={
+                                            activeTab === "sessions"
+                                                ? "#ffffff"
+                                                : "#6b7280"
+                                        }
+                                    />
+                                    <Text
+                                        style={[
+                                            styles.tabText,
+                                            activeTab === "sessions" &&
+                                                styles.tabTextActive,
+                                        ]}
+                                    >
+                                        Sessions
+                                    </Text>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity
+                                    style={[
+                                        styles.tabButton,
+                                        activeTab === "chat" && styles.tabButtonActive,
+                                    ]}
+                                    onPress={() => setActiveTab("chat")}
+                                    activeOpacity={0.8}
+                                >
+                                    <Ionicons
+                                        name="chatbubbles-outline"
+                                        size={16}
+                                        color={
+                                            activeTab === "chat"
+                                                ? "#ffffff"
+                                                : "#6b7280"
+                                        }
+                                    />
+                                    <Text
+                                        style={[
+                                            styles.tabText,
+                                            activeTab === "chat" &&
+                                                styles.tabTextActive,
+                                        ]}
+                                    >
+                                        Chat
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+
+                        {activeTab === "sessions" ? (
+                            isLoadingSessions ? (
+                                <View style={styles.section}>
+                                    <Text style={styles.sectionTitle}>Sessions</Text>
+                                    <View style={styles.sessionsLoadingRow}>
+                                        <ActivityIndicator
+                                            size="small"
+                                            color="#00aeed"
+                                        />
+                                        <Text style={styles.sessionsLoadingText}>
+                                            Loading sessions...
+                                        </Text>
+                                    </View>
+                                </View>
+                            ) : sessions.length ? (
+                                <View style={styles.section}>
+                                <View style={styles.sectionHeader}>
+                                    <Text style={styles.sectionTitle}>Sessions</Text>
+                                    <View style={styles.sessionsCountPill}>
+                                        <Text style={styles.sessionsCountText}>
+                                            {sessions.length}
+                                        </Text>
+                                    </View>
+                                </View>
+
+                                <View style={styles.groupNameCard}>
+                                    <Ionicons name="people" size={18} color="#00aeed" />
+                                    <Text style={styles.groupNameText} numberOfLines={1}>
+                                        {groupName}
+                                    </Text>
+                                </View>
+
+                                <View style={styles.sessionsList}>
+                                    {sessions.map((s) => {
+                                        const dateText = formatSessionDate(s.start_date);
+                                        const startText = formatSessionTime(s.start_time);
+                                        const endText = formatSessionTime(s.end_time);
+                                        const hasMeeting = !!s.bbb_meeting_id;
+                                        const hasRecording = !!s.recording_url;
+
+                                        return (
+                                            <View key={s.id} style={styles.sessionCard}>
+                                                <View style={styles.sessionLeft}>
+                                                    <View style={styles.sessionNumberPill}>
+                                                        <Text style={styles.sessionNumberText}>
+                                                            #{s.session_number}
+                                                        </Text>
+                                                    </View>
+                                                    <Text style={styles.sessionTitle}>
+                                                        Session {s.session_number}
+                                                    </Text>
+                                                    <Text style={styles.sessionMeta}>
+                                                        {dateText}
+                                                        {startText ? ` • ${startText}` : ""}
+                                                        {endText ? ` - ${endText}` : ""}
+                                                    </Text>
+                                                    <View style={styles.instructorRow}>
+                                                        <Ionicons
+                                                            name="person-circle-outline"
+                                                            size={18}
+                                                            color="#6b7280"
+                                                        />
+                                                        <Text
+                                                            style={styles.instructorName}
+                                                            numberOfLines={1}
+                                                        >
+                                                            {s.instructor?.full_name || "Instructor"}
+                                                        </Text>
+                                                    </View>
+                                                </View>
+
+                                                <View style={styles.sessionRight}>
+                                                    <View
+                                                        style={[
+                                                            styles.sessionBadge,
+                                                            hasMeeting
+                                                                ? styles.badgeLive
+                                                                : styles.badgeSoon,
+                                                        ]}
+                                                    >
+                                                        <Ionicons
+                                                            name={
+                                                                hasMeeting
+                                                                    ? "videocam"
+                                                                    : "time-outline"
+                                                            }
+                                                            size={12}
+                                                            color={
+                                                                hasMeeting
+                                                                    ? "#16a34a"
+                                                                    : "#0284c7"
+                                                            }
+                                                        />
+                                                        <Text
+                                                            style={[
+                                                                styles.sessionBadgeText,
+                                                                hasMeeting
+                                                                    ? styles.badgeTextLive
+                                                                    : styles.badgeTextSoon,
+                                                            ]}
+                                                        >
+                                                            {hasMeeting ? "Meeting" : "Scheduled"}
+                                                        </Text>
+                                                    </View>
+
+                                                    <View
+                                                        style={[
+                                                            styles.sessionBadge,
+                                                            hasRecording
+                                                                ? styles.badgeRecord
+                                                                : styles.badgeMuted,
+                                                        ]}
+                                                    >
+                                                        <Ionicons
+                                                            name={
+                                                                hasRecording
+                                                                    ? "play"
+                                                                    : "play-outline"
+                                                            }
+                                                            size={12}
+                                                            color={
+                                                                hasRecording
+                                                                    ? "#7c3aed"
+                                                                    : "#9ca3af"
+                                                            }
+                                                        />
+                                                        <Text
+                                                            style={[
+                                                                styles.sessionBadgeText,
+                                                                hasRecording
+                                                                    ? styles.badgeTextRecord
+                                                                    : styles.badgeTextMuted,
+                                                            ]}
+                                                        >
+                                                            {hasRecording
+                                                                ? "Recording"
+                                                                : "No Recording"}
+                                                        </Text>
+                                                    </View>
+                                                </View>
+                                            </View>
+                                        );
+                                    })}
+                                </View>
+                                </View>
+                            ) : (
+                                <View style={styles.section}>
+                                    <Text style={styles.sectionTitle}>Sessions</Text>
+                                    <View style={styles.emptySessions}>
+                                        <Ionicons
+                                            name="calendar-outline"
+                                            size={32}
+                                            color="#9ca3af"
+                                        />
+                                        <Text style={styles.emptySessionsText}>
+                                            No sessions found
+                                        </Text>
+                                    </View>
+                                </View>
+                            )
+                        ) : null}
+
+                        {activeTab === "chat" && (
+                            <View style={styles.section}>
+                                <View style={styles.sectionHeader}>
+                                    <Text style={styles.sectionTitle}>Chat</Text>
+                                    <TouchableOpacity
+                                        style={styles.openGroupChatButton}
+                                        onPress={() => router.push(`/chat/${id}` as any)}
+                                        activeOpacity={0.8}
+                                    >
+                                        <Ionicons name="chatbox" size={14} color="#ffffff" />
+                                        <Text style={styles.openGroupChatText}>
+                                            Open Group Chat
+                                        </Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        )}
+
                         {/* Teachers Section - shown to students */}
-                        {isUserStudent && teachers.length > 0 && (
+                        {activeTab === "chat" && isUserStudent && teachers.length > 0 && (
                             <View style={styles.section}>
                                 <Text style={styles.sectionTitle}>
-                                    Teachers ({teachers.length})
+                                    Ask Teachers ({teachers.length})
                                 </Text>
                                 <View style={styles.membersList}>
                                     {teachers.map((member) => (
@@ -450,7 +712,7 @@ export default function GroupMembersScreen() {
                         )}
 
                         {/* Students Section - shown to teachers */}
-                        {isUserTeacher && students.length > 0 && (
+                        {activeTab === "chat" && isUserTeacher && students.length > 0 && (
                             <View style={styles.section}>
                                 <View style={styles.sectionHeader}>
                                     <Text style={styles.sectionTitle}>
@@ -487,7 +749,8 @@ export default function GroupMembersScreen() {
                         )}
 
                         {/* Empty state */}
-                        {!isLoadingDetails &&
+                        {activeTab === "chat" &&
+                            !isLoadingDetails &&
                             teachers.length === 0 &&
                             students.length === 0 && (
                                 <View style={styles.emptyContainer}>
@@ -638,6 +901,204 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
         alignItems: "center",
         marginBottom: 12,
+    },
+    tabsContainer: {
+        marginBottom: 16,
+    },
+    tabsPill: {
+        flexDirection: "row",
+        backgroundColor: "#ffffff",
+        borderWidth: 1,
+        borderColor: "#e5e7eb",
+        borderRadius: 14,
+        padding: 4,
+        gap: 6,
+    },
+    tabButton: {
+        flex: 1,
+        flexDirection: "row",
+        justifyContent: "center",
+        alignItems: "center",
+        gap: 8,
+        paddingVertical: 10,
+        borderRadius: 12,
+        backgroundColor: "transparent",
+    },
+    tabButtonActive: {
+        backgroundColor: "#00aeed",
+    },
+    tabText: {
+        fontSize: 14,
+        fontWeight: "700",
+        color: "#6b7280",
+    },
+    tabTextActive: {
+        color: "#ffffff",
+    },
+    openGroupChatButton: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 8,
+        backgroundColor: "#00aeed",
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        borderRadius: 10,
+    },
+    openGroupChatText: {
+        fontSize: 13,
+        fontWeight: "700",
+        color: "#ffffff",
+    },
+    sessionsLoadingRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 10,
+        paddingVertical: 8,
+    },
+    sessionsLoadingText: {
+        fontSize: 14,
+        color: "#6b7280",
+        fontWeight: "500",
+    },
+    sessionsCountPill: {
+        minWidth: 28,
+        paddingHorizontal: 10,
+        height: 24,
+        borderRadius: 12,
+        backgroundColor: "#e0f2fe",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    sessionsCountText: {
+        fontSize: 13,
+        fontWeight: "700",
+        color: "#0284c7",
+    },
+    groupNameCard: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 10,
+        backgroundColor: "#ffffff",
+        borderRadius: 14,
+        paddingVertical: 12,
+        paddingHorizontal: 14,
+        borderWidth: 1,
+        borderColor: "#e5e7eb",
+        marginBottom: 12,
+    },
+    groupNameText: {
+        flex: 1,
+        fontSize: 14,
+        fontWeight: "600",
+        color: "#111827",
+    },
+    sessionsList: {
+        gap: 12,
+    },
+    sessionCard: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        gap: 12,
+        backgroundColor: "#ffffff",
+        borderRadius: 16,
+        padding: 14,
+        borderWidth: 1,
+        borderColor: "#e5e7eb",
+    },
+    sessionLeft: {
+        flex: 1,
+    },
+    sessionRight: {
+        alignItems: "flex-end",
+        justifyContent: "center",
+        gap: 8,
+    },
+    sessionNumberPill: {
+        alignSelf: "flex-start",
+        backgroundColor: "#f0f9ff",
+        borderRadius: 10,
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        marginBottom: 8,
+    },
+    sessionNumberText: {
+        fontSize: 12,
+        fontWeight: "700",
+        color: "#0284c7",
+    },
+    sessionTitle: {
+        fontSize: 15,
+        fontWeight: "700",
+        color: "#111827",
+        marginBottom: 4,
+    },
+    sessionMeta: {
+        fontSize: 13,
+        color: "#6b7280",
+        fontWeight: "500",
+        marginBottom: 8,
+    },
+    instructorRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 6,
+    },
+    instructorName: {
+        flex: 1,
+        fontSize: 13,
+        fontWeight: "600",
+        color: "#374151",
+    },
+    sessionBadge: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 6,
+        paddingHorizontal: 10,
+        paddingVertical: 6,
+        borderRadius: 999,
+    },
+    sessionBadgeText: {
+        fontSize: 12,
+        fontWeight: "700",
+    },
+    badgeLive: {
+        backgroundColor: "#dcfce7",
+    },
+    badgeSoon: {
+        backgroundColor: "#e0f2fe",
+    },
+    badgeRecord: {
+        backgroundColor: "#f3e8ff",
+    },
+    badgeMuted: {
+        backgroundColor: "#f3f4f6",
+    },
+    badgeTextLive: {
+        color: "#16a34a",
+    },
+    badgeTextSoon: {
+        color: "#0284c7",
+    },
+    badgeTextRecord: {
+        color: "#7c3aed",
+    },
+    badgeTextMuted: {
+        color: "#9ca3af",
+    },
+    emptySessions: {
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "#ffffff",
+        borderRadius: 16,
+        paddingVertical: 18,
+        borderWidth: 1,
+        borderColor: "#e5e7eb",
+        gap: 8,
+    },
+    emptySessionsText: {
+        fontSize: 14,
+        fontWeight: "600",
+        color: "#6b7280",
     },
     sectionTitle: {
         fontSize: 16,

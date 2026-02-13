@@ -7,7 +7,6 @@ import { useAppSelector } from "@/store";
 import { Ionicons } from "@expo/vector-icons";
 import * as Clipboard from "expo-clipboard";
 import * as DocumentPicker from "expo-document-picker";
-import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
@@ -24,7 +23,7 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
-    View,
+    View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -42,6 +41,7 @@ interface DisplayMessage {
     type: "system" | "received" | "sent";
     sender?: string;
     senderAvatar?: string | null;
+    senderId?: number;
     text: string;
     attachmentUrl?: string | null;
     attachmentName?: string | null;
@@ -58,39 +58,21 @@ function formatTime(dateString: string): string {
     });
 }
 
-function formatDate(dateString: string): string {
-    const date = new Date(dateString);
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-
-    if (date.toDateString() === today.toDateString()) {
-        return "Today";
-    } else if (date.toDateString() === yesterday.toDateString()) {
-        return "Yesterday";
-    } else {
-        return date.toLocaleDateString("en-US", {
-            month: "short",
-            day: "numeric",
-            year: "numeric",
-        });
+function getInitials(name: string): string {
+    const parts = name.split(" ");
+    if (parts.length >= 2) {
+        return (parts[0][0] + parts[1][0]).toUpperCase();
     }
+    return name.substring(0, 2).toUpperCase();
 }
 
-function DateSeparator({ date }: { date: string }) {
-    return (
-        <View style={styles.dateSeparator}>
-            <Text style={styles.dateSeparatorText}>{date}</Text>
-        </View>
-    );
-}
-
-function SystemMessage({ text }: { text: string }) {
-    return (
-        <View style={styles.systemMessage}>
-            <Text style={styles.systemMessageText}>{text}</Text>
-        </View>
-    );
+function getAvatarColor(name: string): string {
+    const colors = ["#00aeed", "#10b981", "#f59e0b", "#8b5cf6", "#ec4899", "#06b6d4"];
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+        hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return colors[Math.abs(hash) % colors.length];
 }
 
 function normalizeUrl(raw: string) {
@@ -99,13 +81,11 @@ function normalizeUrl(raw: string) {
 }
 
 function normalizePhone(raw: string) {
-    // Remove all non-digit characters except leading +
     const cleaned = raw.replace(/[^\d+]/g, "");
     return `tel:${cleaned}`;
 }
 
 function renderTextWithLinks(text: string) {
-    // Combined regex for URLs and phone numbers
     const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+|[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}[^\s]*)/;
     const phoneRegex = /(\+?\d[\d\s\-().]{7,}\d)/;
     const combinedRegex = new RegExp(
@@ -118,9 +98,7 @@ function renderTextWithLinks(text: string) {
     return parts
         .filter((p) => p && p.length > 0)
         .map((part, idx) => {
-            // Check if it's a URL
             const isUrl = urlRegex.test(part);
-            // Check if it's a phone number (at least 8 digits)
             const digitCount = (part.match(/\d/g) || []).length;
             const isPhone = phoneRegex.test(part) && digitCount >= 8;
 
@@ -163,6 +141,9 @@ function MessageBubble({ message }: { message: DisplayMessage }) {
         Alert.alert("Copied", "Message copied to clipboard");
     };
 
+    const senderInitials = message.sender ? getInitials(message.sender) : "";
+    const avatarColor = message.sender ? getAvatarColor(message.sender) : "#00aeed";
+
     return (
         <View
             style={[
@@ -170,86 +151,104 @@ function MessageBubble({ message }: { message: DisplayMessage }) {
                 isSent ? styles.sentContainer : styles.receivedContainer,
             ]}
         >
-            {!isSent && message.sender && (
-                <Text style={styles.senderName}>{message.sender}</Text>
-            )}
-            <Pressable
-                onLongPress={handleCopy}
-                delayLongPress={350}
-                style={[
-                    styles.messageBubble,
-                    isSent ? styles.sentBubble : styles.receivedBubble,
-                ]}
-            >
-                {hasText && (
-                    <Text
-                        style={[
-                            styles.messageText,
-                            isSent && styles.sentMessageText,
-                        ]}
-                    >
-                        {renderTextWithLinks(message.text)}
-                    </Text>
-                )}
-
-                {!!message.attachmentUrl && (
-                    <TouchableOpacity
-                        style={[
-                            styles.attachmentRow,
-                            !hasText ? styles.attachmentRowNoText : null,
-                            isSent
-                                ? styles.sentAttachmentRow
-                                : styles.receivedAttachmentRow,
-                        ]}
-                        onPress={() => Linking.openURL(message.attachmentUrl!)}
-                        activeOpacity={0.8}
-                    >
-                        <Ionicons
-                            name="attach"
-                            size={16}
-                            color={isSent ? "#ffffff" : "#111827"}
+            {!isSent && (
+                <View style={styles.avatarAndMessage}>
+                    {message.senderAvatar ? (
+                        <Image
+                            source={{ uri: message.senderAvatar }}
+                            style={styles.messageAvatar}
+                            contentFit="cover"
                         />
-                        <Text
-                            style={[
-                                styles.attachmentText,
-                                isSent ? styles.sentAttachmentText : null,
-                            ]}
-                            numberOfLines={1}
+                    ) : (
+                        <View style={[styles.messageAvatarInitials, { backgroundColor: avatarColor }]}>
+                            <Text style={styles.messageAvatarText}>{senderInitials}</Text>
+                        </View>
+                    )}
+                    <View style={styles.messageContent}>
+                        {message.sender && (
+                            <Text style={styles.senderName}>{message.sender}</Text>
+                        )}
+                        <Pressable
+                            onLongPress={handleCopy}
+                            delayLongPress={350}
+                            style={[styles.messageBubble, styles.receivedBubble]}
                         >
-                            {message.attachmentName || "Attachment"}
+                            {hasText && (
+                                <Text style={styles.messageText}>
+                                    {renderTextWithLinks(message.text)}
+                                </Text>
+                            )}
+                            {!!message.attachmentUrl && (
+                                <TouchableOpacity
+                                    style={[styles.attachmentRow, !hasText ? styles.attachmentRowNoText : null]}
+                                    onPress={() => Linking.openURL(message.attachmentUrl!)}
+                                    activeOpacity={0.8}
+                                >
+                                    <Ionicons name="attach" size={16} color="#111827" />
+                                    <Text style={styles.attachmentText} numberOfLines={1}>
+                                        {message.attachmentName || "Attachment"}
+                                    </Text>
+                                </TouchableOpacity>
+                            )}
+                        </Pressable>
+                        {message.time && (
+                            <Text style={[styles.messageTime, styles.receivedTime]}>
+                                {message.time}
+                            </Text>
+                        )}
+                    </View>
+                </View>
+            )}
+            {isSent && (
+                <>
+                    <Pressable
+                        onLongPress={handleCopy}
+                        delayLongPress={350}
+                        style={[styles.messageBubble, styles.sentBubble]}
+                    >
+                        {hasText && (
+                            <Text style={[styles.messageText, styles.sentMessageText]}>
+                                {renderTextWithLinks(message.text)}
+                            </Text>
+                        )}
+                        {!!message.attachmentUrl && (
+                            <TouchableOpacity
+                                style={[
+                                    styles.attachmentRow,
+                                    !hasText ? styles.attachmentRowNoText : null,
+                                    styles.sentAttachmentRow,
+                                ]}
+                                onPress={() => Linking.openURL(message.attachmentUrl!)}
+                                activeOpacity={0.8}
+                            >
+                                <Ionicons name="attach" size={16} color="#ffffff" />
+                                <Text style={[styles.attachmentText, styles.sentAttachmentText]} numberOfLines={1}>
+                                    {message.attachmentName || "Attachment"}
+                                </Text>
+                            </TouchableOpacity>
+                        )}
+                    </Pressable>
+                    {message.time && (
+                        <Text style={[styles.messageTime, styles.sentTime]}>
+                            {message.time}
                         </Text>
-                    </TouchableOpacity>
-                )}
-            </Pressable>
-            {message.time && (
-                <Text
-                    style={[
-                        styles.messageTime,
-                        isSent ? styles.sentTime : styles.receivedTime,
-                    ]}
-                >
-                    {message.time}
-                </Text>
+                    )}
+                </>
             )}
         </View>
     );
 }
 
-export default function PrivateChatScreen() {
+export default function GroupChatScreen() {
     const router = useRouter();
-    const { groupId, userId, userName, userAvatar, userMobile } = useLocalSearchParams<{
+    const { groupId, groupName } = useLocalSearchParams<{
         groupId: string;
-        userId: string;
-        userName?: string;
-        userAvatar?: string;
-        userMobile?: string;
+        groupName?: string;
     }>();
     const { user } = useAppSelector((state) => state.auth);
     const [messages, setMessages] = useState<DisplayMessage[]>([]);
     const [messageText, setMessageText] = useState("");
-    const [selectedAttachment, setSelectedAttachment] = useState<
-        SelectedAttachment | null
-    >(null);
+    const [selectedAttachment, setSelectedAttachment] = useState<SelectedAttachment | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
     const [isSending, setIsSending] = useState(false);
@@ -264,20 +263,13 @@ export default function PrivateChatScreen() {
         (msg: Message): DisplayMessage => ({
             id: msg.id.toString(),
             type: msg.sender_id === currentUserId ? "sent" : "received",
-            sender:
-                msg.sender_id !== currentUserId
-                    ? msg.sender.full_name
-                    : undefined,
-            senderAvatar:
-                msg.sender_id !== currentUserId
-                    ? msg.sender.avatar
-                        ? `${BASE_URL}${msg.sender.avatar}`
-                        : null
-                    : null,
-            text: msg.message,
-            attachmentUrl: msg.attachment_url || (msg.attachment_path
-                ? `${BASE_URL}/${msg.attachment_path}`
-                : null),
+            sender: msg.sender_id !== currentUserId ? msg.sender.full_name : undefined,
+            senderId: msg.sender_id,
+            senderAvatar: msg.sender_id !== currentUserId && msg.sender.avatar
+                ? `${BASE_URL}${msg.sender.avatar}`
+                : null,
+            text: msg.message || "",
+            attachmentUrl: msg.attachment_url || (msg.attachment_path ? `${BASE_URL}/${msg.attachment_path}` : null),
             attachmentName: msg.attachment_name || null,
             time: formatTime(msg.created_at),
             isRead: msg.read_at !== null,
@@ -287,7 +279,7 @@ export default function PrivateChatScreen() {
 
     const fetchMessages = useCallback(
         async (page: number = 1, append: boolean = false) => {
-            if (!groupId || !userId) return;
+            if (!groupId) return;
 
             try {
                 setError(null);
@@ -295,21 +287,17 @@ export default function PrivateChatScreen() {
                     setIsLoadingMore(true);
                 }
 
-                const response = await messagesService.getMessages(
+                const response = await messagesService.getGroupChatMessages(
                     Number(groupId),
-                    Number(userId),
                     page,
                 );
 
                 if (response.data) {
-                    const displayMessages: DisplayMessage[] =
-                        response.data.map(mapMessageToDisplay);
+                    const displayMessages: DisplayMessage[] = response.data.map(mapMessageToDisplay);
 
                     if (append) {
-                        // Prepend older messages (API returns newest first)
                         setMessages((prev) => [...prev, ...displayMessages]);
                     } else {
-                        // Initial load - messages are already newest first from API
                         setMessages(displayMessages);
                     }
 
@@ -323,7 +311,7 @@ export default function PrivateChatScreen() {
                 setIsLoadingMore(false);
             }
         },
-        [groupId, userId, mapMessageToDisplay],
+        [groupId, mapMessageToDisplay],
     );
 
     useEffect(() => {
@@ -332,52 +320,43 @@ export default function PrivateChatScreen() {
 
     // Poll for new messages every 5 seconds
     useEffect(() => {
-        if (!groupId || !userId) return;
+        if (!groupId) return;
 
         const pollInterval = setInterval(async () => {
             try {
-                const response = await messagesService.getMessages(
+                const response = await messagesService.getGroupChatMessages(
                     Number(groupId),
-                    Number(userId),
                     1,
                 );
 
                 if (response.data && response.data.length > 0) {
                     setMessages((prevMessages) => {
-                        // Get IDs of existing messages (excluding temp messages)
                         const existingIds = new Set(
                             prevMessages
                                 .filter((m) => !m.id.startsWith("temp-"))
                                 .map((m) => m.id),
                         );
 
-                        // Find new messages from API
                         const newMessages = response.data
                             .map(mapMessageToDisplay)
                             .filter((msg) => !existingIds.has(msg.id));
 
                         if (newMessages.length > 0) {
-                            // Add new messages at the beginning (newest first for inverted list)
                             return [...newMessages, ...prevMessages];
                         }
                         return prevMessages;
                     });
                 }
             } catch (err) {
-                // Silently fail polling - don't show errors for background refresh
                 console.log("Polling error:", err);
             }
         }, 5000);
 
         return () => clearInterval(pollInterval);
-    }, [groupId, userId, mapMessageToDisplay]);
+    }, [groupId, mapMessageToDisplay]);
 
     const loadMoreMessages = useCallback(() => {
-        if (
-            isLoadingMore ||
-            !pagination ||
-            currentPage >= pagination.last_page
-        ) {
+        if (isLoadingMore || !pagination || currentPage >= pagination.last_page) {
             return;
         }
         fetchMessages(currentPage + 1, true);
@@ -451,7 +430,7 @@ export default function PrivateChatScreen() {
     };
 
     const handleSend = async () => {
-        if (isSending || !groupId || !userId) return;
+        if (isSending || !groupId) return;
 
         const trimmedMessage = messageText.trim();
         const hasText = trimmedMessage.length > 0;
@@ -464,7 +443,6 @@ export default function PrivateChatScreen() {
         setSelectedAttachment(null);
         setIsSending(true);
 
-        // Optimistically add the message at the beginning (newest first for inverted list)
         const tempId = `temp-${Date.now()}`;
         const optimisticMessage: DisplayMessage = {
             id: tempId,
@@ -477,9 +455,8 @@ export default function PrivateChatScreen() {
         setMessages((prev) => [optimisticMessage, ...prev]);
 
         try {
-            const response = await messagesService.sendMessage(
+            const response = await messagesService.sendGroupChatMessage(
                 Number(groupId),
-                Number(userId),
                 hasText ? trimmedMessage : undefined,
                 attachmentToSend
                     ? {
@@ -491,17 +468,13 @@ export default function PrivateChatScreen() {
             );
 
             if (response.data) {
-                // Replace optimistic message with real one
                 setMessages((prev) =>
                     prev.map((msg) =>
-                        msg.id === tempId
-                            ? mapMessageToDisplay(response.data)
-                            : msg,
+                        msg.id === tempId ? mapMessageToDisplay(response.data) : msg,
                     ),
                 );
             }
         } catch (err: any) {
-            // Remove optimistic message on error
             setMessages((prev) => prev.filter((msg) => msg.id !== tempId));
             setMessageText(trimmedMessage);
             setSelectedAttachment(attachmentToSend);
@@ -512,35 +485,21 @@ export default function PrivateChatScreen() {
     };
 
     const renderMessage = ({ item }: { item: DisplayMessage }) => {
-        if (item.type === "system") {
-            return <SystemMessage text={item.text} />;
-        }
         return <MessageBubble message={item} />;
     };
 
-    const displayName = userName || "Chat";
+    const displayName = groupName || "Group Chat";
 
     if (isLoading) {
         return (
             <SafeAreaView style={styles.container}>
                 <Stack.Screen options={{ headerShown: false }} />
                 <View style={styles.header}>
-                    <TouchableOpacity
-                        style={styles.backButton}
-                        onPress={() => router.back()}
-                    >
-                        <Ionicons
-                            name="chevron-back"
-                            size={24}
-                            color="#111827"
-                        />
+                    <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+                        <Ionicons name="chevron-back" size={24} color="#111827" />
                     </TouchableOpacity>
-                    <View style={styles.avatarContainer}>
-                        <Ionicons
-                            name="person-outline"
-                            size={24}
-                            color="#00aeed"
-                        />
+                    <View style={styles.groupAvatarContainer}>
+                        <Ionicons name="people" size={24} color="#ffffff" />
                     </View>
                     <View style={styles.headerInfo}>
                         <Text style={styles.headerTitle}>{displayName}</Text>
@@ -561,27 +520,12 @@ export default function PrivateChatScreen() {
 
             {/* Header */}
             <View style={styles.header}>
-                <TouchableOpacity
-                    style={styles.backButton}
-                    onPress={() => router.back()}
-                >
+                <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
                     <Ionicons name="chevron-back" size={24} color="#111827" />
                 </TouchableOpacity>
 
-                <View style={styles.avatarContainer}>
-                    {userAvatar ? (
-                        <Image
-                            source={{ uri: userAvatar }}
-                            style={styles.headerAvatar}
-                            contentFit="cover"
-                        />
-                    ) : (
-                        <Ionicons
-                            name="person-outline"
-                            size={24}
-                            color="#00aeed"
-                        />
-                    )}
+                <View style={styles.groupAvatarContainer}>
+                    <Ionicons name="people" size={24} color="#ffffff" />
                 </View>
 
                 <View style={styles.headerInfo}>
@@ -589,34 +533,22 @@ export default function PrivateChatScreen() {
                         {displayName}
                     </Text>
                     <View style={styles.headerSubtitleContainer}>
-                        <Text style={styles.headerSubtitle}>Private Chat</Text>
+                        <Text style={styles.headerSubtitle}>Group Chat</Text>
                         <Text style={styles.headerDot}>•</Text>
-                        <Text style={styles.headerStatus}>Active</Text>
+                        <Text style={styles.headerStatus}>
+                            {pagination?.total || 0} messages
+                        </Text>
                     </View>
                 </View>
 
                 <TouchableOpacity
-                    style={styles.ringButton}
-                    onPress={async () => {
-                        if (isSending) return;
-                        // Vibrate immediately for feedback
-                        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                        try {
-                            await messagesService.sendMessage(
-                                Number(groupId),
-                                Number(userId),
-                                "🔔 Ring!",
-                            );
-                            // Vibrate again on success
-                            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                        } catch (err: any) {
-                            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-                            Alert.alert("Error", err.message || "Failed to send ring");
-                        }
-                    }}
-                    disabled={isSending}
+                    style={styles.pollsButton}
+                    onPress={() => router.push({
+                        pathname: `/group/${groupId}/polls`,
+                        params: { groupName: groupName }
+                    } as any)}
                 >
-                    <Ionicons name="notifications" size={22} color="#f59e0b" />
+                    <Ionicons name="bar-chart" size={22} color="#8b5cf6" />
                 </TouchableOpacity>
             </View>
 
@@ -649,10 +581,7 @@ export default function PrivateChatScreen() {
                     ListFooterComponent={
                         isLoadingMore ? (
                             <View style={styles.loadingMoreContainer}>
-                                <ActivityIndicator
-                                    size="small"
-                                    color="#00aeed"
-                                />
+                                <ActivityIndicator size="small" color="#00aeed" />
                                 <Text style={styles.loadingMoreText}>
                                     Loading older messages...
                                 </Text>
@@ -670,14 +599,8 @@ export default function PrivateChatScreen() {
                             <Text style={styles.emptySubtext}>
                                 Start the conversation by sending a message
                             </Text>
-                            <Text style={styles.emptyText}>
-                                No messages yet
-                            </Text>
-                            <Ionicons
-                                name="chatbubbles-outline"
-                                size={48}
-                                color="#9ca3af"
-                            />
+                            <Text style={styles.emptyText}>No messages yet</Text>
+                            <Ionicons name="chatbubbles-outline" size={48} color="#9ca3af" />
                         </View>
                     }
                 />
@@ -698,10 +621,7 @@ export default function PrivateChatScreen() {
                         ) : (
                             <View style={styles.attachmentPreviewChip}>
                                 <Ionicons name="document" size={16} color="#111827" />
-                                <Text
-                                    style={styles.attachmentPreviewText}
-                                    numberOfLines={1}
-                                >
+                                <Text style={styles.attachmentPreviewText} numberOfLines={1}>
                                     {selectedAttachment.name}
                                 </Text>
                             </View>
@@ -740,21 +660,27 @@ export default function PrivateChatScreen() {
                     <TouchableOpacity
                         style={[
                             styles.sendButton,
-                            (messageText.trim() || selectedAttachment) &&
-                            !isSending
+                            (messageText.trim() || selectedAttachment) && !isSending
                                 ? styles.sendButtonActive
                                 : null,
                         ]}
                         onPress={handleSend}
                         disabled={
-                            (!messageText.trim() && !selectedAttachment) ||
-                            isSending
+                            isSending || (!messageText.trim() && !selectedAttachment)
                         }
                     >
                         {isSending ? (
                             <ActivityIndicator size="small" color="#ffffff" />
                         ) : (
-                            <Ionicons name="send" size={20} color="#ffffff" />
+                            <Ionicons
+                                name="send"
+                                size={20}
+                                color={
+                                    messageText.trim() || selectedAttachment
+                                        ? "#ffffff"
+                                        : "#9ca3af"
+                                }
+                            />
                         )}
                     </TouchableOpacity>
                 </View>
@@ -766,83 +692,68 @@ export default function PrivateChatScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#ffffff",
+        backgroundColor: "#f9fafb",
     },
     header: {
         flexDirection: "row",
         alignItems: "center",
-        paddingHorizontal: 16,
+        paddingHorizontal: 12,
         paddingVertical: 12,
         backgroundColor: "#ffffff",
         borderBottomWidth: 1,
         borderBottomColor: "#e5e7eb",
-        gap: 8,
     },
     backButton: {
-        padding: 4,
+        padding: 8,
+        marginRight: 4,
     },
-    avatarContainer: {
-        width: 48,
-        height: 48,
-        borderRadius: 24,
-        backgroundColor: "#e6f7fd",
-        alignItems: "center",
+    groupAvatarContainer: {
+        width: 44,
+        height: 44,
+        borderRadius: 22,
+        backgroundColor: "#00aeed",
         justifyContent: "center",
-        overflow: "hidden",
-    },
-    headerAvatar: {
-        width: 48,
-        height: 48,
-        borderRadius: 24,
+        alignItems: "center",
+        marginRight: 12,
     },
     headerInfo: {
         flex: 1,
     },
+    pollsButton: {
+        padding: 8,
+        marginLeft: 4,
+    },
     headerTitle: {
-        fontSize: 16,
+        fontSize: 17,
         fontWeight: "600",
         color: "#111827",
-        lineHeight: 24,
     },
     headerSubtitleContainer: {
         flexDirection: "row",
         alignItems: "center",
-        gap: 8,
+        marginTop: 2,
     },
     headerSubtitle: {
-        fontSize: 12,
-        fontWeight: "400",
+        fontSize: 13,
         color: "#6b7280",
-        lineHeight: 16,
     },
     headerDot: {
-        fontSize: 12,
+        fontSize: 13,
         color: "#6b7280",
+        marginHorizontal: 6,
     },
     headerStatus: {
-        fontSize: 12,
-        fontWeight: "400",
-        color: "#22c55e",
-        lineHeight: 16,
-    },
-    ringButton: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: "#fef3c7",
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    menuButton: {
-        padding: 4,
+        fontSize: 13,
+        color: "#10b981",
+        fontWeight: "500",
     },
     loadingContainer: {
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
-        gap: 12,
     },
     loadingText: {
+        marginTop: 12,
         fontSize: 14,
         color: "#6b7280",
     },
@@ -858,95 +769,108 @@ const styles = StyleSheet.create({
         flex: 1,
         fontSize: 14,
         color: "#ffffff",
+        marginRight: 12,
     },
     messagesContainer: {
         flex: 1,
-        backgroundColor: "#f9fafb",
     },
     messagesList: {
         paddingHorizontal: 16,
-        paddingBottom: 16,
-        flexGrow: 1,
-    },
-    dateSeparator: {
-        alignSelf: "center",
-        backgroundColor: "#e5e7eb",
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-        borderRadius: 100,
-        marginVertical: 16,
-    },
-    dateSeparatorText: {
-        fontSize: 12,
-        fontWeight: "600",
-        color: "#6b7280",
-    },
-    systemMessage: {
-        alignSelf: "center",
-        backgroundColor: "#f3f4f6",
-        paddingHorizontal: 16,
-        paddingVertical: 8,
-        borderRadius: 10,
-        marginVertical: 8,
-    },
-    systemMessageText: {
-        fontSize: 12,
-        fontWeight: "400",
-        color: "#6b7280",
-        textAlign: "center",
+        paddingVertical: 12,
     },
     messageBubbleContainer: {
         marginVertical: 4,
-        maxWidth: "75%",
-        gap: 4,
     },
     sentContainer: {
-        alignSelf: "flex-end",
         alignItems: "flex-end",
     },
     receivedContainer: {
-        alignSelf: "flex-start",
         alignItems: "flex-start",
+    },
+    avatarAndMessage: {
+        flexDirection: "row",
+        alignItems: "flex-end",
+        maxWidth: "85%",
+    },
+    messageAvatar: {
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+        marginRight: 8,
+    },
+    messageAvatarInitials: {
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+        marginRight: 8,
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    messageAvatarText: {
+        fontSize: 12,
+        fontWeight: "600",
+        color: "#ffffff",
+    },
+    messageContent: {
+        flex: 1,
     },
     senderName: {
         fontSize: 12,
         fontWeight: "600",
         color: "#6b7280",
-        marginLeft: 12,
+        marginBottom: 4,
+        marginLeft: 4,
     },
     messageBubble: {
-        paddingHorizontal: 16,
-        paddingVertical: 12,
+        maxWidth: "100%",
+        paddingHorizontal: 14,
+        paddingVertical: 10,
+        borderRadius: 18,
     },
     sentBubble: {
         backgroundColor: "#00aeed",
-        borderTopLeftRadius: 16,
-        borderTopRightRadius: 16,
-        borderBottomLeftRadius: 16,
         borderBottomRightRadius: 4,
+        maxWidth: "80%",
     },
     receivedBubble: {
         backgroundColor: "#ffffff",
+        borderBottomLeftRadius: 4,
         borderWidth: 1,
         borderColor: "#e5e7eb",
-        borderTopLeftRadius: 16,
-        borderTopRightRadius: 16,
-        borderBottomLeftRadius: 4,
-        borderBottomRightRadius: 16,
     },
     messageText: {
-        fontSize: 16,
-        fontWeight: "400",
+        fontSize: 15,
+        lineHeight: 20,
         color: "#111827",
-        lineHeight: 22,
+    },
+    sentMessageText: {
+        color: "#ffffff",
+    },
+    linkText: {
+        color: "#2563eb",
+        textDecorationLine: "underline",
+    },
+    messageTime: {
+        fontSize: 11,
+        marginTop: 4,
+    },
+    sentTime: {
+        color: "#9ca3af",
+        textAlign: "right",
+        marginRight: 4,
+    },
+    receivedTime: {
+        color: "#9ca3af",
+        marginLeft: 4,
     },
     attachmentRow: {
-        marginTop: 10,
         flexDirection: "row",
         alignItems: "center",
-        gap: 8,
-        paddingTop: 10,
+        marginTop: 8,
+        paddingTop: 8,
         borderTopWidth: 1,
+        borderTopColor: "rgba(0,0,0,0.1)",
+        gap: 6,
     },
     attachmentRowNoText: {
         marginTop: 0,
@@ -954,85 +878,62 @@ const styles = StyleSheet.create({
         borderTopWidth: 0,
     },
     sentAttachmentRow: {
-        borderTopColor: "rgba(255,255,255,0.2)",
-    },
-    receivedAttachmentRow: {
-        borderTopColor: "rgba(17,24,39,0.08)",
+        borderTopColor: "rgba(255,255,255,0.3)",
     },
     attachmentText: {
-        flex: 1,
         fontSize: 13,
-        fontWeight: "600",
         color: "#111827",
-        textDecorationLine: "underline",
+        flex: 1,
     },
     sentAttachmentText: {
         color: "#ffffff",
     },
-    linkText: {
-        color: "#2563eb",
-        textDecorationLine: "underline",
-        fontWeight: "600",
+    dateSeparator: {
+        alignItems: "center",
+        marginVertical: 16,
     },
-    sentMessageText: {
-        color: "#ffffff",
-    },
-    messageTime: {
-        fontSize: 11,
-        fontWeight: "400",
+    dateSeparatorText: {
+        fontSize: 12,
         color: "#9ca3af",
-        marginHorizontal: 4,
-    },
-    sentTime: {
-        textAlign: "right",
-    },
-    receivedTime: {
-        textAlign: "left",
-    },
-    emptyContainer: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        paddingVertical: 60,
-        gap: 8,
-    },
-    emptyContainerInverted: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        paddingVertical: 60,
-        gap: 8,
-        transform: [{ scaleY: -1 }],
+        backgroundColor: "#f3f4f6",
+        paddingHorizontal: 12,
+        paddingVertical: 4,
+        borderRadius: 12,
     },
     loadingMoreContainer: {
         flexDirection: "row",
-        justifyContent: "center",
         alignItems: "center",
+        justifyContent: "center",
         paddingVertical: 16,
         gap: 8,
     },
     loadingMoreText: {
-        fontSize: 12,
+        fontSize: 13,
         color: "#6b7280",
+    },
+    emptyContainerInverted: {
+        alignItems: "center",
+        paddingVertical: 40,
+        transform: [{ scaleY: -1 }],
     },
     emptyText: {
         fontSize: 16,
         fontWeight: "600",
         color: "#6b7280",
+        marginBottom: 8,
     },
     emptySubtext: {
         fontSize: 14,
         color: "#9ca3af",
+        marginBottom: 16,
         textAlign: "center",
     },
     attachmentPreviewRow: {
         flexDirection: "row",
         alignItems: "center",
-        justifyContent: "space-between",
         paddingHorizontal: 16,
-        paddingTop: 10,
-        paddingBottom: 6,
-        backgroundColor: "#ffffff",
+        paddingVertical: 8,
+        backgroundColor: "#f3f4f6",
         borderTopWidth: 1,
         borderTopColor: "#e5e7eb",
     },
@@ -1040,88 +941,70 @@ const styles = StyleSheet.create({
         flex: 1,
         flexDirection: "row",
         alignItems: "center",
-        gap: 8,
+        backgroundColor: "#ffffff",
         paddingHorizontal: 12,
-        paddingVertical: 10,
-        backgroundColor: "#f9fafb",
-        borderWidth: 1,
-        borderColor: "#e5e7eb",
-        borderRadius: 12,
+        paddingVertical: 8,
+        borderRadius: 8,
+        gap: 8,
     },
     imagePreviewContainer: {
         flex: 1,
         flexDirection: "row",
         alignItems: "center",
-        gap: 10,
+        backgroundColor: "#ffffff",
         paddingHorizontal: 8,
         paddingVertical: 6,
-        backgroundColor: "#f9fafb",
-        borderWidth: 1,
-        borderColor: "#e5e7eb",
-        borderRadius: 12,
+        borderRadius: 8,
+        gap: 8,
     },
     imagePreviewThumb: {
-        width: 48,
-        height: 48,
-        borderRadius: 8,
+        width: 40,
+        height: 40,
+        borderRadius: 6,
     },
     attachmentPreviewText: {
         flex: 1,
         fontSize: 13,
-        fontWeight: "600",
-        color: "#111827",
+        color: "#374151",
     },
     attachmentRemoveButton: {
+        padding: 8,
         marginLeft: 8,
-        width: 36,
-        height: 36,
-        borderRadius: 18,
-        alignItems: "center",
-        justifyContent: "center",
-        backgroundColor: "#f3f4f6",
-        borderWidth: 1,
-        borderColor: "#e5e7eb",
     },
     inputArea: {
         flexDirection: "row",
-        alignItems: "center",
-        paddingHorizontal: 16,
-        paddingVertical: 12,
+        alignItems: "flex-end",
+        paddingHorizontal: 12,
+        paddingVertical: 8,
         backgroundColor: "#ffffff",
         borderTopWidth: 1,
         borderTopColor: "#e5e7eb",
-        gap: 8,
     },
     attachButton: {
-        width: 40,
-        height: 40,
-        alignItems: "center",
-        justifyContent: "center",
+        padding: 8,
+        marginRight: 4,
     },
     textInputContainer: {
         flex: 1,
-        backgroundColor: "#f9fafb",
-        borderWidth: 1,
-        borderColor: "#e5e7eb",
+        backgroundColor: "#f3f4f6",
         borderRadius: 20,
         paddingHorizontal: 16,
-        paddingVertical: 10,
-        minHeight: 42,
-        maxHeight: 100,
+        paddingVertical: 8,
+        maxHeight: 120,
     },
     textInput: {
-        fontSize: 14,
-        fontWeight: "400",
+        fontSize: 15,
         color: "#111827",
-        lineHeight: 20,
+        maxHeight: 100,
     },
     sendButton: {
         width: 40,
         height: 40,
         borderRadius: 20,
-        backgroundColor: "#9ca3af",
-        alignItems: "center",
+        backgroundColor: "#e5e7eb",
         justifyContent: "center",
+        alignItems: "center",
+        marginLeft: 8,
     },
     sendButtonActive: {
         backgroundColor: "#00aeed",

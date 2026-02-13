@@ -1,3 +1,4 @@
+import { useTranslation } from "@/contexts/LanguageContext";
 import { Notification } from "@/services/notificationsService";
 import { useAppDispatch, useAppSelector } from "@/store";
 import {
@@ -116,6 +117,7 @@ function NotificationCard({
 
 export default function NotificationsScreen() {
     const dispatch = useAppDispatch();
+    const { t } = useTranslation();
     const { notifications, unreadCount, isLoading } =
         useAppSelector(selectNotifications);
 
@@ -144,7 +146,7 @@ export default function NotificationsScreen() {
         return (
             <SafeAreaView style={styles.container}>
                 <View style={styles.header}>
-                    <Text style={styles.headerTitle}>Notifications</Text>
+                    <Text style={styles.headerTitle}>{t("notifications.title")}</Text>
                 </View>
                 <View style={styles.loadingContainer}>
                     <ActivityIndicator size="large" color="#00aeed" />
@@ -159,7 +161,7 @@ export default function NotificationsScreen() {
             <View style={styles.header}>
                 <View style={styles.headerLeft} />
                 <View style={styles.headerCenter}>
-                    <Text style={styles.headerTitle}>Notifications</Text>
+                    <Text style={styles.headerTitle}>{t("notifications.title")}</Text>
                     {unreadCount > 0 && (
                         <View style={styles.badge}>
                             <Text style={styles.badgeText}>{unreadCount}</Text>
@@ -171,7 +173,7 @@ export default function NotificationsScreen() {
                         style={styles.readAllButton}
                         onPress={handleReadAll}
                     >
-                        <Text style={styles.readAllText}>Read All</Text>
+                        <Text style={styles.readAllText}>{t("notifications.markAllRead")}</Text>
                     </TouchableOpacity>
                 ) : (
                     <View style={styles.headerLeft} />
@@ -206,7 +208,7 @@ export default function NotificationsScreen() {
                             color="#9ca3af"
                         />
                         <Text style={styles.emptyText}>
-                            No notifications yet
+                            {t("notifications.noNotifications")}
                         </Text>
                     </View>
                 }

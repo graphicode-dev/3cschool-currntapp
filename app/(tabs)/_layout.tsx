@@ -1,3 +1,4 @@
+import { useTranslation } from "@/contexts/LanguageContext";
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 import React, { useEffect } from "react";
@@ -12,6 +13,7 @@ import {
 export default function TabLayout() {
     const dispatch = useAppDispatch();
     const { unreadCount } = useAppSelector(selectNotifications);
+    const { t } = useTranslation();
 
     useEffect(() => {
         dispatch(fetchUnreadCount());
@@ -42,7 +44,7 @@ export default function TabLayout() {
             <Tabs.Screen
                 name="chats"
                 options={{
-                    title: "Groups",
+                    title: t("tabs.groups"),
                     tabBarIcon: ({ color, size }) => (
                         <Ionicons
                             name="people-outline"
@@ -55,7 +57,7 @@ export default function TabLayout() {
             <Tabs.Screen
                 name="tickets"
                 options={{
-                    title: "Support",
+                    title: t("tabs.support"),
                     tabBarIcon: ({ color, size }) => (
                         <Ionicons
                             name="headset-outline"
@@ -68,7 +70,7 @@ export default function TabLayout() {
             <Tabs.Screen
                 name="notifications"
                 options={{
-                    title: "Notifications",
+                    title: t("tabs.notifications"),
                     tabBarIcon: ({ color, size }) => (
                         <Ionicons
                             name="notifications-outline"
@@ -88,7 +90,7 @@ export default function TabLayout() {
             <Tabs.Screen
                 name="profile"
                 options={{
-                    title: "Profile",
+                    title: t("tabs.profile"),
                     tabBarIcon: ({ color, size }) => (
                         <Ionicons
                             name="person-outline"

@@ -123,7 +123,7 @@ export default function CreateTicketScreen() {
                     </View>
 
                     {/* Priority Field */}
-                    <View style={styles.fieldContainer}>
+                    {/* <View style={styles.fieldContainer}>
                         <Text style={styles.label}>Priority</Text>
                         <View style={styles.priorityContainer}>
                             {(["low", "medium", "high"] as Priority[]).map(
@@ -154,7 +154,7 @@ export default function CreateTicketScreen() {
                                 ),
                             )}
                         </View>
-                    </View>
+                    </View> */}
 
                     {/* Submit Button */}
                     <TouchableOpacity

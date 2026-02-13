@@ -1,3 +1,4 @@
+import { LanguageProvider } from "@/contexts/LanguageContext";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { store } from "@/store";
 import {
@@ -14,13 +15,15 @@ function Providers({ children }: { children: React.ReactNode }) {
 
     return (
         <Provider store={store}>
-            <ThemeProvider
-                value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-            >
-                <AuthGate>
-                    <NotificationProvider>{children}</NotificationProvider>
-                </AuthGate>
-            </ThemeProvider>
+            <LanguageProvider>
+                <ThemeProvider
+                    value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+                >
+                    <AuthGate>
+                        <NotificationProvider>{children}</NotificationProvider>
+                    </AuthGate>
+                </ThemeProvider>
+            </LanguageProvider>
         </Provider>
     );
 }

@@ -149,6 +149,38 @@ export interface GroupSessionsResponse {
   data: GroupSessionsData;
 }
 
+export interface UpcomingSession {
+  id: number;
+  session_number: number;
+  start_date: string;
+  start_time: string;
+  end_time: string;
+  duration: number;
+  session_status: string;
+  bbb_meeting_id?: string;
+  recording_url?: string | null;
+  group: {
+    id: number;
+    name: string;
+    course: {
+      id: number;
+      title: string;
+    };
+  };
+  instructor: {
+    id: number;
+    full_name: string;
+    avatar?: string | null;
+  };
+}
+
+export interface AllSessionsData {
+  upcoming: UpcomingSession[];
+  past: UpcomingSession[];
+  total_upcoming: number;
+  total_past: number;
+}
+
 export const groupsService = {
   async getGroups(): Promise<ApiResponse<Group[]>> {
     return api.get<Group[]>("/groups");
@@ -160,5 +192,9 @@ export const groupsService = {
 
   async getGroupSessions(id: number): Promise<ApiResponse<GroupSessionsData>> {
     return api.get<GroupSessionsData>(`/groups/${id}/sessions`);
+  },
+
+  async getAllSessions(): Promise<ApiResponse<AllSessionsData>> {
+    return api.get<AllSessionsData>("/groups/all-sessions");
   },
 };

@@ -1,3 +1,4 @@
+import { useLanguage } from "@/contexts/LanguageContext";
 import { useAppDispatch, useAppSelector } from "@/store";
 import { logoutUser } from "@/store/slices/authSlice";
 import { Ionicons } from "@expo/vector-icons";
@@ -5,13 +6,14 @@ import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    Modal,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -64,6 +66,8 @@ export default function ProfileScreen() {
     const dispatch = useAppDispatch();
     const { user } = useAppSelector((state) => state.auth);
     const [isLoggingOut, setIsLoggingOut] = useState(false);
+    const [showLanguageModal, setShowLanguageModal] = useState(false);
+    const { language, setLanguage, t } = useLanguage();
 
     const handleLogout = () => {
         Alert.alert(
@@ -107,9 +111,9 @@ export default function ProfileScreen() {
                 {/* Header with Gradient Background */}
                 <View style={styles.headerGradient}>
                     <View style={styles.headerContent}>
-                        <Text style={styles.headerTitle}>My Profile</Text>
+                        <Text style={styles.headerTitle}>{t("profile.title")}</Text>
                         <Text style={styles.headerSubtitle}>
-                            Manage your account
+                            {t("profile.editProfile")}
                         </Text>
                     </View>
 
@@ -303,6 +307,43 @@ export default function ProfileScreen() {
                     </View>
                 </View>
 
+                {/* Settings Section */}
+                <View style={styles.infoSection}>
+                    <Text style={styles.sectionTitle}>
+                        {t("profile.settings")}
+                    </Text>
+                    <View style={styles.infoCard}>
+                        <TouchableOpacity
+                            style={styles.settingsRow}
+                            onPress={() => setShowLanguageModal(true)}
+                        >
+                            <View
+                                style={[
+                                    styles.infoIconContainer,
+                                    { backgroundColor: "#e6f7fd" },
+                                ]}
+                            >
+                                <Ionicons
+                                    name="language-outline"
+                                    size={18}
+                                    color="#00aeed"
+                                />
+                            </View>
+                            <View style={styles.infoContent}>
+                                <Text style={styles.infoLabel}>{t("profile.language")}</Text>
+                                <Text style={styles.infoValue}>
+                                    {language === "ar" ? "العربية" : "English"}
+                                </Text>
+                            </View>
+                            <Ionicons
+                                name="chevron-forward"
+                                size={20}
+                                color="#9ca3af"
+                            />
+                        </TouchableOpacity>
+                    </View>
+                </View>
+
                 {/* Logout Button */}
                 <View style={styles.infoSection}>
                     <TouchableOpacity
@@ -321,7 +362,7 @@ export default function ProfileScreen() {
                                     color="#ffffff"
                                 />
                                 <Text style={styles.logoutButtonText}>
-                                    Logout
+                                    {t("profile.logout")}
                                 </Text>
                             </>
                         )}
@@ -331,6 +372,75 @@ export default function ProfileScreen() {
                 {/* App Version */}
                 <Text style={styles.versionText}>3C School App v1.0.0</Text>
             </ScrollView>
+
+            {/* Language Selection Modal */}
+            <Modal
+                visible={showLanguageModal}
+                transparent
+                animationType="fade"
+                onRequestClose={() => setShowLanguageModal(false)}
+            >
+                <TouchableOpacity
+                    style={styles.modalOverlay}
+                    activeOpacity={1}
+                    onPress={() => setShowLanguageModal(false)}
+                >
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modalTitle}>{t("profile.selectLanguage")}</Text>
+                        
+                        <TouchableOpacity
+                            style={[
+                                styles.languageOption,
+                                language === "en" && styles.languageOptionSelected,
+                            ]}
+                            onPress={() => {
+                                setLanguage("en");
+                                setShowLanguageModal(false);
+                            }}
+                        >
+                            <Ionicons name="language-outline" size={24} color={language === "en" ? "#00aeed" : "#6b7280"} />
+                            <Text style={[
+                                styles.languageText,
+                                language === "en" && styles.languageTextSelected,
+                            ]}>
+                                English
+                            </Text>
+                            {language === "en" && (
+                                <Ionicons name="checkmark-circle" size={24} color="#00aeed" />
+                            )}
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={[
+                                styles.languageOption,
+                                language === "ar" && styles.languageOptionSelected,
+                            ]}
+                            onPress={() => {
+                                setLanguage("ar");
+                                setShowLanguageModal(false);
+                            }}
+                        >
+                            <Ionicons name="language-outline" size={24} color={language === "ar" ? "#00aeed" : "#6b7280"} />
+                            <Text style={[
+                                styles.languageText,
+                                language === "ar" && styles.languageTextSelected,
+                            ]}>
+                                العربية
+                            </Text>
+                            {language === "ar" && (
+                                <Ionicons name="checkmark-circle" size={24} color="#00aeed" />
+                            )}
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={styles.modalCloseButton}
+                            onPress={() => setShowLanguageModal(false)}
+                        >
+                            <Text style={styles.modalCloseText}>{t("common.cancel")}</Text>
+                        </TouchableOpacity>
+                    </View>
+                </TouchableOpacity>
+            </Modal>
         </SafeAreaView>
     );
 }
@@ -578,5 +688,66 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: "600",
         color: "#ffffff",
+    },
+    settingsRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        padding: 14,
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    modalContent: {
+        backgroundColor: "#ffffff",
+        borderRadius: 20,
+        padding: 24,
+        width: "85%",
+        maxWidth: 340,
+    },
+    modalTitle: {
+        fontSize: 18,
+        fontWeight: "700",
+        color: "#111827",
+        textAlign: "center",
+        marginBottom: 20,
+    },
+    languageOption: {
+        flexDirection: "row",
+        alignItems: "center",
+        padding: 16,
+        borderRadius: 12,
+        marginBottom: 12,
+        backgroundColor: "#f9fafb",
+    },
+    languageOptionSelected: {
+        backgroundColor: "#e6f7fd",
+        borderWidth: 2,
+        borderColor: "#00aeed",
+    },
+    languageIcon: {
+        marginRight: 12,
+    },
+    languageText: {
+        flex: 1,
+        fontSize: 16,
+        fontWeight: "500",
+        color: "#374151",
+    },
+    languageTextSelected: {
+        color: "#00aeed",
+        fontWeight: "600",
+    },
+    modalCloseButton: {
+        marginTop: 8,
+        padding: 14,
+        alignItems: "center",
+    },
+    modalCloseText: {
+        fontSize: 16,
+        fontWeight: "500",
+        color: "#6b7280",
     },
 });

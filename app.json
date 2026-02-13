@@ -7,7 +7,7 @@
     ],
     "name": "3c",
     "slug": "3c",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/icon/ios-adaptive-light-icon.png",
     "userInterfaceStyle": "automatic",
@@ -19,7 +19,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.c3school.app",
-      "buildNumber": "3",
+      "buildNumber": "4",
       "icon": {
         "dark": "./assets/icon/ios-adaptive-dark-icon.png",
         "light": "./assets/icon/ios-adaptive-light-icon.png"
@@ -39,7 +39,8 @@
       "googleServicesFile": "./google-services.json",
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.c3school.app"
+      "package": "com.c3school.app",
+      "versionCode": 3
     },
     "plugins": [
       "expo-router",
@@ -61,7 +62,8 @@
           "icon": "./assets/icon/notification.png",
           "color": "#ffffff"
         }
-      ]
+      ],
+      "expo-localization"
     ],
     "experiments": {
       "typedRoutes": true,

@@ -677,16 +677,32 @@ export default function GroupMembersScreen() {
                             <View style={styles.section}>
                                 <View style={styles.sectionHeader}>
                                     <Text style={styles.sectionTitle}>Chat</Text>
-                                    <TouchableOpacity
-                                        style={styles.openGroupChatButton}
-                                        onPress={() => router.push(`/chat/${id}` as any)}
-                                        activeOpacity={0.8}
-                                    >
-                                        <Ionicons name="chatbox" size={14} color="#ffffff" />
-                                        <Text style={styles.openGroupChatText}>
-                                            Open Group Chat
-                                        </Text>
-                                    </TouchableOpacity>
+                                    <View style={styles.chatButtonsRow}>
+                                        <TouchableOpacity
+                                            style={styles.openPollsButton}
+                                            onPress={() => router.push({
+                                                pathname: `/group/${id}/polls`,
+                                                params: { groupName: groupName }
+                                            } as any)}
+                                            activeOpacity={0.8}
+                                        >
+                                            <Ionicons name="bar-chart" size={14} color="#8b5cf6" />
+                                            <Text style={styles.openPollsText}>Polls</Text>
+                                        </TouchableOpacity>
+                                        <TouchableOpacity
+                                            style={styles.openGroupChatButton}
+                                            onPress={() => router.push({
+                                                pathname: `/chat/group/${id}`,
+                                                params: { groupName: groupName }
+                                            } as any)}
+                                            activeOpacity={0.8}
+                                        >
+                                            <Ionicons name="chatbox" size={14} color="#ffffff" />
+                                            <Text style={styles.openGroupChatText}>
+                                                Group Chat
+                                            </Text>
+                                        </TouchableOpacity>
+                                    </View>
                                 </View>
                             </View>
                         )}
@@ -935,10 +951,29 @@ const styles = StyleSheet.create({
     tabTextActive: {
         color: "#ffffff",
     },
-    openGroupChatButton: {
+    chatButtonsRow: {
         flexDirection: "row",
         alignItems: "center",
         gap: 8,
+    },
+    openPollsButton: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 6,
+        backgroundColor: "#f3e8ff",
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        borderRadius: 10,
+    },
+    openPollsText: {
+        fontSize: 13,
+        fontWeight: "600",
+        color: "#8b5cf6",
+    },
+    openGroupChatButton: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 6,
         backgroundColor: "#00aeed",
         paddingHorizontal: 12,
         paddingVertical: 8,
@@ -946,7 +981,7 @@ const styles = StyleSheet.create({
     },
     openGroupChatText: {
         fontSize: 13,
-        fontWeight: "700",
+        fontWeight: "600",
         color: "#ffffff",
     },
     sessionsLoadingRow: {

@@ -1,3 +1,4 @@
+import { useTranslation } from "@/contexts/LanguageContext";
 import { Ticket, ticketsService } from "@/services/ticketsService";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
@@ -148,6 +149,7 @@ function TicketCard({
 
 export default function TicketsScreen() {
     const router = useRouter();
+    const { t } = useTranslation();
     const [tickets, setTickets] = useState<Ticket[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
@@ -194,12 +196,12 @@ export default function TicketsScreen() {
             <SafeAreaView style={styles.container}>
                 <View style={styles.header}>
                     <View style={styles.headerLeft} />
-                    <Text style={styles.headerTitle}>Help & Support</Text>
+                    <Text style={styles.headerTitle}>{t("support.title")}</Text>
                     <View style={styles.headerLeft} />
                 </View>
                 <View style={styles.loadingContainer}>
                     <ActivityIndicator size="large" color="#00aeed" />
-                    <Text style={styles.loadingText}>Loading tickets...</Text>
+                    <Text style={styles.loadingText}>{t("common.loading")}</Text>
                 </View>
             </SafeAreaView>
         );
@@ -210,7 +212,7 @@ export default function TicketsScreen() {
             <SafeAreaView style={styles.container}>
                 <View style={styles.header}>
                     <View style={styles.headerLeft} />
-                    <Text style={styles.headerTitle}>Help & Support</Text>
+                    <Text style={styles.headerTitle}>{t("support.title")}</Text>
                     <View style={styles.headerLeft} />
                 </View>
                 <View style={styles.errorContainer}>
@@ -224,7 +226,7 @@ export default function TicketsScreen() {
                         style={styles.retryButton}
                         onPress={() => fetchTickets()}
                     >
-                        <Text style={styles.retryButtonText}>Try Again</Text>
+                        <Text style={styles.retryButtonText}>{t("common.retry")}</Text>
                     </TouchableOpacity>
                 </View>
             </SafeAreaView>
@@ -236,7 +238,7 @@ export default function TicketsScreen() {
             {/* Header */}
             <View style={styles.header}>
                 <View style={styles.headerLeft} />
-                <Text style={styles.headerTitle}>Help & Support</Text>
+                <Text style={styles.headerTitle}>{t("support.title")}</Text>
                 <TouchableOpacity
                     onPress={handleRefresh}
                     style={styles.refreshButton}
@@ -286,7 +288,7 @@ export default function TicketsScreen() {
 
                 {/* Recent Tickets Section */}
                 <View style={styles.ticketsSection}>
-                    <Text style={styles.sectionTitle}>Your Recent Tickets</Text>
+                    <Text style={styles.sectionTitle}>{t("support.recentTickets")}</Text>
                     {tickets.length === 0 ? (
                         <View style={styles.emptyContainer}>
                             <Ionicons
@@ -294,7 +296,7 @@ export default function TicketsScreen() {
                                 size={48}
                                 color="#9ca3af"
                             />
-                            <Text style={styles.emptyText}>No tickets yet</Text>
+                            <Text style={styles.emptyText}>{t("support.noTickets")}</Text>
                             <Text style={styles.emptySubtext}>
                                 Create a ticket to get help from our support
                                 team

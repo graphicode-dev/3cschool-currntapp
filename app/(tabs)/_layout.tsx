@@ -2,6 +2,7 @@ import { useTranslation } from "@/contexts/LanguageContext";
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 import React, { useEffect } from "react";
+import { useWindowDimensions } from "react-native";
 
 import { HapticTab } from "@/components/haptic-tab";
 import { useAppDispatch, useAppSelector } from "@/store";
@@ -14,6 +15,8 @@ export default function TabLayout() {
     const dispatch = useAppDispatch();
     const { unreadCount } = useAppSelector(selectNotifications);
     const { t } = useTranslation();
+    const { width } = useWindowDimensions();
+    const isTablet = width >= 768;
 
     useEffect(() => {
         dispatch(fetchUnreadCount());
@@ -31,12 +34,12 @@ export default function TabLayout() {
                     backgroundColor: "#ffffff",
                     borderTopWidth: 1,
                     borderTopColor: "#e5e7eb",
-                    height: 78,
+                    height: isTablet ? 88 : 78,
                     paddingTop: 8,
-                    paddingBottom: 20,
+                    paddingBottom: isTablet ? 24 : 20,
                 },
                 tabBarLabelStyle: {
-                    fontSize: 14,
+                    fontSize: isTablet ? 15 : 14,
                     fontWeight: "400",
                 },
             }}

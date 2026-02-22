@@ -1,5 +1,4 @@
 import { CreateTicketRequest, ticketsService } from "@/services/ticketsService";
-import { useAppSelector } from "@/store";
 import { Ionicons } from "@expo/vector-icons";
 import { Stack, useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -13,6 +12,7 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
+    useWindowDimensions,
     View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -21,11 +21,12 @@ type Priority = "low" | "medium" | "high";
 
 export default function CreateTicketScreen() {
     const router = useRouter();
-    const { user } = useAppSelector((state) => state.auth);
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [priority, setPriority] = useState<Priority>("medium");
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const { width } = useWindowDimensions();
+    const isTablet = width >= 768;
 
     // Get the first group ID from user's groups (you may need to adjust this)
     const courseGroupId = 1; // This should come from the selected group or user's current group
@@ -87,7 +88,14 @@ export default function CreateTicketScreen() {
             >
                 <ScrollView
                     style={styles.scrollView}
-                    contentContainerStyle={styles.scrollContent}
+                    contentContainerStyle={[
+                        styles.scrollContent,
+                        isTablet && {
+                            maxWidth: 540,
+                            alignSelf: "center",
+                            width: "100%",
+                        },
+                    ]}
                     showsVerticalScrollIndicator={false}
                     keyboardShouldPersistTaps="handled"
                 >
@@ -166,7 +174,6 @@ export default function CreateTicketScreen() {
                                 styles.submitButtonDisabled,
                         ]}
                         onPress={handleSubmit}
-                        activeOpacity={0.8}
                         disabled={
                             !title.trim() || !description.trim() || isSubmitting
                         }

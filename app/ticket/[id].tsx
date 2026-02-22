@@ -16,6 +16,7 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
+    useWindowDimensions,
     View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -133,6 +134,8 @@ export default function TicketDetailScreen() {
     const [isLoading, setIsLoading] = useState(true);
     const [isSending, setIsSending] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const { width } = useWindowDimensions();
+    const isTablet = width >= 768;
 
     const currentUserId = user?.id;
 
@@ -381,7 +384,14 @@ export default function TicketDetailScreen() {
                     data={messages}
                     keyExtractor={(item) => item.id}
                     renderItem={renderMessage}
-                    contentContainerStyle={styles.messagesList}
+                    contentContainerStyle={[
+                        styles.messagesList,
+                        isTablet && {
+                            maxWidth: 600,
+                            alignSelf: "center",
+                            width: "100%",
+                        },
+                    ]}
                     showsVerticalScrollIndicator={false}
                     ListHeaderComponent={<DateSeparator />}
                     ListEmptyComponent={
@@ -394,7 +404,16 @@ export default function TicketDetailScreen() {
                 />
 
                 {/* Input Area */}
-                <View style={styles.inputArea}>
+                <View
+                    style={[
+                        styles.inputArea,
+                        isTablet && {
+                            maxWidth: 600,
+                            alignSelf: "center",
+                            width: "100%",
+                        },
+                    ]}
+                >
                     <TouchableOpacity style={styles.attachButton}>
                         <Ionicons name="attach" size={24} color="#6b7280" />
                     </TouchableOpacity>

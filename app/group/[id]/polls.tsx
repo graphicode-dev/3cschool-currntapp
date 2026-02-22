@@ -15,6 +15,7 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
+    useWindowDimensions,
     View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -30,7 +31,14 @@ function getInitials(name: string): string {
 }
 
 function getAvatarColor(name: string): string {
-    const colors = ["#00aeed", "#10b981", "#f59e0b", "#8b5cf6", "#ec4899", "#06b6d4"];
+    const colors = [
+        "#00aeed",
+        "#10b981",
+        "#f59e0b",
+        "#8b5cf6",
+        "#ec4899",
+        "#06b6d4",
+    ];
     let hash = 0;
     for (let i = 0; i < name.length; i++) {
         hash = name.charCodeAt(i) + ((hash << 5) - hash);
@@ -57,12 +65,12 @@ function formatExpiresIn(dateString: string | null): string {
     const now = Date.now();
     const expiresAt = new Date(dateString).getTime();
     const diff = expiresAt - now;
-    
+
     if (diff <= 0) return "Expired";
-    
+
     const hours = Math.floor(diff / 3600000);
     const days = Math.floor(diff / 86400000);
-    
+
     if (hours < 1) return "< 1h left";
     if (hours < 24) return `${hours}h left`;
     return `${days}d left`;
@@ -83,19 +91,22 @@ function PollCard({
     currentUserId: number | undefined;
     isTeacher: boolean;
 }) {
-    const [selectedOptions, setSelectedOptions] = useState<number[]>(poll.user_votes || []);
+    const [selectedOptions, setSelectedOptions] = useState<number[]>(
+        poll.user_votes || [],
+    );
     const canVote = !poll.user_voted && !poll.is_closed && !poll.is_expired;
-    const canClose = (poll.created_by === currentUserId || isTeacher) && !poll.is_closed;
+    const canClose =
+        (poll.created_by === currentUserId || isTeacher) && !poll.is_closed;
     const showResults = poll.user_voted || poll.is_closed || poll.is_expired;
 
     const handleOptionPress = (optionId: number) => {
         if (!canVote) return;
-        
+
         if (poll.is_multiple_choice) {
-            setSelectedOptions(prev => 
-                prev.includes(optionId) 
-                    ? prev.filter(id => id !== optionId)
-                    : [...prev, optionId]
+            setSelectedOptions((prev) =>
+                prev.includes(optionId)
+                    ? prev.filter((id) => id !== optionId)
+                    : [...prev, optionId],
             );
         } else {
             setSelectedOptions([optionId]);
@@ -104,7 +115,10 @@ function PollCard({
 
     const handleVote = () => {
         if (selectedOptions.length === 0) {
-            Alert.alert("Select Option", "Please select at least one option to vote.");
+            Alert.alert(
+                "Select Option",
+                "Please select at least one option to vote.",
+            );
             return;
         }
         onVote(poll.id, selectedOptions);
@@ -120,30 +134,51 @@ function PollCard({
                 <View style={styles.pollCreatorInfo}>
                     {poll.creator.avatar ? (
                         <Image
-                            source={{ uri: `${BASE_URL}${poll.creator.avatar}` }}
+                            source={{
+                                uri: `${BASE_URL}${poll.creator.avatar}`,
+                            }}
                             style={styles.creatorAvatar}
                             contentFit="cover"
                         />
                     ) : (
-                        <View style={[styles.creatorAvatarInitials, { backgroundColor: creatorColor }]}>
-                            <Text style={styles.creatorInitialsText}>{creatorInitials}</Text>
+                        <View
+                            style={[
+                                styles.creatorAvatarInitials,
+                                { backgroundColor: creatorColor },
+                            ]}
+                        >
+                            <Text style={styles.creatorInitialsText}>
+                                {creatorInitials}
+                            </Text>
                         </View>
                     )}
                     <View style={styles.pollCreatorDetails}>
-                        <Text style={styles.creatorName}>{poll.creator.full_name}</Text>
-                        <Text style={styles.pollTime}>{formatTimeAgo(poll.created_at)}</Text>
+                        <Text style={styles.creatorName}>
+                            {poll.creator.full_name}
+                        </Text>
+                        <Text style={styles.pollTime}>
+                            {formatTimeAgo(poll.created_at)}
+                        </Text>
                     </View>
                 </View>
                 <View style={styles.pollBadges}>
                     {poll.is_anonymous && (
                         <View style={styles.anonymousBadge}>
-                            <Ionicons name="eye-off" size={12} color="#6b7280" />
+                            <Ionicons
+                                name="eye-off"
+                                size={12}
+                                color="#6b7280"
+                            />
                             <Text style={styles.badgeText}>Anonymous</Text>
                         </View>
                     )}
                     {poll.is_multiple_choice && (
                         <View style={styles.multipleBadge}>
-                            <Ionicons name="checkbox" size={12} color="#6b7280" />
+                            <Ionicons
+                                name="checkbox"
+                                size={12}
+                                color="#6b7280"
+                            />
                             <Text style={styles.badgeText}>Multiple</Text>
                         </View>
                     )}
@@ -158,13 +193,27 @@ function PollCard({
 
             {/* Poll Status */}
             {(poll.is_closed || poll.is_expired) && (
-                <View style={[styles.statusBanner, poll.is_closed ? styles.closedBanner : styles.expiredBanner]}>
-                    <Ionicons 
-                        name={poll.is_closed ? "lock-closed" : "time"} 
-                        size={14} 
-                        color={poll.is_closed ? "#dc2626" : "#f59e0b"} 
+                <View
+                    style={[
+                        styles.statusBanner,
+                        poll.is_closed
+                            ? styles.closedBanner
+                            : styles.expiredBanner,
+                    ]}
+                >
+                    <Ionicons
+                        name={poll.is_closed ? "lock-closed" : "time"}
+                        size={14}
+                        color={poll.is_closed ? "#dc2626" : "#f59e0b"}
                     />
-                    <Text style={[styles.statusText, poll.is_closed ? styles.closedText : styles.expiredText]}>
+                    <Text
+                        style={[
+                            styles.statusText,
+                            poll.is_closed
+                                ? styles.closedText
+                                : styles.expiredText,
+                        ]}
+                    >
                         {poll.is_closed ? "Poll Closed" : "Poll Expired"}
                     </Text>
                 </View>
@@ -174,7 +223,9 @@ function PollCard({
             {poll.expires_at && !poll.is_closed && !poll.is_expired && (
                 <View style={styles.expiresContainer}>
                     <Ionicons name="timer-outline" size={14} color="#f59e0b" />
-                    <Text style={styles.expiresText}>{formatExpiresIn(poll.expires_at)}</Text>
+                    <Text style={styles.expiresText}>
+                        {formatExpiresIn(poll.expires_at)}
+                    </Text>
                 </View>
             )}
 
@@ -183,7 +234,7 @@ function PollCard({
                 {poll.options.map((option) => {
                     const isSelected = selectedOptions.includes(option.id);
                     const isVoted = poll.user_votes?.includes(option.id);
-                    
+
                     return (
                         <TouchableOpacity
                             key={option.id}
@@ -197,44 +248,66 @@ function PollCard({
                             activeOpacity={canVote ? 0.7 : 1}
                         >
                             {showResults && (
-                                <View 
+                                <View
                                     style={[
                                         styles.optionProgressBar,
                                         { width: `${option.vote_percentage}%` },
                                         isVoted && styles.optionProgressVoted,
-                                    ]} 
+                                    ]}
                                 />
                             )}
                             <View style={styles.optionContent}>
                                 <View style={styles.optionLeft}>
                                     {canVote ? (
-                                        <View style={[
-                                            styles.optionCheckbox,
-                                            poll.is_multiple_choice ? styles.checkboxSquare : styles.checkboxCircle,
-                                            isSelected && styles.checkboxSelected,
-                                        ]}>
+                                        <View
+                                            style={[
+                                                styles.optionCheckbox,
+                                                poll.is_multiple_choice
+                                                    ? styles.checkboxSquare
+                                                    : styles.checkboxCircle,
+                                                isSelected &&
+                                                    styles.checkboxSelected,
+                                            ]}
+                                        >
                                             {isSelected && (
-                                                <Ionicons 
-                                                    name={poll.is_multiple_choice ? "checkmark" : "ellipse"} 
-                                                    size={poll.is_multiple_choice ? 14 : 8} 
-                                                    color="#ffffff" 
+                                                <Ionicons
+                                                    name={
+                                                        poll.is_multiple_choice
+                                                            ? "checkmark"
+                                                            : "ellipse"
+                                                    }
+                                                    size={
+                                                        poll.is_multiple_choice
+                                                            ? 14
+                                                            : 8
+                                                    }
+                                                    color="#ffffff"
                                                 />
                                             )}
                                         </View>
                                     ) : isVoted ? (
-                                        <Ionicons name="checkmark-circle" size={20} color="#00aeed" />
+                                        <Ionicons
+                                            name="checkmark-circle"
+                                            size={20}
+                                            color="#00aeed"
+                                        />
                                     ) : null}
-                                    <Text style={[
-                                        styles.optionText,
-                                        isVoted && styles.optionTextVoted,
-                                    ]}>
+                                    <Text
+                                        style={[
+                                            styles.optionText,
+                                            isVoted && styles.optionTextVoted,
+                                        ]}
+                                    >
                                         {option.option_text}
                                     </Text>
                                 </View>
                                 {showResults && (
                                     <View style={styles.optionRight}>
                                         <Text style={styles.optionVotes}>
-                                            {option.votes_count} {option.votes_count === 1 ? "vote" : "votes"}
+                                            {option.votes_count}{" "}
+                                            {option.votes_count === 1
+                                                ? "vote"
+                                                : "votes"}
                                         </Text>
                                         <Text style={styles.optionPercentage}>
                                             {option.vote_percentage.toFixed(0)}%
@@ -251,7 +324,8 @@ function PollCard({
             <View style={styles.totalVotesContainer}>
                 <Ionicons name="people" size={14} color="#9ca3af" />
                 <Text style={styles.totalVotesText}>
-                    {poll.total_votes} {poll.total_votes === 1 ? "vote" : "votes"}
+                    {poll.total_votes}{" "}
+                    {poll.total_votes === 1 ? "vote" : "votes"}
                 </Text>
             </View>
 
@@ -261,7 +335,8 @@ function PollCard({
                     <TouchableOpacity
                         style={[
                             styles.voteButton,
-                            selectedOptions.length === 0 && styles.voteButtonDisabled,
+                            selectedOptions.length === 0 &&
+                                styles.voteButtonDisabled,
                         ]}
                         onPress={handleVote}
                         disabled={selectedOptions.length === 0 || isVoting}
@@ -270,7 +345,11 @@ function PollCard({
                             <ActivityIndicator size="small" color="#ffffff" />
                         ) : (
                             <>
-                                <Ionicons name="checkmark-circle" size={18} color="#ffffff" />
+                                <Ionicons
+                                    name="checkmark-circle"
+                                    size={18}
+                                    color="#ffffff"
+                                />
                                 <Text style={styles.voteButtonText}>Vote</Text>
                             </>
                         )}
@@ -285,12 +364,20 @@ function PollCard({
                                 "Are you sure you want to close this poll? This cannot be undone.",
                                 [
                                     { text: "Cancel", style: "cancel" },
-                                    { text: "Close Poll", style: "destructive", onPress: () => onClose(poll.id) },
-                                ]
+                                    {
+                                        text: "Close Poll",
+                                        style: "destructive",
+                                        onPress: () => onClose(poll.id),
+                                    },
+                                ],
                             );
                         }}
                     >
-                        <Ionicons name="lock-closed" size={16} color="#dc2626" />
+                        <Ionicons
+                            name="lock-closed"
+                            size={16}
+                            color="#dc2626"
+                        />
                         <Text style={styles.closeButtonText}>Close Poll</Text>
                     </TouchableOpacity>
                 )}
@@ -307,7 +394,13 @@ function CreatePollModal({
 }: {
     visible: boolean;
     onClose: () => void;
-    onCreate: (question: string, options: string[], isMultiple: boolean, isAnonymous: boolean, expiresInHours: number | null) => void;
+    onCreate: (
+        question: string,
+        options: string[],
+        isMultiple: boolean,
+        isAnonymous: boolean,
+        expiresInHours: number | null,
+    ) => void;
     isCreating: boolean;
 }) {
     const [question, setQuestion] = useState("");
@@ -336,7 +429,9 @@ function CreatePollModal({
 
     const handleCreate = () => {
         const trimmedQuestion = question.trim();
-        const trimmedOptions = options.map(o => o.trim()).filter(o => o.length > 0);
+        const trimmedOptions = options
+            .map((o) => o.trim())
+            .filter((o) => o.length > 0);
 
         if (!trimmedQuestion) {
             Alert.alert("Error", "Please enter a question.");
@@ -349,11 +444,20 @@ function CreatePollModal({
 
         const hours = expiresInHours ? parseInt(expiresInHours, 10) : null;
         if (hours !== null && (isNaN(hours) || hours < 1 || hours > 168)) {
-            Alert.alert("Error", "Expiration time must be between 1 and 168 hours (7 days).");
+            Alert.alert(
+                "Error",
+                "Expiration time must be between 1 and 168 hours (7 days).",
+            );
             return;
         }
 
-        onCreate(trimmedQuestion, trimmedOptions, isMultipleChoice, isAnonymous, hours);
+        onCreate(
+            trimmedQuestion,
+            trimmedOptions,
+            isMultipleChoice,
+            isAnonymous,
+            hours,
+        );
     };
 
     const resetForm = () => {
@@ -373,11 +477,16 @@ function CreatePollModal({
         >
             <SafeAreaView style={styles.modalContainer}>
                 <View style={styles.modalHeader}>
-                    <TouchableOpacity onPress={() => { resetForm(); onClose(); }}>
+                    <TouchableOpacity
+                        onPress={() => {
+                            resetForm();
+                            onClose();
+                        }}
+                    >
                         <Text style={styles.modalCancelText}>Cancel</Text>
                     </TouchableOpacity>
                     <Text style={styles.modalTitle}>Create Poll</Text>
-                    <TouchableOpacity 
+                    <TouchableOpacity
                         onPress={handleCreate}
                         disabled={isCreating}
                     >
@@ -389,7 +498,10 @@ function CreatePollModal({
                     </TouchableOpacity>
                 </View>
 
-                <ScrollView style={styles.modalContent} showsVerticalScrollIndicator={false}>
+                <ScrollView
+                    style={styles.modalContent}
+                    showsVerticalScrollIndicator={false}
+                >
                     {/* Question */}
                     <View style={styles.formSection}>
                         <Text style={styles.formLabel}>Question</Text>
@@ -414,7 +526,9 @@ function CreatePollModal({
                                     placeholder={`Option ${index + 1}`}
                                     placeholderTextColor="#9ca3af"
                                     value={option}
-                                    onChangeText={(value) => updateOption(index, value)}
+                                    onChangeText={(value) =>
+                                        updateOption(index, value)
+                                    }
                                     maxLength={200}
                                 />
                                 {options.length > 2 && (
@@ -422,15 +536,28 @@ function CreatePollModal({
                                         style={styles.removeOptionButton}
                                         onPress={() => removeOption(index)}
                                     >
-                                        <Ionicons name="close-circle" size={24} color="#dc2626" />
+                                        <Ionicons
+                                            name="close-circle"
+                                            size={24}
+                                            color="#dc2626"
+                                        />
                                     </TouchableOpacity>
                                 )}
                             </View>
                         ))}
                         {options.length < 10 && (
-                            <TouchableOpacity style={styles.addOptionButton} onPress={addOption}>
-                                <Ionicons name="add-circle" size={20} color="#00aeed" />
-                                <Text style={styles.addOptionText}>Add Option</Text>
+                            <TouchableOpacity
+                                style={styles.addOptionButton}
+                                onPress={addOption}
+                            >
+                                <Ionicons
+                                    name="add-circle"
+                                    size={20}
+                                    color="#00aeed"
+                                />
+                                <Text style={styles.addOptionText}>
+                                    Add Option
+                                </Text>
                             </TouchableOpacity>
                         )}
                     </View>
@@ -438,20 +565,41 @@ function CreatePollModal({
                     {/* Settings */}
                     <View style={styles.formSection}>
                         <Text style={styles.formLabel}>Settings</Text>
-                        
+
                         <TouchableOpacity
                             style={styles.settingRow}
-                            onPress={() => setIsMultipleChoice(!isMultipleChoice)}
+                            onPress={() =>
+                                setIsMultipleChoice(!isMultipleChoice)
+                            }
                         >
                             <View style={styles.settingInfo}>
-                                <Ionicons name="checkbox-outline" size={20} color="#6b7280" />
+                                <Ionicons
+                                    name="checkbox-outline"
+                                    size={20}
+                                    color="#6b7280"
+                                />
                                 <View style={styles.settingTextContainer}>
-                                    <Text style={styles.settingTitle}>Multiple Choice</Text>
-                                    <Text style={styles.settingDescription}>Allow selecting multiple options</Text>
+                                    <Text style={styles.settingTitle}>
+                                        Multiple Choice
+                                    </Text>
+                                    <Text style={styles.settingDescription}>
+                                        Allow selecting multiple options
+                                    </Text>
                                 </View>
                             </View>
-                            <View style={[styles.toggle, isMultipleChoice && styles.toggleActive]}>
-                                <View style={[styles.toggleKnob, isMultipleChoice && styles.toggleKnobActive]} />
+                            <View
+                                style={[
+                                    styles.toggle,
+                                    isMultipleChoice && styles.toggleActive,
+                                ]}
+                            >
+                                <View
+                                    style={[
+                                        styles.toggleKnob,
+                                        isMultipleChoice &&
+                                            styles.toggleKnobActive,
+                                    ]}
+                                />
                             </View>
                         </TouchableOpacity>
 
@@ -460,23 +608,49 @@ function CreatePollModal({
                             onPress={() => setIsAnonymous(!isAnonymous)}
                         >
                             <View style={styles.settingInfo}>
-                                <Ionicons name="eye-off-outline" size={20} color="#6b7280" />
+                                <Ionicons
+                                    name="eye-off-outline"
+                                    size={20}
+                                    color="#6b7280"
+                                />
                                 <View style={styles.settingTextContainer}>
-                                    <Text style={styles.settingTitle}>Anonymous Voting</Text>
-                                    <Text style={styles.settingDescription}>Hide who voted for what</Text>
+                                    <Text style={styles.settingTitle}>
+                                        Anonymous Voting
+                                    </Text>
+                                    <Text style={styles.settingDescription}>
+                                        Hide who voted for what
+                                    </Text>
                                 </View>
                             </View>
-                            <View style={[styles.toggle, isAnonymous && styles.toggleActive]}>
-                                <View style={[styles.toggleKnob, isAnonymous && styles.toggleKnobActive]} />
+                            <View
+                                style={[
+                                    styles.toggle,
+                                    isAnonymous && styles.toggleActive,
+                                ]}
+                            >
+                                <View
+                                    style={[
+                                        styles.toggleKnob,
+                                        isAnonymous && styles.toggleKnobActive,
+                                    ]}
+                                />
                             </View>
                         </TouchableOpacity>
 
                         <View style={styles.settingRow}>
                             <View style={styles.settingInfo}>
-                                <Ionicons name="timer-outline" size={20} color="#6b7280" />
+                                <Ionicons
+                                    name="timer-outline"
+                                    size={20}
+                                    color="#6b7280"
+                                />
                                 <View style={styles.settingTextContainer}>
-                                    <Text style={styles.settingTitle}>Expires In (hours)</Text>
-                                    <Text style={styles.settingDescription}>Leave empty for no expiration</Text>
+                                    <Text style={styles.settingTitle}>
+                                        Expires In (hours)
+                                    </Text>
+                                    <Text style={styles.settingDescription}>
+                                        Leave empty for no expiration
+                                    </Text>
                                 </View>
                             </View>
                             <TextInput
@@ -498,8 +672,13 @@ function CreatePollModal({
 
 export default function PollsScreen() {
     const router = useRouter();
-    const { id, groupName } = useLocalSearchParams<{ id: string; groupName?: string }>();
+    const { id, groupName } = useLocalSearchParams<{
+        id: string;
+        groupName?: string;
+    }>();
     const { user } = useAppSelector((state) => state.auth);
+    const { width } = useWindowDimensions();
+    const isTablet = width >= 768;
     const [polls, setPolls] = useState<Poll[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
@@ -511,24 +690,27 @@ export default function PollsScreen() {
     const currentUserId = user?.id;
     const isTeacher = user?.role_name === "teacher";
 
-    const fetchPolls = useCallback(async (showRefresh = false) => {
-        if (!id) return;
+    const fetchPolls = useCallback(
+        async (showRefresh = false) => {
+            if (!id) return;
 
-        try {
-            if (showRefresh) setIsRefreshing(true);
-            setError(null);
+            try {
+                if (showRefresh) setIsRefreshing(true);
+                setError(null);
 
-            const response = await pollsService.getPolls(Number(id));
-            if (response.data) {
-                setPolls(response.data);
+                const response = await pollsService.getPolls(Number(id));
+                if (response.data) {
+                    setPolls(response.data);
+                }
+            } catch (err: any) {
+                setError(err.message || "Failed to load polls");
+            } finally {
+                setIsLoading(false);
+                setIsRefreshing(false);
             }
-        } catch (err: any) {
-            setError(err.message || "Failed to load polls");
-        } finally {
-            setIsLoading(false);
-            setIsRefreshing(false);
-        }
-    }, [id]);
+        },
+        [id],
+    );
 
     useEffect(() => {
         fetchPolls();
@@ -539,9 +721,15 @@ export default function PollsScreen() {
 
         setIsVoting(true);
         try {
-            const response = await pollsService.vote(Number(id), pollId, optionIds);
+            const response = await pollsService.vote(
+                Number(id),
+                pollId,
+                optionIds,
+            );
             if (response.data) {
-                setPolls(prev => prev.map(p => p.id === pollId ? response.data : p));
+                setPolls((prev) =>
+                    prev.map((p) => (p.id === pollId ? response.data : p)),
+                );
             }
         } catch (err: any) {
             Alert.alert("Error", err.message || "Failed to submit vote");
@@ -556,7 +744,9 @@ export default function PollsScreen() {
         try {
             const response = await pollsService.closePoll(Number(id), pollId);
             if (response.data) {
-                setPolls(prev => prev.map(p => p.id === pollId ? response.data : p));
+                setPolls((prev) =>
+                    prev.map((p) => (p.id === pollId ? response.data : p)),
+                );
             }
         } catch (err: any) {
             Alert.alert("Error", err.message || "Failed to close poll");
@@ -568,7 +758,7 @@ export default function PollsScreen() {
         options: string[],
         isMultiple: boolean,
         isAnonymous: boolean,
-        expiresInHours: number | null
+        expiresInHours: number | null,
     ) => {
         if (!id) return;
 
@@ -582,7 +772,7 @@ export default function PollsScreen() {
                 expires_in_hours: expiresInHours || undefined,
             });
             if (response.data) {
-                setPolls(prev => [response.data, ...prev]);
+                setPolls((prev) => [response.data, ...prev]);
                 setShowCreateModal(false);
             }
         } catch (err: any) {
@@ -599,8 +789,15 @@ export default function PollsScreen() {
             <SafeAreaView style={styles.container}>
                 <Stack.Screen options={{ headerShown: false }} />
                 <View style={styles.header}>
-                    <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-                        <Ionicons name="chevron-back" size={24} color="#111827" />
+                    <TouchableOpacity
+                        style={styles.backButton}
+                        onPress={() => router.back()}
+                    >
+                        <Ionicons
+                            name="chevron-back"
+                            size={24}
+                            color="#111827"
+                        />
                     </TouchableOpacity>
                     <View style={styles.headerInfo}>
                         <Text style={styles.headerTitle}>Polls</Text>
@@ -621,7 +818,10 @@ export default function PollsScreen() {
 
             {/* Header */}
             <View style={styles.header}>
-                <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+                <TouchableOpacity
+                    style={styles.backButton}
+                    onPress={() => router.back()}
+                >
                     <Ionicons name="chevron-back" size={24} color="#111827" />
                 </TouchableOpacity>
                 <View style={styles.headerInfo}>
@@ -660,7 +860,14 @@ export default function PollsScreen() {
                         isTeacher={isTeacher}
                     />
                 )}
-                contentContainerStyle={styles.listContent}
+                contentContainerStyle={[
+                    styles.listContent,
+                    isTablet && {
+                        maxWidth: 650,
+                        alignSelf: "center" as const,
+                        width: "100%" as const,
+                    },
+                ]}
                 showsVerticalScrollIndicator={false}
                 refreshControl={
                     <RefreshControl
@@ -672,7 +879,11 @@ export default function PollsScreen() {
                 }
                 ListEmptyComponent={
                     <View style={styles.emptyContainer}>
-                        <Ionicons name="bar-chart-outline" size={64} color="#d1d5db" />
+                        <Ionicons
+                            name="bar-chart-outline"
+                            size={64}
+                            color="#d1d5db"
+                        />
                         <Text style={styles.emptyTitle}>No Polls Yet</Text>
                         <Text style={styles.emptySubtitle}>
                             Create a poll to get feedback from your group
@@ -681,8 +892,14 @@ export default function PollsScreen() {
                             style={styles.emptyCreateButton}
                             onPress={() => setShowCreateModal(true)}
                         >
-                            <Ionicons name="add-circle" size={20} color="#ffffff" />
-                            <Text style={styles.emptyCreateText}>Create Poll</Text>
+                            <Ionicons
+                                name="add-circle"
+                                size={20}
+                                color="#ffffff"
+                            />
+                            <Text style={styles.emptyCreateText}>
+                                Create Poll
+                            </Text>
                         </TouchableOpacity>
                     </View>
                 }

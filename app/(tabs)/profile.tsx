@@ -13,6 +13,7 @@ import {
     StyleSheet,
     Text,
     TouchableOpacity,
+    useWindowDimensions,
     View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -68,6 +69,8 @@ export default function ProfileScreen() {
     const [isLoggingOut, setIsLoggingOut] = useState(false);
     const [showLanguageModal, setShowLanguageModal] = useState(false);
     const { language, setLanguage, t } = useLanguage();
+    const { width } = useWindowDimensions();
+    const isTablet = width >= 768;
 
     const handleLogout = () => {
         Alert.alert(
@@ -105,13 +108,22 @@ export default function ProfileScreen() {
     return (
         <SafeAreaView style={styles.container}>
             <ScrollView
-                contentContainerStyle={styles.scrollContent}
+                contentContainerStyle={[
+                    styles.scrollContent,
+                    isTablet && {
+                        maxWidth: 600,
+                        alignSelf: "center",
+                        width: "100%",
+                    },
+                ]}
                 showsVerticalScrollIndicator={false}
             >
                 {/* Header with Gradient Background */}
                 <View style={styles.headerGradient}>
                     <View style={styles.headerContent}>
-                        <Text style={styles.headerTitle}>{t("profile.title")}</Text>
+                        <Text style={styles.headerTitle}>
+                            {t("profile.title")}
+                        </Text>
                         <Text style={styles.headerSubtitle}>
                             {t("profile.editProfile")}
                         </Text>
@@ -330,7 +342,9 @@ export default function ProfileScreen() {
                                 />
                             </View>
                             <View style={styles.infoContent}>
-                                <Text style={styles.infoLabel}>{t("profile.language")}</Text>
+                                <Text style={styles.infoLabel}>
+                                    {t("profile.language")}
+                                </Text>
                                 <Text style={styles.infoValue}>
                                     {language === "ar" ? "العربية" : "English"}
                                 </Text>
@@ -348,7 +362,6 @@ export default function ProfileScreen() {
                 <View style={styles.infoSection}>
                     <TouchableOpacity
                         style={styles.logoutButton}
-                        activeOpacity={0.7}
                         onPress={handleLogout}
                         disabled={isLoggingOut}
                     >
@@ -386,49 +399,79 @@ export default function ProfileScreen() {
                     onPress={() => setShowLanguageModal(false)}
                 >
                     <View style={styles.modalContent}>
-                        <Text style={styles.modalTitle}>{t("profile.selectLanguage")}</Text>
-                        
+                        <Text style={styles.modalTitle}>
+                            {t("profile.selectLanguage")}
+                        </Text>
+
                         <TouchableOpacity
                             style={[
                                 styles.languageOption,
-                                language === "en" && styles.languageOptionSelected,
+                                language === "en" &&
+                                    styles.languageOptionSelected,
                             ]}
                             onPress={() => {
                                 setLanguage("en");
                                 setShowLanguageModal(false);
                             }}
                         >
-                            <Ionicons name="language-outline" size={24} color={language === "en" ? "#00aeed" : "#6b7280"} />
-                            <Text style={[
-                                styles.languageText,
-                                language === "en" && styles.languageTextSelected,
-                            ]}>
+                            <Ionicons
+                                name="language-outline"
+                                size={24}
+                                color={
+                                    language === "en" ? "#00aeed" : "#6b7280"
+                                }
+                            />
+                            <Text
+                                style={[
+                                    styles.languageText,
+                                    language === "en" &&
+                                        styles.languageTextSelected,
+                                ]}
+                            >
                                 English
                             </Text>
                             {language === "en" && (
-                                <Ionicons name="checkmark-circle" size={24} color="#00aeed" />
+                                <Ionicons
+                                    name="checkmark-circle"
+                                    size={24}
+                                    color="#00aeed"
+                                />
                             )}
                         </TouchableOpacity>
 
                         <TouchableOpacity
                             style={[
                                 styles.languageOption,
-                                language === "ar" && styles.languageOptionSelected,
+                                language === "ar" &&
+                                    styles.languageOptionSelected,
                             ]}
                             onPress={() => {
                                 setLanguage("ar");
                                 setShowLanguageModal(false);
                             }}
                         >
-                            <Ionicons name="language-outline" size={24} color={language === "ar" ? "#00aeed" : "#6b7280"} />
-                            <Text style={[
-                                styles.languageText,
-                                language === "ar" && styles.languageTextSelected,
-                            ]}>
+                            <Ionicons
+                                name="language-outline"
+                                size={24}
+                                color={
+                                    language === "ar" ? "#00aeed" : "#6b7280"
+                                }
+                            />
+                            <Text
+                                style={[
+                                    styles.languageText,
+                                    language === "ar" &&
+                                        styles.languageTextSelected,
+                                ]}
+                            >
                                 العربية
                             </Text>
                             {language === "ar" && (
-                                <Ionicons name="checkmark-circle" size={24} color="#00aeed" />
+                                <Ionicons
+                                    name="checkmark-circle"
+                                    size={24}
+                                    color="#00aeed"
+                                />
                             )}
                         </TouchableOpacity>
 
@@ -436,7 +479,9 @@ export default function ProfileScreen() {
                             style={styles.modalCloseButton}
                             onPress={() => setShowLanguageModal(false)}
                         >
-                            <Text style={styles.modalCloseText}>{t("common.cancel")}</Text>
+                            <Text style={styles.modalCloseText}>
+                                {t("common.cancel")}
+                            </Text>
                         </TouchableOpacity>
                     </View>
                 </TouchableOpacity>

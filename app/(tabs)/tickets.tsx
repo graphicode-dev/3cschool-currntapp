@@ -10,6 +10,7 @@ import {
     StyleSheet,
     Text,
     TouchableOpacity,
+    useWindowDimensions,
     View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -154,6 +155,8 @@ export default function TicketsScreen() {
     const [isLoading, setIsLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const { width } = useWindowDimensions();
+    const isTablet = width >= 768;
 
     const fetchTickets = useCallback(async (showRefresh = false) => {
         try {
@@ -201,7 +204,9 @@ export default function TicketsScreen() {
                 </View>
                 <View style={styles.loadingContainer}>
                     <ActivityIndicator size="large" color="#00aeed" />
-                    <Text style={styles.loadingText}>{t("common.loading")}</Text>
+                    <Text style={styles.loadingText}>
+                        {t("common.loading")}
+                    </Text>
                 </View>
             </SafeAreaView>
         );
@@ -226,7 +231,9 @@ export default function TicketsScreen() {
                         style={styles.retryButton}
                         onPress={() => fetchTickets()}
                     >
-                        <Text style={styles.retryButtonText}>{t("common.retry")}</Text>
+                        <Text style={styles.retryButtonText}>
+                            {t("common.retry")}
+                        </Text>
                     </TouchableOpacity>
                 </View>
             </SafeAreaView>
@@ -253,7 +260,14 @@ export default function TicketsScreen() {
 
             <ScrollView
                 style={styles.scrollView}
-                contentContainerStyle={styles.scrollContent}
+                contentContainerStyle={[
+                    styles.scrollContent,
+                    isTablet && {
+                        maxWidth: 600,
+                        alignSelf: "center",
+                        width: "100%",
+                    },
+                ]}
                 showsVerticalScrollIndicator={false}
                 refreshControl={
                     <RefreshControl
@@ -288,7 +302,9 @@ export default function TicketsScreen() {
 
                 {/* Recent Tickets Section */}
                 <View style={styles.ticketsSection}>
-                    <Text style={styles.sectionTitle}>{t("support.recentTickets")}</Text>
+                    <Text style={styles.sectionTitle}>
+                        {t("support.recentTickets")}
+                    </Text>
                     {tickets.length === 0 ? (
                         <View style={styles.emptyContainer}>
                             <Ionicons
@@ -296,7 +312,9 @@ export default function TicketsScreen() {
                                 size={48}
                                 color="#9ca3af"
                             />
-                            <Text style={styles.emptyText}>{t("support.noTickets")}</Text>
+                            <Text style={styles.emptyText}>
+                                {t("support.noTickets")}
+                            </Text>
                             <Text style={styles.emptySubtext}>
                                 Create a ticket to get help from our support
                                 team
@@ -317,11 +335,7 @@ export default function TicketsScreen() {
             </ScrollView>
 
             {/* Floating Action Button */}
-            <TouchableOpacity
-                style={styles.fab}
-                onPress={handleCreateTicket}
-                activeOpacity={0.8}
-            >
+            <TouchableOpacity style={styles.fab} onPress={handleCreateTicket}>
                 <Ionicons name="add" size={24} color="#ffffff" />
             </TouchableOpacity>
         </SafeAreaView>

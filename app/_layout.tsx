@@ -1,4 +1,5 @@
 import Providers from "@/providers";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
@@ -8,6 +9,7 @@ export const unstable_settings = {
 };
 
 export default function RootLayout() {
+    // AsyncStorage.clear();
     return (
         <Providers>
             <Stack>

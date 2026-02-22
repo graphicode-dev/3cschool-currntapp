@@ -21,6 +21,7 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
+    useWindowDimensions,
     View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -290,10 +291,16 @@ export default function GroupMembersScreen() {
     const router = useRouter();
     const { id } = useLocalSearchParams();
     const dispatch = useAppDispatch();
-    const { groupDetails, groupSessions, isLoadingDetails, isLoadingSessions, error } = useAppSelector(
-        (state) => state.groups,
-    );
+    const {
+        groupDetails,
+        groupSessions,
+        isLoadingDetails,
+        isLoadingSessions,
+        error,
+    } = useAppSelector((state) => state.groups);
     const { user } = useAppSelector((state) => state.auth);
+    const { width: screenWidth } = useWindowDimensions();
+    const isTablet = screenWidth >= 768;
     const [activeTab, setActiveTab] = useState<"sessions" | "chat">("sessions");
     const [showBroadcastModal, setShowBroadcastModal] = useState(false);
     const [broadcastMessage, setBroadcastMessage] = useState("");
@@ -456,7 +463,8 @@ export default function GroupMembersScreen() {
                                 <TouchableOpacity
                                     style={[
                                         styles.tabButton,
-                                        activeTab === "sessions" && styles.tabButtonActive,
+                                        activeTab === "sessions" &&
+                                            styles.tabButtonActive,
                                     ]}
                                     onPress={() => setActiveTab("sessions")}
                                     activeOpacity={0.8}
@@ -484,7 +492,8 @@ export default function GroupMembersScreen() {
                                 <TouchableOpacity
                                     style={[
                                         styles.tabButton,
-                                        activeTab === "chat" && styles.tabButtonActive,
+                                        activeTab === "chat" &&
+                                            styles.tabButtonActive,
                                     ]}
                                     onPress={() => setActiveTab("chat")}
                                     activeOpacity={0.8}
@@ -514,151 +523,223 @@ export default function GroupMembersScreen() {
                         {activeTab === "sessions" ? (
                             isLoadingSessions ? (
                                 <View style={styles.section}>
-                                    <Text style={styles.sectionTitle}>Sessions</Text>
+                                    <Text style={styles.sectionTitle}>
+                                        Sessions
+                                    </Text>
                                     <View style={styles.sessionsLoadingRow}>
                                         <ActivityIndicator
                                             size="small"
                                             color="#00aeed"
                                         />
-                                        <Text style={styles.sessionsLoadingText}>
+                                        <Text
+                                            style={styles.sessionsLoadingText}
+                                        >
                                             Loading sessions...
                                         </Text>
                                     </View>
                                 </View>
                             ) : sessions.length ? (
                                 <View style={styles.section}>
-                                <View style={styles.sectionHeader}>
-                                    <Text style={styles.sectionTitle}>Sessions</Text>
-                                    <View style={styles.sessionsCountPill}>
-                                        <Text style={styles.sessionsCountText}>
-                                            {sessions.length}
+                                    <View style={styles.sectionHeader}>
+                                        <Text style={styles.sectionTitle}>
+                                            Sessions
+                                        </Text>
+                                        <View style={styles.sessionsCountPill}>
+                                            <Text
+                                                style={styles.sessionsCountText}
+                                            >
+                                                {sessions.length}
+                                            </Text>
+                                        </View>
+                                    </View>
+
+                                    <View style={styles.groupNameCard}>
+                                        <Ionicons
+                                            name="people"
+                                            size={18}
+                                            color="#00aeed"
+                                        />
+                                        <Text
+                                            style={styles.groupNameText}
+                                            numberOfLines={1}
+                                        >
+                                            {groupName}
                                         </Text>
                                     </View>
-                                </View>
 
-                                <View style={styles.groupNameCard}>
-                                    <Ionicons name="people" size={18} color="#00aeed" />
-                                    <Text style={styles.groupNameText} numberOfLines={1}>
-                                        {groupName}
-                                    </Text>
-                                </View>
+                                    <View style={styles.sessionsList}>
+                                        {sessions.map((s) => {
+                                            const dateText = formatSessionDate(
+                                                s.start_date,
+                                            );
+                                            const startText = formatSessionTime(
+                                                s.start_time,
+                                            );
+                                            const endText = formatSessionTime(
+                                                s.end_time,
+                                            );
+                                            const hasMeeting =
+                                                !!s.bbb_meeting_id;
+                                            const hasRecording =
+                                                !!s.recording_url;
 
-                                <View style={styles.sessionsList}>
-                                    {sessions.map((s) => {
-                                        const dateText = formatSessionDate(s.start_date);
-                                        const startText = formatSessionTime(s.start_time);
-                                        const endText = formatSessionTime(s.end_time);
-                                        const hasMeeting = !!s.bbb_meeting_id;
-                                        const hasRecording = !!s.recording_url;
-
-                                        return (
-                                            <View key={s.id} style={styles.sessionCard}>
-                                                <View style={styles.sessionLeft}>
-                                                    <View style={styles.sessionNumberPill}>
-                                                        <Text style={styles.sessionNumberText}>
-                                                            #{s.session_number}
-                                                        </Text>
-                                                    </View>
-                                                    <Text style={styles.sessionTitle}>
-                                                        Session {s.session_number}
-                                                    </Text>
-                                                    <Text style={styles.sessionMeta}>
-                                                        {dateText}
-                                                        {startText ? ` • ${startText}` : ""}
-                                                        {endText ? ` - ${endText}` : ""}
-                                                    </Text>
-                                                    <View style={styles.instructorRow}>
-                                                        <Ionicons
-                                                            name="person-circle-outline"
-                                                            size={18}
-                                                            color="#6b7280"
-                                                        />
-                                                        <Text
-                                                            style={styles.instructorName}
-                                                            numberOfLines={1}
-                                                        >
-                                                            {s.instructor?.full_name || "Instructor"}
-                                                        </Text>
-                                                    </View>
-                                                </View>
-
-                                                <View style={styles.sessionRight}>
+                                            return (
+                                                <View
+                                                    key={s.id}
+                                                    style={styles.sessionCard}
+                                                >
                                                     <View
-                                                        style={[
-                                                            styles.sessionBadge,
-                                                            hasMeeting
-                                                                ? styles.badgeLive
-                                                                : styles.badgeSoon,
-                                                        ]}
+                                                        style={
+                                                            styles.sessionLeft
+                                                        }
                                                     >
-                                                        <Ionicons
-                                                            name={
-                                                                hasMeeting
-                                                                    ? "videocam"
-                                                                    : "time-outline"
+                                                        <View
+                                                            style={
+                                                                styles.sessionNumberPill
                                                             }
-                                                            size={12}
-                                                            color={
-                                                                hasMeeting
-                                                                    ? "#16a34a"
-                                                                    : "#0284c7"
-                                                            }
-                                                        />
+                                                        >
+                                                            <Text
+                                                                style={
+                                                                    styles.sessionNumberText
+                                                                }
+                                                            >
+                                                                #
+                                                                {
+                                                                    s.session_number
+                                                                }
+                                                            </Text>
+                                                        </View>
                                                         <Text
+                                                            style={
+                                                                styles.sessionTitle
+                                                            }
+                                                        >
+                                                            Session{" "}
+                                                            {s.session_number}
+                                                        </Text>
+                                                        <Text
+                                                            style={
+                                                                styles.sessionMeta
+                                                            }
+                                                        >
+                                                            {dateText}
+                                                            {startText
+                                                                ? ` • ${startText}`
+                                                                : ""}
+                                                            {endText
+                                                                ? ` - ${endText}`
+                                                                : ""}
+                                                        </Text>
+                                                        <View
+                                                            style={
+                                                                styles.instructorRow
+                                                            }
+                                                        >
+                                                            <Ionicons
+                                                                name="person-circle-outline"
+                                                                size={18}
+                                                                color="#6b7280"
+                                                            />
+                                                            <Text
+                                                                style={
+                                                                    styles.instructorName
+                                                                }
+                                                                numberOfLines={
+                                                                    1
+                                                                }
+                                                            >
+                                                                {s.instructor
+                                                                    ?.full_name ||
+                                                                    "Instructor"}
+                                                            </Text>
+                                                        </View>
+                                                    </View>
+
+                                                    <View
+                                                        style={
+                                                            styles.sessionRight
+                                                        }
+                                                    >
+                                                        <View
                                                             style={[
-                                                                styles.sessionBadgeText,
+                                                                styles.sessionBadge,
                                                                 hasMeeting
-                                                                    ? styles.badgeTextLive
-                                                                    : styles.badgeTextSoon,
+                                                                    ? styles.badgeLive
+                                                                    : styles.badgeSoon,
                                                             ]}
                                                         >
-                                                            {hasMeeting ? "Meeting" : "Scheduled"}
-                                                        </Text>
-                                                    </View>
+                                                            <Ionicons
+                                                                name={
+                                                                    hasMeeting
+                                                                        ? "videocam"
+                                                                        : "time-outline"
+                                                                }
+                                                                size={12}
+                                                                color={
+                                                                    hasMeeting
+                                                                        ? "#16a34a"
+                                                                        : "#0284c7"
+                                                                }
+                                                            />
+                                                            <Text
+                                                                style={[
+                                                                    styles.sessionBadgeText,
+                                                                    hasMeeting
+                                                                        ? styles.badgeTextLive
+                                                                        : styles.badgeTextSoon,
+                                                                ]}
+                                                            >
+                                                                {hasMeeting
+                                                                    ? "Meeting"
+                                                                    : "Scheduled"}
+                                                            </Text>
+                                                        </View>
 
-                                                    <View
-                                                        style={[
-                                                            styles.sessionBadge,
-                                                            hasRecording
-                                                                ? styles.badgeRecord
-                                                                : styles.badgeMuted,
-                                                        ]}
-                                                    >
-                                                        <Ionicons
-                                                            name={
-                                                                hasRecording
-                                                                    ? "play"
-                                                                    : "play-outline"
-                                                            }
-                                                            size={12}
-                                                            color={
-                                                                hasRecording
-                                                                    ? "#7c3aed"
-                                                                    : "#9ca3af"
-                                                            }
-                                                        />
-                                                        <Text
+                                                        <View
                                                             style={[
-                                                                styles.sessionBadgeText,
+                                                                styles.sessionBadge,
                                                                 hasRecording
-                                                                    ? styles.badgeTextRecord
-                                                                    : styles.badgeTextMuted,
+                                                                    ? styles.badgeRecord
+                                                                    : styles.badgeMuted,
                                                             ]}
                                                         >
-                                                            {hasRecording
-                                                                ? "Recording"
-                                                                : "No Recording"}
-                                                        </Text>
+                                                            <Ionicons
+                                                                name={
+                                                                    hasRecording
+                                                                        ? "play"
+                                                                        : "play-outline"
+                                                                }
+                                                                size={12}
+                                                                color={
+                                                                    hasRecording
+                                                                        ? "#7c3aed"
+                                                                        : "#9ca3af"
+                                                                }
+                                                            />
+                                                            <Text
+                                                                style={[
+                                                                    styles.sessionBadgeText,
+                                                                    hasRecording
+                                                                        ? styles.badgeTextRecord
+                                                                        : styles.badgeTextMuted,
+                                                                ]}
+                                                            >
+                                                                {hasRecording
+                                                                    ? "Recording"
+                                                                    : "No Recording"}
+                                                            </Text>
+                                                        </View>
                                                     </View>
                                                 </View>
-                                            </View>
-                                        );
-                                    })}
-                                </View>
+                                            );
+                                        })}
+                                    </View>
                                 </View>
                             ) : (
                                 <View style={styles.section}>
-                                    <Text style={styles.sectionTitle}>Sessions</Text>
+                                    <Text style={styles.sectionTitle}>
+                                        Sessions
+                                    </Text>
                                     <View style={styles.emptySessions}>
                                         <Ionicons
                                             name="calendar-outline"
@@ -676,29 +757,51 @@ export default function GroupMembersScreen() {
                         {activeTab === "chat" && (
                             <View style={styles.section}>
                                 <View style={styles.sectionHeader}>
-                                    <Text style={styles.sectionTitle}>Chat</Text>
+                                    <Text style={styles.sectionTitle}>
+                                        Chat
+                                    </Text>
                                     <View style={styles.chatButtonsRow}>
                                         <TouchableOpacity
                                             style={styles.openPollsButton}
-                                            onPress={() => router.push({
-                                                pathname: `/group/${id}/polls`,
-                                                params: { groupName: groupName }
-                                            } as any)}
+                                            onPress={() =>
+                                                router.push({
+                                                    pathname: `/group/${id}/polls`,
+                                                    params: {
+                                                        groupName: groupName,
+                                                    },
+                                                } as any)
+                                            }
                                             activeOpacity={0.8}
                                         >
-                                            <Ionicons name="bar-chart" size={14} color="#8b5cf6" />
-                                            <Text style={styles.openPollsText}>Polls</Text>
+                                            <Ionicons
+                                                name="bar-chart"
+                                                size={14}
+                                                color="#8b5cf6"
+                                            />
+                                            <Text style={styles.openPollsText}>
+                                                Polls
+                                            </Text>
                                         </TouchableOpacity>
                                         <TouchableOpacity
                                             style={styles.openGroupChatButton}
-                                            onPress={() => router.push({
-                                                pathname: `/chat/group/${id}`,
-                                                params: { groupName: groupName }
-                                            } as any)}
+                                            onPress={() =>
+                                                router.push({
+                                                    pathname: `/chat/group/${id}`,
+                                                    params: {
+                                                        groupName: groupName,
+                                                    },
+                                                } as any)
+                                            }
                                             activeOpacity={0.8}
                                         >
-                                            <Ionicons name="chatbox" size={14} color="#ffffff" />
-                                            <Text style={styles.openGroupChatText}>
+                                            <Ionicons
+                                                name="chatbox"
+                                                size={14}
+                                                color="#ffffff"
+                                            />
+                                            <Text
+                                                style={styles.openGroupChatText}
+                                            >
                                                 Group Chat
                                             </Text>
                                         </TouchableOpacity>
@@ -708,61 +811,65 @@ export default function GroupMembersScreen() {
                         )}
 
                         {/* Teachers Section - shown to students */}
-                        {activeTab === "chat" && isUserStudent && teachers.length > 0 && (
-                            <View style={styles.section}>
-                                <Text style={styles.sectionTitle}>
-                                    Ask Teachers ({teachers.length})
-                                </Text>
-                                <View style={styles.membersList}>
-                                    {teachers.map((member) => (
-                                        <MemberCard
-                                            key={member.id}
-                                            member={member}
-                                            onPress={() =>
-                                                handleMemberPress(member)
-                                            }
-                                        />
-                                    ))}
+                        {activeTab === "chat" &&
+                            isUserStudent &&
+                            teachers.length > 0 && (
+                                <View style={styles.section}>
+                                    <Text style={styles.sectionTitle}>
+                                        Ask Teachers ({teachers.length})
+                                    </Text>
+                                    <View style={styles.membersList}>
+                                        {teachers.map((member) => (
+                                            <MemberCard
+                                                key={member.id}
+                                                member={member}
+                                                onPress={() =>
+                                                    handleMemberPress(member)
+                                                }
+                                            />
+                                        ))}
+                                    </View>
                                 </View>
-                            </View>
-                        )}
+                            )}
 
                         {/* Students Section - shown to teachers */}
-                        {activeTab === "chat" && isUserTeacher && students.length > 0 && (
-                            <View style={styles.section}>
-                                <View style={styles.sectionHeader}>
-                                    <Text style={styles.sectionTitle}>
-                                        Students ({students.length})
-                                    </Text>
-                                    <TouchableOpacity
-                                        style={styles.sendToAllButton}
-                                        onPress={() =>
-                                            setShowBroadcastModal(true)
-                                        }
-                                    >
-                                        <Ionicons
-                                            name="send"
-                                            size={14}
-                                            color="#ffffff"
-                                        />
-                                        <Text style={styles.sendToAllText}>
-                                            Send to All
+                        {activeTab === "chat" &&
+                            isUserTeacher &&
+                            students.length > 0 && (
+                                <View style={styles.section}>
+                                    <View style={styles.sectionHeader}>
+                                        <Text style={styles.sectionTitle}>
+                                            Students ({students.length})
                                         </Text>
-                                    </TouchableOpacity>
-                                </View>
-                                <View style={styles.membersList}>
-                                    {students.map((member) => (
-                                        <MemberCard
-                                            key={member.id}
-                                            member={member}
+                                        <TouchableOpacity
+                                            style={styles.sendToAllButton}
                                             onPress={() =>
-                                                handleMemberPress(member)
+                                                setShowBroadcastModal(true)
                                             }
-                                        />
-                                    ))}
+                                        >
+                                            <Ionicons
+                                                name="send"
+                                                size={14}
+                                                color="#ffffff"
+                                            />
+                                            <Text style={styles.sendToAllText}>
+                                                Send to All
+                                            </Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                    <View style={styles.membersList}>
+                                        {students.map((member) => (
+                                            <MemberCard
+                                                key={member.id}
+                                                member={member}
+                                                onPress={() =>
+                                                    handleMemberPress(member)
+                                                }
+                                            />
+                                        ))}
+                                    </View>
                                 </View>
-                            </View>
-                        )}
+                            )}
 
                         {/* Empty state */}
                         {activeTab === "chat" &&
@@ -782,7 +889,14 @@ export default function GroupMembersScreen() {
                             )}
                     </>
                 }
-                contentContainerStyle={styles.listContent}
+                contentContainerStyle={[
+                    styles.listContent,
+                    isTablet && {
+                        maxWidth: 650,
+                        alignSelf: "center" as const,
+                        width: "100%" as const,
+                    },
+                ]}
                 showsVerticalScrollIndicator={false}
             />
 

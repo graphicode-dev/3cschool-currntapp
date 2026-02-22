@@ -8,11 +8,11 @@ import {
     KeyboardAvoidingView,
     Linking,
     Platform,
-    Pressable,
     StyleSheet,
     Text,
     TextInput,
     TouchableOpacity,
+    useWindowDimensions,
     View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -95,11 +95,12 @@ function normalizePhone(raw: string) {
 
 function renderTextWithLinks(text: string) {
     // Combined regex for URLs and phone numbers
-    const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+|[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}[^\s]*)/;
+    const urlRegex =
+        /(https?:\/\/[^\s]+|www\.[^\s]+|[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}[^\s]*)/;
     const phoneRegex = /(\+?\d[\d\s\-().]{7,}\d)/;
     const combinedRegex = new RegExp(
         `${urlRegex.source}|${phoneRegex.source}`,
-        "g"
+        "g",
     );
 
     const parts = text.split(combinedRegex);
@@ -161,7 +162,7 @@ function MessageBubble({ message }: { message: Message }) {
             {!isSent && message.sender && (
                 <Text style={styles.senderName}>{message.sender}</Text>
             )}
-            <Pressable
+            <TouchableOpacity
                 onLongPress={handleCopy}
                 delayLongPress={350}
                 style={[
@@ -169,8 +170,10 @@ function MessageBubble({ message }: { message: Message }) {
                     isSent ? styles.sentBubble : styles.receivedBubble,
                 ]}
             >
-                <Text style={styles.messageText}>{renderTextWithLinks(message.text)}</Text>
-            </Pressable>
+                <Text style={styles.messageText}>
+                    {renderTextWithLinks(message.text)}
+                </Text>
+            </TouchableOpacity>
             {message.time && (
                 <Text
                     style={[
@@ -189,6 +192,8 @@ export default function ChatDetailScreen() {
     const router = useRouter();
     const { id } = useLocalSearchParams();
     const [messageText, setMessageText] = useState("");
+    const { width } = useWindowDimensions();
+    const isTablet = width >= 768;
 
     const handleSend = () => {
         if (messageText.trim()) {
@@ -250,13 +255,29 @@ export default function ChatDetailScreen() {
                     data={MESSAGES}
                     keyExtractor={(item) => item.id}
                     renderItem={renderMessage}
-                    contentContainerStyle={styles.messagesList}
+                    contentContainerStyle={[
+                        styles.messagesList,
+                        isTablet && {
+                            maxWidth: 600,
+                            alignSelf: "center",
+                            width: "100%",
+                        },
+                    ]}
                     showsVerticalScrollIndicator={false}
                     ListHeaderComponent={<DateSeparator />}
                 />
 
                 {/* Input Area */}
-                <View style={styles.inputArea}>
+                <View
+                    style={[
+                        styles.inputArea,
+                        isTablet && {
+                            maxWidth: 600,
+                            alignSelf: "center",
+                            width: "100%",
+                        },
+                    ]}
+                >
                     <TouchableOpacity style={styles.attachButton}>
                         <Ionicons name="attach" size={24} color="#6b7280" />
                     </TouchableOpacity>

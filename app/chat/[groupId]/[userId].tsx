@@ -19,11 +19,11 @@ import {
     KeyboardAvoidingView,
     Linking,
     Platform,
-    Pressable,
     StyleSheet,
     Text,
     TextInput,
     TouchableOpacity,
+    useWindowDimensions,
     View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -106,11 +106,12 @@ function normalizePhone(raw: string) {
 
 function renderTextWithLinks(text: string) {
     // Combined regex for URLs and phone numbers
-    const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+|[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}[^\s]*)/;
+    const urlRegex =
+        /(https?:\/\/[^\s]+|www\.[^\s]+|[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}[^\s]*)/;
     const phoneRegex = /(\+?\d[\d\s\-().]{7,}\d)/;
     const combinedRegex = new RegExp(
         `${urlRegex.source}|${phoneRegex.source}`,
-        "g"
+        "g",
     );
 
     const parts = text.split(combinedRegex);
@@ -173,7 +174,7 @@ function MessageBubble({ message }: { message: DisplayMessage }) {
             {!isSent && message.sender && (
                 <Text style={styles.senderName}>{message.sender}</Text>
             )}
-            <Pressable
+            <TouchableOpacity
                 onLongPress={handleCopy}
                 delayLongPress={350}
                 style={[
@@ -220,7 +221,7 @@ function MessageBubble({ message }: { message: DisplayMessage }) {
                         </Text>
                     </TouchableOpacity>
                 )}
-            </Pressable>
+            </TouchableOpacity>
             {message.time && (
                 <Text
                     style={[
@@ -237,19 +238,21 @@ function MessageBubble({ message }: { message: DisplayMessage }) {
 
 export default function PrivateChatScreen() {
     const router = useRouter();
-    const { groupId, userId, userName, userAvatar, userMobile } = useLocalSearchParams<{
-        groupId: string;
-        userId: string;
-        userName?: string;
-        userAvatar?: string;
-        userMobile?: string;
-    }>();
+    const { groupId, userId, userName, userAvatar, userMobile } =
+        useLocalSearchParams<{
+            groupId: string;
+            userId: string;
+            userName?: string;
+            userAvatar?: string;
+            userMobile?: string;
+        }>();
     const { user } = useAppSelector((state) => state.auth);
+    const { width } = useWindowDimensions();
+    const isTablet = width >= 768;
     const [messages, setMessages] = useState<DisplayMessage[]>([]);
     const [messageText, setMessageText] = useState("");
-    const [selectedAttachment, setSelectedAttachment] = useState<
-        SelectedAttachment | null
-    >(null);
+    const [selectedAttachment, setSelectedAttachment] =
+        useState<SelectedAttachment | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
     const [isSending, setIsSending] = useState(false);
@@ -275,9 +278,11 @@ export default function PrivateChatScreen() {
                         : null
                     : null,
             text: msg.message,
-            attachmentUrl: msg.attachment_url || (msg.attachment_path
-                ? `${BASE_URL}/${msg.attachment_path}`
-                : null),
+            attachmentUrl:
+                msg.attachment_url ||
+                (msg.attachment_path
+                    ? `${BASE_URL}/${msg.attachment_path}`
+                    : null),
             attachmentName: msg.attachment_name || null,
             time: formatTime(msg.created_at),
             isRead: msg.read_at !== null,
@@ -385,9 +390,13 @@ export default function PrivateChatScreen() {
 
     const handlePickImage = async () => {
         try {
-            const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+            const permissionResult =
+                await ImagePicker.requestMediaLibraryPermissionsAsync();
             if (!permissionResult.granted) {
-                Alert.alert("Permission Required", "Please allow access to your photo library to send images.");
+                Alert.alert(
+                    "Permission Required",
+                    "Please allow access to your photo library to send images.",
+                );
                 return;
             }
 
@@ -446,7 +455,7 @@ export default function PrivateChatScreen() {
                 { text: "File", onPress: handlePickDocument },
                 { text: "Cancel", style: "cancel" },
             ],
-            { cancelable: true }
+            { cancelable: true },
         );
     };
 
@@ -600,7 +609,9 @@ export default function PrivateChatScreen() {
                     onPress={async () => {
                         if (isSending) return;
                         // Vibrate immediately for feedback
-                        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                        Haptics.notificationAsync(
+                            Haptics.NotificationFeedbackType.Success,
+                        );
                         try {
                             await messagesService.sendMessage(
                                 Number(groupId),
@@ -608,10 +619,17 @@ export default function PrivateChatScreen() {
                                 "🔔 Ring!",
                             );
                             // Vibrate again on success
-                            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                            Haptics.notificationAsync(
+                                Haptics.NotificationFeedbackType.Success,
+                            );
                         } catch (err: any) {
-                            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-                            Alert.alert("Error", err.message || "Failed to send ring");
+                            Haptics.notificationAsync(
+                                Haptics.NotificationFeedbackType.Error,
+                            );
+                            Alert.alert(
+                                "Error",
+                                err.message || "Failed to send ring",
+                            );
                         }
                     }}
                     disabled={isSending}
@@ -641,7 +659,14 @@ export default function PrivateChatScreen() {
                     data={messages}
                     keyExtractor={(item) => item.id}
                     renderItem={renderMessage}
-                    contentContainerStyle={styles.messagesList}
+                    contentContainerStyle={[
+                        styles.messagesList,
+                        isTablet && {
+                            maxWidth: 700,
+                            alignSelf: "center" as const,
+                            width: "100%" as const,
+                        },
+                    ]}
                     showsVerticalScrollIndicator={false}
                     inverted
                     onEndReached={loadMoreMessages}
@@ -691,13 +716,20 @@ export default function PrivateChatScreen() {
                                     style={styles.imagePreviewThumb}
                                     contentFit="cover"
                                 />
-                                <Text style={styles.attachmentPreviewText} numberOfLines={1}>
+                                <Text
+                                    style={styles.attachmentPreviewText}
+                                    numberOfLines={1}
+                                >
                                     {selectedAttachment.name}
                                 </Text>
                             </View>
                         ) : (
                             <View style={styles.attachmentPreviewChip}>
-                                <Ionicons name="document" size={16} color="#111827" />
+                                <Ionicons
+                                    name="document"
+                                    size={16}
+                                    color="#111827"
+                                />
                                 <Text
                                     style={styles.attachmentPreviewText}
                                     numberOfLines={1}
@@ -716,7 +748,16 @@ export default function PrivateChatScreen() {
                 )}
 
                 {/* Input Area */}
-                <View style={styles.inputArea}>
+                <View
+                    style={[
+                        styles.inputArea,
+                        isTablet && {
+                            maxWidth: 700,
+                            alignSelf: "center" as const,
+                            width: "100%" as const,
+                        },
+                    ]}
+                >
                     <TouchableOpacity
                         style={styles.attachButton}
                         onPress={handlePickAttachment}

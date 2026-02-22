@@ -18,12 +18,12 @@ import {
     KeyboardAvoidingView,
     Linking,
     Platform,
-    Pressable,
     StyleSheet,
     Text,
     TextInput,
     TouchableOpacity,
-    View
+    useWindowDimensions,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -67,7 +67,14 @@ function getInitials(name: string): string {
 }
 
 function getAvatarColor(name: string): string {
-    const colors = ["#00aeed", "#10b981", "#f59e0b", "#8b5cf6", "#ec4899", "#06b6d4"];
+    const colors = [
+        "#00aeed",
+        "#10b981",
+        "#f59e0b",
+        "#8b5cf6",
+        "#ec4899",
+        "#06b6d4",
+    ];
     let hash = 0;
     for (let i = 0; i < name.length; i++) {
         hash = name.charCodeAt(i) + ((hash << 5) - hash);
@@ -86,11 +93,12 @@ function normalizePhone(raw: string) {
 }
 
 function renderTextWithLinks(text: string) {
-    const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+|[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}[^\s]*)/;
+    const urlRegex =
+        /(https?:\/\/[^\s]+|www\.[^\s]+|[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}[^\s]*)/;
     const phoneRegex = /(\+?\d[\d\s\-().]{7,}\d)/;
     const combinedRegex = new RegExp(
         `${urlRegex.source}|${phoneRegex.source}`,
-        "g"
+        "g",
     );
 
     const parts = text.split(combinedRegex);
@@ -142,7 +150,9 @@ function MessageBubble({ message }: { message: DisplayMessage }) {
     };
 
     const senderInitials = message.sender ? getInitials(message.sender) : "";
-    const avatarColor = message.sender ? getAvatarColor(message.sender) : "#00aeed";
+    const avatarColor = message.sender
+        ? getAvatarColor(message.sender)
+        : "#00aeed";
 
     return (
         <View
@@ -160,18 +170,30 @@ function MessageBubble({ message }: { message: DisplayMessage }) {
                             contentFit="cover"
                         />
                     ) : (
-                        <View style={[styles.messageAvatarInitials, { backgroundColor: avatarColor }]}>
-                            <Text style={styles.messageAvatarText}>{senderInitials}</Text>
+                        <View
+                            style={[
+                                styles.messageAvatarInitials,
+                                { backgroundColor: avatarColor },
+                            ]}
+                        >
+                            <Text style={styles.messageAvatarText}>
+                                {senderInitials}
+                            </Text>
                         </View>
                     )}
                     <View style={styles.messageContent}>
                         {message.sender && (
-                            <Text style={styles.senderName}>{message.sender}</Text>
+                            <Text style={styles.senderName}>
+                                {message.sender}
+                            </Text>
                         )}
-                        <Pressable
+                        <TouchableOpacity
                             onLongPress={handleCopy}
                             delayLongPress={350}
-                            style={[styles.messageBubble, styles.receivedBubble]}
+                            style={[
+                                styles.messageBubble,
+                                styles.receivedBubble,
+                            ]}
                         >
                             {hasText && (
                                 <Text style={styles.messageText}>
@@ -180,19 +202,38 @@ function MessageBubble({ message }: { message: DisplayMessage }) {
                             )}
                             {!!message.attachmentUrl && (
                                 <TouchableOpacity
-                                    style={[styles.attachmentRow, !hasText ? styles.attachmentRowNoText : null]}
-                                    onPress={() => Linking.openURL(message.attachmentUrl!)}
+                                    style={[
+                                        styles.attachmentRow,
+                                        !hasText
+                                            ? styles.attachmentRowNoText
+                                            : null,
+                                    ]}
+                                    onPress={() =>
+                                        Linking.openURL(message.attachmentUrl!)
+                                    }
                                     activeOpacity={0.8}
                                 >
-                                    <Ionicons name="attach" size={16} color="#111827" />
-                                    <Text style={styles.attachmentText} numberOfLines={1}>
+                                    <Ionicons
+                                        name="attach"
+                                        size={16}
+                                        color="#111827"
+                                    />
+                                    <Text
+                                        style={styles.attachmentText}
+                                        numberOfLines={1}
+                                    >
                                         {message.attachmentName || "Attachment"}
                                     </Text>
                                 </TouchableOpacity>
                             )}
-                        </Pressable>
+                        </TouchableOpacity>
                         {message.time && (
-                            <Text style={[styles.messageTime, styles.receivedTime]}>
+                            <Text
+                                style={[
+                                    styles.messageTime,
+                                    styles.receivedTime,
+                                ]}
+                            >
                                 {message.time}
                             </Text>
                         )}
@@ -201,13 +242,18 @@ function MessageBubble({ message }: { message: DisplayMessage }) {
             )}
             {isSent && (
                 <>
-                    <Pressable
+                    <TouchableOpacity
                         onLongPress={handleCopy}
                         delayLongPress={350}
                         style={[styles.messageBubble, styles.sentBubble]}
                     >
                         {hasText && (
-                            <Text style={[styles.messageText, styles.sentMessageText]}>
+                            <Text
+                                style={[
+                                    styles.messageText,
+                                    styles.sentMessageText,
+                                ]}
+                            >
                                 {renderTextWithLinks(message.text)}
                             </Text>
                         )}
@@ -215,19 +261,33 @@ function MessageBubble({ message }: { message: DisplayMessage }) {
                             <TouchableOpacity
                                 style={[
                                     styles.attachmentRow,
-                                    !hasText ? styles.attachmentRowNoText : null,
+                                    !hasText
+                                        ? styles.attachmentRowNoText
+                                        : null,
                                     styles.sentAttachmentRow,
                                 ]}
-                                onPress={() => Linking.openURL(message.attachmentUrl!)}
+                                onPress={() =>
+                                    Linking.openURL(message.attachmentUrl!)
+                                }
                                 activeOpacity={0.8}
                             >
-                                <Ionicons name="attach" size={16} color="#ffffff" />
-                                <Text style={[styles.attachmentText, styles.sentAttachmentText]} numberOfLines={1}>
+                                <Ionicons
+                                    name="attach"
+                                    size={16}
+                                    color="#ffffff"
+                                />
+                                <Text
+                                    style={[
+                                        styles.attachmentText,
+                                        styles.sentAttachmentText,
+                                    ]}
+                                    numberOfLines={1}
+                                >
                                     {message.attachmentName || "Attachment"}
                                 </Text>
                             </TouchableOpacity>
                         )}
-                    </Pressable>
+                    </TouchableOpacity>
                     {message.time && (
                         <Text style={[styles.messageTime, styles.sentTime]}>
                             {message.time}
@@ -246,9 +306,12 @@ export default function GroupChatScreen() {
         groupName?: string;
     }>();
     const { user } = useAppSelector((state) => state.auth);
+    const { width } = useWindowDimensions();
+    const isTablet = width >= 768;
     const [messages, setMessages] = useState<DisplayMessage[]>([]);
     const [messageText, setMessageText] = useState("");
-    const [selectedAttachment, setSelectedAttachment] = useState<SelectedAttachment | null>(null);
+    const [selectedAttachment, setSelectedAttachment] =
+        useState<SelectedAttachment | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
     const [isSending, setIsSending] = useState(false);
@@ -263,13 +326,21 @@ export default function GroupChatScreen() {
         (msg: Message): DisplayMessage => ({
             id: msg.id.toString(),
             type: msg.sender_id === currentUserId ? "sent" : "received",
-            sender: msg.sender_id !== currentUserId ? msg.sender.full_name : undefined,
+            sender:
+                msg.sender_id !== currentUserId
+                    ? msg.sender.full_name
+                    : undefined,
             senderId: msg.sender_id,
-            senderAvatar: msg.sender_id !== currentUserId && msg.sender.avatar
-                ? `${BASE_URL}${msg.sender.avatar}`
-                : null,
+            senderAvatar:
+                msg.sender_id !== currentUserId && msg.sender.avatar
+                    ? `${BASE_URL}${msg.sender.avatar}`
+                    : null,
             text: msg.message || "",
-            attachmentUrl: msg.attachment_url || (msg.attachment_path ? `${BASE_URL}/${msg.attachment_path}` : null),
+            attachmentUrl:
+                msg.attachment_url ||
+                (msg.attachment_path
+                    ? `${BASE_URL}/${msg.attachment_path}`
+                    : null),
             attachmentName: msg.attachment_name || null,
             time: formatTime(msg.created_at),
             isRead: msg.read_at !== null,
@@ -293,7 +364,8 @@ export default function GroupChatScreen() {
                 );
 
                 if (response.data) {
-                    const displayMessages: DisplayMessage[] = response.data.map(mapMessageToDisplay);
+                    const displayMessages: DisplayMessage[] =
+                        response.data.map(mapMessageToDisplay);
 
                     if (append) {
                         setMessages((prev) => [...prev, ...displayMessages]);
@@ -356,7 +428,11 @@ export default function GroupChatScreen() {
     }, [groupId, mapMessageToDisplay]);
 
     const loadMoreMessages = useCallback(() => {
-        if (isLoadingMore || !pagination || currentPage >= pagination.last_page) {
+        if (
+            isLoadingMore ||
+            !pagination ||
+            currentPage >= pagination.last_page
+        ) {
             return;
         }
         fetchMessages(currentPage + 1, true);
@@ -364,9 +440,13 @@ export default function GroupChatScreen() {
 
     const handlePickImage = async () => {
         try {
-            const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+            const permissionResult =
+                await ImagePicker.requestMediaLibraryPermissionsAsync();
             if (!permissionResult.granted) {
-                Alert.alert("Permission Required", "Please allow access to your photo library to send images.");
+                Alert.alert(
+                    "Permission Required",
+                    "Please allow access to your photo library to send images.",
+                );
                 return;
             }
 
@@ -425,7 +505,7 @@ export default function GroupChatScreen() {
                 { text: "File", onPress: handlePickDocument },
                 { text: "Cancel", style: "cancel" },
             ],
-            { cancelable: true }
+            { cancelable: true },
         );
     };
 
@@ -470,7 +550,9 @@ export default function GroupChatScreen() {
             if (response.data) {
                 setMessages((prev) =>
                     prev.map((msg) =>
-                        msg.id === tempId ? mapMessageToDisplay(response.data) : msg,
+                        msg.id === tempId
+                            ? mapMessageToDisplay(response.data)
+                            : msg,
                     ),
                 );
             }
@@ -495,8 +577,15 @@ export default function GroupChatScreen() {
             <SafeAreaView style={styles.container}>
                 <Stack.Screen options={{ headerShown: false }} />
                 <View style={styles.header}>
-                    <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-                        <Ionicons name="chevron-back" size={24} color="#111827" />
+                    <TouchableOpacity
+                        style={styles.backButton}
+                        onPress={() => router.back()}
+                    >
+                        <Ionicons
+                            name="chevron-back"
+                            size={24}
+                            color="#111827"
+                        />
                     </TouchableOpacity>
                     <View style={styles.groupAvatarContainer}>
                         <Ionicons name="people" size={24} color="#ffffff" />
@@ -520,7 +609,10 @@ export default function GroupChatScreen() {
 
             {/* Header */}
             <View style={styles.header}>
-                <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+                <TouchableOpacity
+                    style={styles.backButton}
+                    onPress={() => router.back()}
+                >
                     <Ionicons name="chevron-back" size={24} color="#111827" />
                 </TouchableOpacity>
 
@@ -543,10 +635,12 @@ export default function GroupChatScreen() {
 
                 <TouchableOpacity
                     style={styles.pollsButton}
-                    onPress={() => router.push({
-                        pathname: `/group/${groupId}/polls`,
-                        params: { groupName: groupName }
-                    } as any)}
+                    onPress={() =>
+                        router.push({
+                            pathname: `/group/${groupId}/polls`,
+                            params: { groupName: groupName },
+                        } as any)
+                    }
                 >
                     <Ionicons name="bar-chart" size={22} color="#8b5cf6" />
                 </TouchableOpacity>
@@ -573,7 +667,14 @@ export default function GroupChatScreen() {
                     data={messages}
                     keyExtractor={(item) => item.id}
                     renderItem={renderMessage}
-                    contentContainerStyle={styles.messagesList}
+                    contentContainerStyle={[
+                        styles.messagesList,
+                        isTablet && {
+                            maxWidth: 700,
+                            alignSelf: "center" as const,
+                            width: "100%" as const,
+                        },
+                    ]}
                     showsVerticalScrollIndicator={false}
                     inverted
                     onEndReached={loadMoreMessages}
@@ -581,7 +682,10 @@ export default function GroupChatScreen() {
                     ListFooterComponent={
                         isLoadingMore ? (
                             <View style={styles.loadingMoreContainer}>
-                                <ActivityIndicator size="small" color="#00aeed" />
+                                <ActivityIndicator
+                                    size="small"
+                                    color="#00aeed"
+                                />
                                 <Text style={styles.loadingMoreText}>
                                     Loading older messages...
                                 </Text>
@@ -599,8 +703,14 @@ export default function GroupChatScreen() {
                             <Text style={styles.emptySubtext}>
                                 Start the conversation by sending a message
                             </Text>
-                            <Text style={styles.emptyText}>No messages yet</Text>
-                            <Ionicons name="chatbubbles-outline" size={48} color="#9ca3af" />
+                            <Text style={styles.emptyText}>
+                                No messages yet
+                            </Text>
+                            <Ionicons
+                                name="chatbubbles-outline"
+                                size={48}
+                                color="#9ca3af"
+                            />
                         </View>
                     }
                 />
@@ -614,14 +724,24 @@ export default function GroupChatScreen() {
                                     style={styles.imagePreviewThumb}
                                     contentFit="cover"
                                 />
-                                <Text style={styles.attachmentPreviewText} numberOfLines={1}>
+                                <Text
+                                    style={styles.attachmentPreviewText}
+                                    numberOfLines={1}
+                                >
                                     {selectedAttachment.name}
                                 </Text>
                             </View>
                         ) : (
                             <View style={styles.attachmentPreviewChip}>
-                                <Ionicons name="document" size={16} color="#111827" />
-                                <Text style={styles.attachmentPreviewText} numberOfLines={1}>
+                                <Ionicons
+                                    name="document"
+                                    size={16}
+                                    color="#111827"
+                                />
+                                <Text
+                                    style={styles.attachmentPreviewText}
+                                    numberOfLines={1}
+                                >
                                     {selectedAttachment.name}
                                 </Text>
                             </View>
@@ -636,7 +756,16 @@ export default function GroupChatScreen() {
                 )}
 
                 {/* Input Area */}
-                <View style={styles.inputArea}>
+                <View
+                    style={[
+                        styles.inputArea,
+                        isTablet && {
+                            maxWidth: 700,
+                            alignSelf: "center" as const,
+                            width: "100%" as const,
+                        },
+                    ]}
+                >
                     <TouchableOpacity
                         style={styles.attachButton}
                         onPress={handlePickAttachment}
@@ -660,13 +789,15 @@ export default function GroupChatScreen() {
                     <TouchableOpacity
                         style={[
                             styles.sendButton,
-                            (messageText.trim() || selectedAttachment) && !isSending
+                            (messageText.trim() || selectedAttachment) &&
+                            !isSending
                                 ? styles.sendButtonActive
                                 : null,
                         ]}
                         onPress={handleSend}
                         disabled={
-                            isSending || (!messageText.trim() && !selectedAttachment)
+                            isSending ||
+                            (!messageText.trim() && !selectedAttachment)
                         }
                     >
                         {isSending ? (

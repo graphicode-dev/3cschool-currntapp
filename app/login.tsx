@@ -13,6 +13,7 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
+    useWindowDimensions,
     View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -25,6 +26,8 @@ export default function LoginScreen() {
         error: authError,
         isAuthenticated,
     } = useAppSelector((state) => state.auth);
+    const { width } = useWindowDimensions();
+    const isTablet = width >= 768;
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -70,7 +73,10 @@ export default function LoginScreen() {
                 style={styles.keyboardView}
             >
                 <ScrollView
-                    contentContainerStyle={styles.scrollContent}
+                    contentContainerStyle={[
+                        styles.scrollContent,
+                        isTablet && styles.scrollContentTablet,
+                    ]}
                     showsVerticalScrollIndicator={false}
                     keyboardShouldPersistTaps="handled"
                 >
@@ -157,12 +163,8 @@ export default function LoginScreen() {
 
                     {/* Login Button */}
                     <TouchableOpacity
-                        style={[
-                            styles.loginButton,
-                            isLoading ? styles.loginButtonDisabled : null,
-                        ]}
+                        style={styles.loginButton}
                         onPress={handleLogin}
-                        activeOpacity={0.8}
                         disabled={isLoading}
                     >
                         {isLoading ? (
@@ -188,6 +190,11 @@ const styles = StyleSheet.create({
     scrollContent: {
         flexGrow: 1,
         paddingHorizontal: 16,
+    },
+    scrollContentTablet: {
+        maxWidth: 480,
+        alignSelf: "center",
+        width: "100%",
     },
     logoContainer: {
         marginTop: 24,

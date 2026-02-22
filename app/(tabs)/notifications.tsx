@@ -16,6 +16,7 @@ import {
     StyleSheet,
     Text,
     TouchableOpacity,
+    useWindowDimensions,
     View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -120,6 +121,8 @@ export default function NotificationsScreen() {
     const { t } = useTranslation();
     const { notifications, unreadCount, isLoading } =
         useAppSelector(selectNotifications);
+    const { width } = useWindowDimensions();
+    const isTablet = width >= 768;
 
     const loadNotifications = useCallback(() => {
         dispatch(fetchNotifications());
@@ -146,7 +149,9 @@ export default function NotificationsScreen() {
         return (
             <SafeAreaView style={styles.container}>
                 <View style={styles.header}>
-                    <Text style={styles.headerTitle}>{t("notifications.title")}</Text>
+                    <Text style={styles.headerTitle}>
+                        {t("notifications.title")}
+                    </Text>
                 </View>
                 <View style={styles.loadingContainer}>
                     <ActivityIndicator size="large" color="#00aeed" />
@@ -161,7 +166,9 @@ export default function NotificationsScreen() {
             <View style={styles.header}>
                 <View style={styles.headerLeft} />
                 <View style={styles.headerCenter}>
-                    <Text style={styles.headerTitle}>{t("notifications.title")}</Text>
+                    <Text style={styles.headerTitle}>
+                        {t("notifications.title")}
+                    </Text>
                     {unreadCount > 0 && (
                         <View style={styles.badge}>
                             <Text style={styles.badgeText}>{unreadCount}</Text>
@@ -173,7 +180,9 @@ export default function NotificationsScreen() {
                         style={styles.readAllButton}
                         onPress={handleReadAll}
                     >
-                        <Text style={styles.readAllText}>{t("notifications.markAllRead")}</Text>
+                        <Text style={styles.readAllText}>
+                            {t("notifications.markAllRead")}
+                        </Text>
                     </TouchableOpacity>
                 ) : (
                     <View style={styles.headerLeft} />
@@ -190,7 +199,14 @@ export default function NotificationsScreen() {
                         onPress={handleNotificationPress}
                     />
                 )}
-                contentContainerStyle={styles.listContent}
+                contentContainerStyle={[
+                    styles.listContent,
+                    isTablet && {
+                        maxWidth: 600,
+                        alignSelf: "center",
+                        width: "100%",
+                    },
+                ]}
                 showsVerticalScrollIndicator={false}
                 refreshControl={
                     <RefreshControl

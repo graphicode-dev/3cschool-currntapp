@@ -1,12 +1,22 @@
 import { useTranslation } from "@/contexts/LanguageContext";
-import { Group, groupsService, UpcomingSession } from "@/services/groupsService";
+import {
+    Group,
+    groupsService,
+    UpcomingSession,
+} from "@/services/groupsService";
 import { useAppDispatch, useAppSelector } from "@/store";
 import { fetchGroups } from "@/store/slices/groupsSlice";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 import {
     ActivityIndicator,
     Animated,
@@ -15,6 +25,7 @@ import {
     StyleSheet,
     Text,
     TouchableOpacity,
+    useWindowDimensions,
     View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -211,23 +222,49 @@ function GroupCard({
                 {/* Demo Badge */}
                 {group.is_demo && (
                     <View style={styles.demoBadge}>
-                        <Text style={styles.demoBadgeText}>{t("groups.demo")}</Text>
+                        <Text style={styles.demoBadgeText}>
+                            {t("groups.demo")}
+                        </Text>
                     </View>
                 )}
 
                 {/* Hint Labels */}
                 <View style={styles.actionButtonsRow}>
                     <View style={styles.actionButton}>
-                        <Ionicons name={isTeacher ? "people-outline" : "help-circle-outline"} size={16} color="#00aeed" />
-                        <Text style={styles.actionButtonText}>{isTeacher ? t("groups.chatStudents") : t("groups.askInstructor")}</Text>
+                        <Ionicons
+                            name={
+                                isTeacher
+                                    ? "people-outline"
+                                    : "help-circle-outline"
+                            }
+                            size={16}
+                            color="#00aeed"
+                        />
+                        <Text style={styles.actionButtonText}>
+                            {isTeacher
+                                ? t("groups.chatStudents")
+                                : t("groups.askInstructor")}
+                        </Text>
                     </View>
                     <View style={styles.actionButton}>
-                        <Ionicons name="calendar-outline" size={16} color="#00aeed" />
-                        <Text style={styles.actionButtonText}>{t("groups.schedule")}</Text>
+                        <Ionicons
+                            name="calendar-outline"
+                            size={16}
+                            color="#00aeed"
+                        />
+                        <Text style={styles.actionButtonText}>
+                            {t("groups.schedule")}
+                        </Text>
                     </View>
                     <View style={styles.actionButton}>
-                        <Ionicons name="chatbubbles-outline" size={16} color="#00aeed" />
-                        <Text style={styles.actionButtonText}>{t("groups.chatGroup")}</Text>
+                        <Ionicons
+                            name="chatbubbles-outline"
+                            size={16}
+                            color="#00aeed"
+                        />
+                        <Text style={styles.actionButtonText}>
+                            {t("groups.chatGroup")}
+                        </Text>
                     </View>
                 </View>
             </View>
@@ -237,7 +274,9 @@ function GroupCard({
 
 function formatSessionDate(dateStr: string): string {
     // Handle "2026-02-07 01:50:00" format by replacing space with T
-    const normalizedDate = dateStr.includes(" ") ? dateStr.replace(" ", "T") : dateStr;
+    const normalizedDate = dateStr.includes(" ")
+        ? dateStr.replace(" ", "T")
+        : dateStr;
     const date = new Date(normalizedDate);
     const today = new Date();
     const tomorrow = new Date(today);
@@ -273,7 +312,11 @@ export default function GroupsScreen() {
     );
     const { user } = useAppSelector((state) => state.auth);
     const { t } = useTranslation();
-    const [upcomingSession, setUpcomingSession] = useState<UpcomingSession | null>(null);
+    const { width } = useWindowDimensions();
+    const isTablet = width >= 768;
+    const contentMaxWidth = isTablet ? 600 : undefined;
+    const [upcomingSession, setUpcomingSession] =
+        useState<UpcomingSession | null>(null);
     const [totalUpcoming, setTotalUpcoming] = useState<number>(0);
     const [countdown, setCountdown] = useState<string>("");
 
@@ -290,34 +333,40 @@ export default function GroupsScreen() {
     // Calculate countdown
     const calculateCountdown = useCallback(() => {
         if (!upcomingSession) return "";
-        
+
         const now = new Date();
-        
+
         // Handle different date formats from API
         // start_date can be "2026-02-07 01:50:00" or "2026-02-07"
         let sessionDate: Date;
-        
+
         if (upcomingSession.start_date.includes(" ")) {
             // start_date already includes time, use it directly
-            sessionDate = new Date(upcomingSession.start_date.replace(" ", "T"));
+            sessionDate = new Date(
+                upcomingSession.start_date.replace(" ", "T"),
+            );
         } else if (upcomingSession.start_time) {
             // start_date is just date, combine with start_time
-            sessionDate = new Date(`${upcomingSession.start_date}T${upcomingSession.start_time}`);
+            sessionDate = new Date(
+                `${upcomingSession.start_date}T${upcomingSession.start_time}`,
+            );
         } else {
             // Fallback to just the date
             sessionDate = new Date(upcomingSession.start_date);
         }
-        
+
         const diff = sessionDate.getTime() - now.getTime();
-        
+
         if (isNaN(diff)) return "Soon";
         if (diff <= 0) return "Starting now!";
-        
+
         const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const hours = Math.floor(
+            (diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
+        );
         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-        
+
         if (days > 0) return `${days}d ${hours}h ${minutes}m`;
         if (hours > 0) return `${hours}h ${minutes}m ${seconds}s`;
         return `${minutes}m ${seconds}s`;
@@ -340,7 +389,7 @@ export default function GroupsScreen() {
                     easing: Easing.inOut(Easing.ease),
                     useNativeDriver: true,
                 }),
-            ])
+            ]),
         );
 
         // Shimmer animation
@@ -350,7 +399,7 @@ export default function GroupsScreen() {
                 duration: 2000,
                 easing: Easing.linear,
                 useNativeDriver: true,
-            })
+            }),
         );
 
         // Bounce animation for arrow
@@ -368,7 +417,7 @@ export default function GroupsScreen() {
                     easing: Easing.inOut(Easing.ease),
                     useNativeDriver: true,
                 }),
-            ])
+            ]),
         );
 
         pulse.start();
@@ -385,12 +434,12 @@ export default function GroupsScreen() {
     // Countdown timer
     useEffect(() => {
         if (!upcomingSession) return;
-        
+
         setCountdown(calculateCountdown());
         const interval = setInterval(() => {
             setCountdown(calculateCountdown());
         }, 1000);
-        
+
         return () => clearInterval(interval);
     }, [upcomingSession, calculateCountdown]);
 
@@ -404,7 +453,10 @@ export default function GroupsScreen() {
             const response = await groupsService.getAllSessions();
             if (response.data?.upcoming?.length > 0) {
                 setUpcomingSession(response.data.upcoming[0]);
-                setTotalUpcoming(response.data.total_upcoming || response.data.upcoming.length);
+                setTotalUpcoming(
+                    response.data.total_upcoming ||
+                        response.data.upcoming.length,
+                );
             } else {
                 setUpcomingSession(null);
                 setTotalUpcoming(0);
@@ -433,7 +485,9 @@ export default function GroupsScreen() {
                 </View>
                 <View style={styles.loadingContainer}>
                     <ActivityIndicator size="large" color="#00aeed" />
-                    <Text style={styles.loadingText}>{t("groups.loadingGroups")}</Text>
+                    <Text style={styles.loadingText}>
+                        {t("groups.loadingGroups")}
+                    </Text>
                 </View>
             </SafeAreaView>
         );
@@ -458,7 +512,9 @@ export default function GroupsScreen() {
                         style={styles.retryButton}
                         onPress={handleRefresh}
                     >
-                        <Text style={styles.retryButtonText}>{t("common.retry")}</Text>
+                        <Text style={styles.retryButtonText}>
+                            {t("common.retry")}
+                        </Text>
                     </TouchableOpacity>
                 </View>
             </SafeAreaView>
@@ -488,7 +544,9 @@ export default function GroupsScreen() {
                 <TouchableOpacity
                     style={styles.upcomingCard}
                     activeOpacity={0.9}
-                    onPress={() => router.push(`/group/${upcomingSession.group.id}` as any)}
+                    onPress={() =>
+                        router.push(`/group/${upcomingSession.group.id}` as any)
+                    }
                 >
                     <LinearGradient
                         colors={["#6366f1", "#8b5cf6", "#a855f7"]}
@@ -497,53 +555,106 @@ export default function GroupsScreen() {
                         style={styles.upcomingCardGradient}
                     >
                         <View style={styles.upcomingCardHeader}>
-                            <Animated.View style={[styles.upcomingBadge, { transform: [{ scale: pulseAnim }] }]}>
-                                <Ionicons name="sparkles" size={12} color="#8b5cf6" />
-                                <Text style={styles.upcomingBadgeText}>{t("upcomingSession.nextSession")}</Text>
+                            <Animated.View
+                                style={[
+                                    styles.upcomingBadge,
+                                    { transform: [{ scale: pulseAnim }] },
+                                ]}
+                            >
+                                <Ionicons
+                                    name="sparkles"
+                                    size={12}
+                                    color="#8b5cf6"
+                                />
+                                <Text style={styles.upcomingBadgeText}>
+                                    {t("upcomingSession.nextSession")}
+                                </Text>
                             </Animated.View>
                             <View style={styles.upcomingCountCircle}>
-                                <Text style={styles.upcomingCountNumber}>{totalUpcoming}</Text>
-                                <Text style={styles.upcomingCountLabel}>{t("upcomingSession.upcoming")}</Text>
+                                <Text style={styles.upcomingCountNumber}>
+                                    {totalUpcoming}
+                                </Text>
+                                <Text style={styles.upcomingCountLabel}>
+                                    {t("upcomingSession.upcoming")}
+                                </Text>
                             </View>
                         </View>
-                        <Text style={styles.upcomingCardTitle} numberOfLines={2}>
-                               {upcomingSession.group.name}
-                           
+                        <Text
+                            style={styles.upcomingCardTitle}
+                            numberOfLines={2}
+                        >
+                            {upcomingSession.group.name}
                         </Text>
-                        <Text style={styles.upcomingGroupName} numberOfLines={1}>
-                          {upcomingSession.group.course.title}
+                        <Text
+                            style={styles.upcomingGroupName}
+                            numberOfLines={1}
+                        >
+                            {upcomingSession.group.course.title}
                         </Text>
-                        
+
                         {/* Countdown Timer */}
                         <View style={styles.countdownContainer}>
-                            <Ionicons name="timer-outline" size={18} color="#fbbf24" />
-                            <Text style={styles.countdownText}>{countdown}</Text>
+                            <Ionicons
+                                name="timer-outline"
+                                size={18}
+                                color="#fbbf24"
+                            />
+                            <Text style={styles.countdownText}>
+                                {countdown}
+                            </Text>
                         </View>
-                        
+
                         <View style={styles.upcomingCardDetails}>
                             <View style={styles.upcomingDetailItem}>
-                                <Ionicons name="calendar-outline" size={16} color="rgba(255,255,255,0.9)" />
+                                <Ionicons
+                                    name="calendar-outline"
+                                    size={16}
+                                    color="rgba(255,255,255,0.9)"
+                                />
                                 <Text style={styles.upcomingDetailText}>
-                                    {formatSessionDate(upcomingSession.start_date)}
+                                    {formatSessionDate(
+                                        upcomingSession.start_date,
+                                    )}
                                 </Text>
                             </View>
                             <View style={styles.upcomingDetailItem}>
-                                <Ionicons name="time-outline" size={16} color="rgba(255,255,255,0.9)" />
+                                <Ionicons
+                                    name="time-outline"
+                                    size={16}
+                                    color="rgba(255,255,255,0.9)"
+                                />
                                 <Text style={styles.upcomingDetailText}>
-                                    {formatSessionTime(upcomingSession.start_time)}
+                                    {formatSessionTime(
+                                        upcomingSession.start_time,
+                                    )}
                                 </Text>
                             </View>
                         </View>
                         <View style={styles.upcomingCardFooter}>
                             <View style={styles.upcomingInstructor}>
-                                <Ionicons name="person-circle" size={20} color="rgba(255,255,255,0.9)" />
+                                <Ionicons
+                                    name="person-circle"
+                                    size={20}
+                                    color="rgba(255,255,255,0.9)"
+                                />
                                 <Text style={styles.upcomingInstructorText}>
                                     {upcomingSession.instructor.full_name}
                                 </Text>
                             </View>
-                            <Animated.View style={[styles.upcomingArrow, { transform: [{ translateX: bounceAnim }] }]}>
-                                <Text style={styles.upcomingArrowText}>{t("common.view")}</Text>
-                                <Ionicons name="arrow-forward-circle" size={22} color="#ffffff" />
+                            <Animated.View
+                                style={[
+                                    styles.upcomingArrow,
+                                    { transform: [{ translateX: bounceAnim }] },
+                                ]}
+                            >
+                                <Text style={styles.upcomingArrowText}>
+                                    {t("common.view")}
+                                </Text>
+                                <Ionicons
+                                    name="arrow-forward-circle"
+                                    size={22}
+                                    color="#ffffff"
+                                />
                             </Animated.View>
                         </View>
                     </LinearGradient>
@@ -561,7 +672,14 @@ export default function GroupsScreen() {
                         isTeacher={isTeacher}
                     />
                 )}
-                contentContainerStyle={styles.listContent}
+                contentContainerStyle={[
+                    styles.listContent,
+                    isTablet && {
+                        maxWidth: contentMaxWidth,
+                        alignSelf: "center",
+                        width: "100%",
+                    },
+                ]}
                 showsVerticalScrollIndicator={false}
                 refreshing={isLoading}
                 onRefresh={handleRefresh}
@@ -572,7 +690,9 @@ export default function GroupsScreen() {
                             size={48}
                             color="#9ca3af"
                         />
-                        <Text style={styles.emptyText}>{t("groups.noGroups")}</Text>
+                        <Text style={styles.emptyText}>
+                            {t("groups.noGroups")}
+                        </Text>
                     </View>
                 }
             />

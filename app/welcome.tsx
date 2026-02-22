@@ -8,9 +8,9 @@ import {
     Dimensions,
     StyleSheet,
     Text,
+    TouchableOpacity,
     View
 } from "react-native";
-import { GestureHandlerRootView, TouchableOpacity } from "react-native-gesture-handler";
 import Animated, {
     useAnimatedStyle,
     useSharedValue,
@@ -120,7 +120,7 @@ export default function WelcomeScreen() {
     };
 
     return (
-        <GestureHandlerRootView style={styles.container}>
+        <View style={styles.container}>
             <LinearGradient
                 colors={["#0ea5e9", "#0284c7", "#0369a1"]}
                 style={styles.gradientTop}
@@ -231,7 +231,7 @@ export default function WelcomeScreen() {
                     </Animated.View>
                 </View>
             </SafeAreaView>
-        </GestureHandlerRootView>
+        </View>
     );
 }
 

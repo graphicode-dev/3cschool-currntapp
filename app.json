@@ -19,7 +19,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.c3school.app",
-      "buildNumber": "4",
+      "buildNumber": "5",
       "icon": {
         "dark": "./assets/icon/ios-adaptive-dark-icon.png",
         "light": "./assets/icon/ios-adaptive-light-icon.png"

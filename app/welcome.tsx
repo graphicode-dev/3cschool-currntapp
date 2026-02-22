@@ -128,7 +128,7 @@ export default function WelcomeScreen() {
                 end={{ x: 1, y: 1 }}
             />
 
-            <SafeAreaView style={styles.safeArea}>
+            
                 <View style={styles.content}>
                     {/* Welcome Header */}
                     <Animated.View style={[styles.welcomeHeader, welcomeAnimatedStyle]}>
@@ -230,7 +230,7 @@ export default function WelcomeScreen() {
                         </TouchableOpacity>
                     </Animated.View>
                 </View>
-            </SafeAreaView>
+            
         </View>
     );
 }

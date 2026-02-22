@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "791123070397",
+    "project_id": "cschool-currntapp",
+    "storage_bucket": "cschool-currntapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:791123070397:android:6024b0b4edfea4b37b16d4",
+        "android_client_info": {
+          "package_name": "app.c3school.current"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAbwZSh0QhvloU0WucQrIdliw-swalOR7E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

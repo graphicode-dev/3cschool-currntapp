@@ -39,7 +39,7 @@
       "googleServicesFile": "./google-services.json",
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.c3school.app",
+      "package": "app.c3school.current",
       "versionCode": 4
     },
     "plugins": [

@@ -1,41 +1,70 @@
-import { getLocales } from "expo-localization";
-import { I18n } from "i18n-js";
+/**
+ * i18n/index.ts
+ *
+ * Initializes i18next with react-i18next, handles RTL switching,
+ * and provides language persistence helpers used by LanguageContext.
+ *
+ * ⚠️  IMPORTANT: No AsyncStorage / SecureStore calls at module scope.
+ *     Native modules are not ready when this file is first imported.
+ *     All storage access happens lazily inside the exported async functions.
+ */
 
-import ar from "./translations/ar";
-import en from "./translations/en";
+import i18n from "i18next";
+import { initReactI18next } from "react-i18next";
+import { I18nManager } from "react-native";
 
-const i18n = new I18n({
-    en,
-    ar,
+import ar from "@/i18n/locales/ar.json";
+import en from "@/i18n/locales/en.json";
+
+const LANGUAGE_KEY = "app_language";
+
+// ─── Init i18next (synchronous — no native calls) ─────────────────────────────
+
+i18n.use(initReactI18next).init({
+    compatibilityJSON: "v4",
+    lng: "en",
+    fallbackLng: "en",
+    resources: {
+        en: { translation: en },
+        ar: { translation: ar },
+    },
+    interpolation: { escapeValue: false },
 });
-
-// Get device locale
-const deviceLocale = getLocales()[0]?.languageCode || "en";
-
-// Set the locale once at the beginning of your app
-i18n.locale = deviceLocale;
-i18n.enableFallback = true;
-i18n.defaultLocale = "en";
 
 export default i18n;
 
-// Helper function to check if current language is RTL
-export const isRTL = () => {
-    return i18n.locale === "ar";
+// ─── RTL helper (synchronous — safe at any time) ─────────────────────────────
+
+/**
+ * Forces RTL for Arabic, LTR for English.
+ * I18nManager changes only take visual effect after a full app restart.
+ * Always call this BEFORE triggering the restart.
+ */
+export const applyRTL = (lang: string): void => {
+    const shouldBeRTL = lang === "ar";
+    if (I18nManager.isRTL !== shouldBeRTL) {
+        I18nManager.allowRTL(shouldBeRTL);
+        I18nManager.forceRTL(shouldBeRTL);
+    }
 };
 
-// Get current locale
-export const getCurrentLocale = () => {
-    return i18n.locale;
+// ─── Persistence helpers (lazy — only called from useEffect / callbacks) ──────
+
+/**
+ * Persists the chosen language using expo-secure-store.
+ * Called only from within React callbacks — never at module load time.
+ */
+export const saveLanguage = async (lang: string): Promise<void> => {
+    const SecureStore = await import("expo-secure-store");
+    await SecureStore.setItemAsync(LANGUAGE_KEY, lang);
 };
 
-// Set locale
-export const setLocale = (locale: "en" | "ar") => {
-    i18n.locale = locale;
+/**
+ * Loads the persisted language.
+ * Called only from within useEffect — never at module load time.
+ */
+export const loadSavedLanguage = async (): Promise<string> => {
+    const SecureStore = await import("expo-secure-store");
+    const saved = await SecureStore.getItemAsync(LANGUAGE_KEY);
+    return saved ?? "en";
 };
-
-// Supported languages
-export const SUPPORTED_LANGUAGES = [
-    { code: "en", name: "English", nativeName: "English" },
-    { code: "ar", name: "Arabic", nativeName: "العربية" },
-];

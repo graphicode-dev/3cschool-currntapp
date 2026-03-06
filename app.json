@@ -1,12 +1,13 @@
 {
   "expo": {
-    "scheme": "threec",
+    "scheme": "3cschool",
     "platforms": [
       "ios",
-      "android"
+      "android",
+      "web"
     ],
-    "name": "3c",
-    "slug": "3c",
+    "name": "3cschool",
+    "slug": "3cschool",
     "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/icon/ios-adaptive-light-icon.png",
@@ -63,7 +64,8 @@
           "color": "#ffffff"
         }
       ],
-      "expo-localization"
+      "expo-localization",
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true,
@@ -74,7 +76,14 @@
       "eas": {
         "projectId": "9fa16be6-9e25-49af-b344-9dc9b15f376e"
       },
-      "apiUrl": "https://3cschool.net/api"
+      "apiUrl": "https://3cschool.net/api",
+      "projectName": "3cschool",
+      "envMode": "development",
+      "auth": {
+        "cookieExpiresDays": "7",
+        "tokenKey": "3cschool_token",
+        "userKey": "auth_user"
+      }
     },
     "owner": "graphicode"
   }

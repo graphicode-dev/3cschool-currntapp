@@ -1,0 +1,314 @@
+/**
+ * Groups Tab Screen
+ *
+ * Layout:
+ *   1. Session banner  – current ongoing session, else next upcoming.
+ *      Progress card overlaid at bottom of banner.
+ *   2. My Groups       – carousel of group cards (real API, image fallback).
+ *   3. My To-Do        – Zustand-powered task list with filter tabs.
+ */
+
+import GroupsList from "@/components/groups/groups-list";
+import GroupsMyTasks from "@/components/groups/groups-my-todo";
+import { ProgressCard } from "@/components/groups/groups-progress-card";
+import { GroupsSearchFilter } from "@/components/groups/groups-search-filter";
+import { SessionCard } from "@/components/groups/groups-session-card";
+import { RenderSection } from "@/components/RenderSection";
+import ScreenWrapper from "@/components/ScreenWrapper";
+import { ThemedText } from "@/components/themed-text";
+import { PullToRefreshScrollView } from "@/components/ui/Pulltorefresh";
+import { useDebounce } from "@/hooks/useDebounce";
+import { useGroupsList } from "@/services/groups/groups.queries";
+import { useAllSessions } from "@/services/sessions/sessions.queries";
+import { Session } from "@/services/sessions/sessions.types";
+import { useMemo, useState } from "react";
+import { StyleSheet, View } from "react-native";
+
+// ─── Banner session picker ────────────────────────────────────────────────────
+
+function pickBannerSession(upcoming: Session[]): Session | null {
+    if (!upcoming.length) return null;
+
+    const now = new Date();
+
+    // 1. Prefer ongoing (started within the past 3 h and not yet finished)
+    const ongoing = upcoming.find((s) => {
+        try {
+            const start = new Date(`${s.start_date}T${s.start_time}`);
+            const ms = now.getTime() - start.getTime();
+            return ms >= 0 && ms < 3 * 60 * 60 * 1000;
+        } catch {
+            return false;
+        }
+    });
+    if (ongoing) return ongoing;
+
+    // 2. Earliest future session
+    const future = upcoming
+        .filter((s) => {
+            try {
+                return new Date(`${s.start_date}T${s.start_time}`) > now;
+            } catch {
+                return false;
+            }
+        })
+        .sort(
+            (a, b) =>
+                new Date(`${a.start_date}T${a.start_time}`).getTime() -
+                new Date(`${b.start_date}T${b.start_time}`).getTime(),
+        );
+
+    return future[0] ?? upcoming[0];
+}
+
+// ─── Screen ───────────────────────────────────────────────────────────────────
+
+export default function GroupsScreen() {
+    // Search and filter state
+    const [searchText, setSearchText] = useState("");
+    const [filterText, setFilterText] = useState("");
+
+    // Debounced search value to avoid excessive API calls
+    const debouncedSearch = useDebounce(searchText, 500);
+
+    // Combine search and filter for API call
+    const searchParams = useMemo(() => {
+        const params: { search?: string; filter?: string } = {};
+        if (debouncedSearch.trim()) {
+            params.search = debouncedSearch.trim();
+        }
+        if (filterText.trim()) {
+            params.filter = filterText.trim();
+        }
+        return params;
+    }, [debouncedSearch, filterText]);
+
+    const {
+        data: groups = [],
+        isLoading: groupsLoading,
+        error: groupsError,
+        refetch: refetchGroups,
+    } = useGroupsList(searchParams);
+
+    const {
+        data: sessionsData,
+        isLoading: sessionsLoading,
+        refetch: refetchSessions,
+    } = useAllSessions();
+
+    console.log("📅 Sessions Data:", {
+        sessionsData,
+        upcoming: sessionsData?.upcoming,
+        upcomingLength: sessionsData?.upcoming?.length,
+        past: sessionsData?.past,
+        pastLength: sessionsData?.past?.length,
+        totalUpcoming: sessionsData?.total_upcoming,
+    });
+
+    const bannerSession = useMemo(
+        () => pickBannerSession(sessionsData?.upcoming ?? []),
+        [sessionsData?.upcoming],
+    );
+
+    const totalSessions =
+        (sessionsData?.total_upcoming ?? 0) + (sessionsData?.past?.length ?? 0);
+    const doneSessions = sessionsData?.past?.length ?? 0;
+
+    // Earliest strictly-future session for the donut countdown.
+    // bannerSession may be ongoing or past — this always looks ahead.
+    const nextSessionDate = useMemo(() => {
+        const now = Date.now();
+        console.log("🕐 Calculating nextSessionDate:", {
+            now,
+            nowDate: new Date(now).toString(),
+            upcomingSessions: sessionsData?.upcoming,
+        });
+
+        const future = (sessionsData?.upcoming ?? [])
+            .filter((s) => {
+                try {
+                    // Parse date properly - handle both date formats
+                    let sessionDate: Date;
+
+                    // If start_date already includes time, use it directly
+                    if (
+                        s.start_date.includes(" ") &&
+                        s.start_date.includes(":")
+                    ) {
+                        sessionDate = new Date(s.start_date);
+                    } else {
+                        // Otherwise combine start_date and start_time
+                        sessionDate = new Date(
+                            `${s.start_date}T${s.start_time}`,
+                        );
+                    }
+
+                    const sessionTime = sessionDate.getTime();
+                    const isFuture = sessionTime > now;
+
+                    console.log(`📅 Session ${s.id}:`, {
+                        start_date: s.start_date,
+                        start_time: s.start_time,
+                        sessionDate: sessionDate.toString(),
+                        sessionTime,
+                        nowTime: now,
+                        isFuture,
+                        timeDiff: sessionTime - now,
+                        daysUntil: Math.floor(
+                            (sessionTime - now) / (1000 * 60 * 60 * 24),
+                        ),
+                    });
+                    return isFuture;
+                } catch (error) {
+                    console.log(`❌ Invalid date for session ${s.id}:`, {
+                        start_date: s.start_date,
+                        start_time: s.start_time,
+                        error,
+                    });
+                    return false;
+                }
+            })
+            .sort((a, b) => {
+                const dateA =
+                    a.start_date.includes(" ") && a.start_date.includes(":")
+                        ? new Date(a.start_date).getTime()
+                        : new Date(`${a.start_date}T${a.start_time}`).getTime();
+                const dateB =
+                    b.start_date.includes(" ") && b.start_date.includes(":")
+                        ? new Date(b.start_date).getTime()
+                        : new Date(`${b.start_date}T${b.start_time}`).getTime();
+                return dateA - dateB;
+            });
+
+        console.log("🔮 Future sessions after filtering:", {
+            futureCount: future.length,
+            futureSessions: future,
+        });
+
+        if (!future.length) {
+            console.log("❌ No future sessions found");
+            return undefined;
+        }
+
+        const nextSession =
+            future[0].start_date.includes(" ") &&
+            future[0].start_date.includes(":")
+                ? new Date(future[0].start_date)
+                : new Date(`${future[0].start_date}T${future[0].start_time}`);
+
+        console.log("✅ Next session found:", {
+            session: future[0],
+            nextSessionDate: nextSession.toString(),
+            nextSessionTimestamp: nextSession.getTime(),
+        });
+
+        return nextSession;
+    }, [sessionsData?.upcoming]);
+
+    return (
+        <ScreenWrapper>
+            <PullToRefreshScrollView
+                refetches={[refetchGroups, refetchSessions]}
+                style={styles.scroll}
+                contentContainerStyle={styles.content}
+            >
+                {/* ── 1. Session banner ───────────────────────────────────── */}
+                <View style={styles.bannerSection}>
+                    <RenderSection
+                        isLoading={sessionsLoading}
+                        error=""
+                        data={bannerSession}
+                    >
+                        {bannerSession ? (
+                            <SessionCard session={bannerSession} />
+                        ) : null}
+                    </RenderSection>
+
+                    {/* Progress card sits on top of the banner's bottom edge */}
+                    {!sessionsLoading && (
+                        <>
+                            {console.log("🎯 ProgressCard will receive:", {
+                                label: "Next Session",
+                                highlight: `${nextSessionDate?.toLocaleDateString()} - ${nextSessionDate?.toLocaleTimeString()}`,
+                                elapsed: doneSessions,
+                                total: Math.max(totalSessions, 1),
+                                nextSessionDate,
+                                nextSessionDateType: typeof nextSessionDate,
+                                nextSessionDateValid:
+                                    nextSessionDate instanceof Date,
+                            })}
+                            <ProgressCard
+                                label="Next Session"
+                                highlight={`${nextSessionDate?.toLocaleDateString()} - ${nextSessionDate?.toLocaleTimeString()}`}
+                                elapsed={doneSessions}
+                                total={Math.max(totalSessions, 1)}
+                                nextSessionDate={nextSessionDate!}
+                            />
+                        </>
+                    )}
+                </View>
+
+                {/* ── 2. My Groups ────────────────────────────────────────── */}
+                <View style={styles.section}>
+                    <ThemedText style={styles.sectionTitle}>
+                        My Groups
+                    </ThemedText>
+
+                    {/* Search & Filter */}
+                    <GroupsSearchFilter
+                        searchValue={searchText}
+                        onSearchChange={setSearchText}
+                        filterValue={filterText}
+                        onFilterChange={setFilterText}
+                        onFilterPress={() => {
+                            // TODO: Show filter modal/picker
+                            console.log("Filter pressed");
+                        }}
+                    />
+
+                    <RenderSection
+                        isLoading={groupsLoading}
+                        error={groupsError?.message ?? ""}
+                        data={groups}
+                    >
+                        <GroupsList data={groups} />
+                    </RenderSection>
+                </View>
+
+                {/* ── 3. My To-Do ─────────────────────────────────────────── */}
+                <View style={styles.section}>
+                    <ThemedText style={styles.sectionTitle}>
+                        My To-Do
+                    </ThemedText>
+                    <GroupsMyTasks />
+                </View>
+            </PullToRefreshScrollView>
+        </ScreenWrapper>
+    );
+}
+
+const styles = StyleSheet.create({
+    scroll: { flex: 1 },
+    content: {
+        paddingBottom: 120,
+        gap: 36,
+        paddingTop: 16,
+        paddingHorizontal: 20,
+    },
+
+    // Banner: needs extra paddingBottom so the overlaid ProgressCard
+    // (position: absolute, bottom: -36) doesn't clip into the next section.
+    bannerSection: {
+        position: "relative",
+        paddingBottom: 50,
+    },
+
+    section: { gap: 14 },
+
+    sectionTitle: {
+        fontSize: 20,
+        fontFamily: "Poppins-SemiBold",
+        color: "#393838",
+        textTransform: "capitalize",
+    },
+});

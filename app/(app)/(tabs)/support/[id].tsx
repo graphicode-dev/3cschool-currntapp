@@ -21,8 +21,6 @@ export default function TicketChatScreen() {
         isLoadingTicket,
         isSending,
         sendMessage,
-        replyingTo,
-        setReplyingTo,
         ticketError,
         error,
     } = useTicketChat();
@@ -110,6 +108,7 @@ export default function TicketChatScreen() {
                     image: selectedTicket.avatar,
                     size: 30,
                 }}
+                href="/(app)/(tabs)/support"
             />
 
             <FlatList
@@ -123,8 +122,6 @@ export default function TicketChatScreen() {
                         chatType="private"
                         showAvatar
                         showSenderName={false}
-                        onNavigateToMessage={() => {}}
-                        highlightedMessageId={undefined}
                     />
                 )}
                 contentContainerStyle={styles.list}
@@ -134,12 +131,7 @@ export default function TicketChatScreen() {
             />
 
             <View style={styles.inputWrap}>
-                <ChatInput
-                    onSend={handleSendMessage}
-                    replyTo={replyingTo}
-                    onClearReply={() => setReplyingTo(null)}
-                    isSending={isSending}
-                />
+                <ChatInput onSend={handleSendMessage} isSending={isSending} />
             </View>
         </ScreenWrapper>
     );

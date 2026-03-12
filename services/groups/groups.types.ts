@@ -188,6 +188,20 @@ export interface GroupAgeGroup {
     updated_at: string;
 }
 
+export interface LastGroupMessage {
+    id: number;
+    message: string;
+    created_at: string;
+    sender: {
+        id: number;
+        full_name: string;
+        avatar: string | null;
+        role_name: string;
+    };
+    has_attachment: boolean;
+    attachment_type: string | null;
+}
+
 export interface Group {
     id: number;
     teacher_id: number;
@@ -214,6 +228,8 @@ export interface Group {
     course: GroupCourse;
     teacher: GroupTeacher;
     age_group: GroupAgeGroup;
+    last_message: LastGroupMessage | null;
+    unread_count: number;
 }
 
 export interface GroupDetail {

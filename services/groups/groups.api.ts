@@ -1,5 +1,6 @@
 import { ApiResponse } from "@/services/api";
 import { api } from "@/services/api/client";
+import { postFormData } from "../api/client/httpClient";
 import {
     BroadcastPayload,
     BroadcastResponse,
@@ -10,7 +11,6 @@ import {
     MessageSendResponse,
     UnreadMessagesResponse,
 } from "./groups.types";
-import { postFormData } from "../api/client/httpClient";
 
 const BASE_URL = "/groups";
 
@@ -21,7 +21,6 @@ export const groupsApi = {
     ): Promise<Group[]> => {
         const queryParams: Record<string, unknown> = {};
         if (params?.search?.trim()) queryParams.search = params.search.trim();
-        if (params?.filter?.trim()) queryParams.filter = params.filter.trim();
 
         const response = await api.get<ApiResponse<Group[]>>(BASE_URL, {
             params: Object.keys(queryParams).length ? queryParams : undefined,

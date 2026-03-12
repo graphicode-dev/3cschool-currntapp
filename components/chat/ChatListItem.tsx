@@ -1,15 +1,15 @@
 import { ThemedText } from "@/components/themed-text";
 import { MappedGroup } from "@/hooks/useGroupChats";
-import { useUnreadMessages } from "@/services/groups/groups.queries";
-import { Image } from "expo-image";
+import { formatMessageTime } from "@/utils";
 import React from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
+import Avatar from "../avatar";
 
 interface BasicChatListItemProps {
     chat: MappedGroup;
-    isSelected: boolean;
-    onClick: (group: MappedGroup) => void;
-    onLongPress?: (id: string) => void;
+    isSelected?: boolean;
+    onClick: (chat: MappedGroup) => void;
+    onLongPress?: (chatId: string) => void;
 }
 
 export const ChatListItem = ({
@@ -18,14 +18,6 @@ export const ChatListItem = ({
     onClick,
     onLongPress,
 }: BasicChatListItemProps) => {
-    const { data: unreadData } = useUnreadMessages();
-
-    // Get unread count for this specific chat
-    const unreadCount =
-        unreadData?.by_group?.find(
-            (item: any) => item.course_group_id === chat.id,
-        )?.count || 0;
-
     return (
         <TouchableOpacity
             onPress={() => onClick(chat)}
@@ -35,17 +27,7 @@ export const ChatListItem = ({
             activeOpacity={0.7}
         >
             {/* Avatar */}
-            <View style={styles.avatarWrap}>
-                <Image
-                    source={{
-                        uri:
-                            chat.avatar ||
-                            "https://via.placeholder.com/48x48/1890FF/FFFFFF?text=" +
-                                chat.name.charAt(0).toUpperCase(),
-                    }}
-                    style={styles.avatar}
-                />
-            </View>
+            <Avatar image={chat.thumbnail} name={chat.name} size={50} />
 
             {/* ThemedText */}
             <View style={styles.info}>
@@ -53,17 +35,31 @@ export const ChatListItem = ({
                     {chat.name}
                 </ThemedText>
                 <ThemedText style={styles.lastMessage} numberOfLines={1}>
-                    {chat.lastMessage}
+                    {chat.lastMessage?.has_attachment ? (
+                        <>
+                            {chat.lastMessage?.sender?.full_name}: 📎{" "}
+                            {chat.lastMessage?.attachment_type || "file"}
+                        </>
+                    ) : (
+                        <>
+                            {chat.lastMessage?.sender?.full_name}:{" "}
+                            {chat.lastMessage?.message}
+                        </>
+                    )}
                 </ThemedText>
             </View>
 
             {/* Time + Unread */}
             <View style={styles.rightCol}>
-                {/* <ThemedText style={styles.time}>{chat.time}</ThemedText> */}
-                {unreadCount > 0 && (
+                <ThemedText style={styles.time}>
+                    {chat.lastMessage?.created_at
+                        ? formatMessageTime(chat.lastMessage.created_at, false)
+                        : ""}
+                </ThemedText>
+                {chat.unreadCount > 0 && (
                     <View style={styles.unreadBadge}>
                         <ThemedText style={styles.unreadBadgeText}>
-                            {unreadCount > 99 ? "99+" : unreadCount}
+                            {chat.unreadCount > 99 ? "99+" : chat.unreadCount}
                         </ThemedText>
                     </View>
                 )}
@@ -84,16 +80,6 @@ const styles = StyleSheet.create({
     },
     itemSelected: {
         backgroundColor: "#E6F7FF",
-    },
-    avatarWrap: {
-        position: "relative",
-    },
-    avatar: {
-        width: 48,
-        height: 48,
-        borderRadius: 24,
-        borderWidth: 2,
-        borderColor: "#FFFFFF",
     },
     dot: {
         position: "absolute",
@@ -133,8 +119,10 @@ const styles = StyleSheet.create({
         marginBottom: 3,
     },
     rightCol: {
-        alignItems: "flex-end",
+        alignItems: "flex-start",
+        justifyContent: "flex-start",
         gap: 4,
+        height: "100%",
     },
     time: {
         fontSize: 10,

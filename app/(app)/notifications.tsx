@@ -77,13 +77,42 @@ export default function NotificationsScreen() {
     // Drop-in replacement for handleNavigate in NotificationsScreen
     const handleNavigate = useCallback(
         (item: Notification) => {
-            // Handle chat_message type notifications
-            if (item.type === "chat_message" && item.data?.group_id) {
-                router.push(`/(app)/(tabs)/chat/${item.data.group_id}` as any);
+            // Handle chat_message and broadcast_message types - go to group chat
+            if (
+                (item.type === "chat_message" ||
+                    item.type === "broadcast_message" ||
+                    item.type === "group_chat_message") &&
+                item.data?.group_id
+            ) {
+                router.push({
+                    pathname: "/(app)/(tabs)/chats/[id]",
+                    params: {
+                        id: item.data.group_id,
+                        groupId: item.data.group_id,
+                        groupName: item.data.group_name || "Chat",
+                    },
+                } as any);
                 return;
             }
 
-            // Handle notifications with navigateTo property (legacy/support)
+            // Handle ticket_reply types - go to ticket detail
+            if (item.type === "ticket_reply" && item.data?.ticket_id) {
+                router.push({
+                    pathname: "/(app)/(tabs)/support/[id]",
+                    params: {
+                        id: item.data.ticket_id,
+                    },
+                } as any);
+                return;
+            }
+
+            // Handle push notifications - no navigation (general notifications)
+            if (item.type === "push") {
+                // No navigation for push notifications, just mark as read
+                return;
+            }
+
+            // Handle legacy notifications with navigateTo property
             if (!item.data?.navigateTo) return;
 
             const params =

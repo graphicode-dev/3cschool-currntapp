@@ -1,22 +1,16 @@
 import { Icons } from "@/constants/icons";
 import { Palette } from "@/constants/theme";
-import { StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
+import { StyleSheet, TextInput, View } from "react-native";
 
-interface GroupsSearchFilterProps {
+interface GroupsSearchProps {
     searchValue: string;
     onSearchChange: (text: string) => void;
-    filterValue: string;
-    onFilterChange: (filter: string) => void;
-    onFilterPress: () => void;
 }
 
-export function GroupsSearchFilter({
+export function GroupsSearch({
     searchValue,
     onSearchChange,
-    filterValue,
-    onFilterChange,
-    onFilterPress,
-}: GroupsSearchFilterProps) {
+}: GroupsSearchProps) {
     return (
         <View style={styles.container}>
             {/* Search Input */}
@@ -30,17 +24,6 @@ export function GroupsSearchFilter({
                     onChangeText={onSearchChange}
                 />
             </View>
-
-            {/* Filter Button */}
-            <TouchableOpacity
-                style={styles.filterButton}
-                onPress={onFilterPress}
-            >
-                <Icons.FilterIcon
-                    size={20}
-                    color={filterValue ? Palette.brand[500] : Palette.slate600}
-                />
-            </TouchableOpacity>
         </View>
     );
 }
@@ -70,16 +53,5 @@ const styles = StyleSheet.create({
         color: Palette.slate900,
         padding: 0,
         margin: 0,
-    },
-    filterButton: {
-        backgroundColor: Palette.white,
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: Palette.slate100,
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-        alignItems: "center",
-        justifyContent: "center",
-        minWidth: 48,
     },
 });

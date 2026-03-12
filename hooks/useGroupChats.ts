@@ -2,9 +2,10 @@ import { useAuthStore } from "@/services/auth/auth.store";
 import { groupsApi } from "@/services/groups/groups.api";
 import { groupsKeys } from "@/services/groups/groups.keys";
 import { useGroupChat, useGroupsList } from "@/services/groups/groups.queries";
-import { Group, GroupMessage } from "@/services/groups/groups.types";
+import { GroupMessage, LastGroupMessage } from "@/services/groups/groups.types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useMemo, useState } from "react";
+import { useDebounce } from "./useDebounce";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -15,7 +16,7 @@ export interface MappedChatMessage {
     createdAt: string;
     avatar?: string;
     senderName?: string;
-    imageUri?: string;
+    imageUrl?: string;
     replyTo?: MappedChatMessage;
 }
 
@@ -23,7 +24,8 @@ export interface MappedGroup {
     id: number;
     name: string;
     avatar?: string;
-    lastMessage?: string;
+    thumbnail?: string;
+    lastMessage?: LastGroupMessage;
     unreadCount: number;
     time: string;
 }
@@ -37,14 +39,10 @@ const toChatMessage = (msg: GroupMessage, myId: number): MappedChatMessage => ({
     createdAt: msg.created_at?.replace(" ", "T") ?? "",
     avatar: msg.sender?.avatar ?? undefined,
     senderName: msg.sender?.full_name,
-    imageUri: msg.attachment_path
-        ? `https://3cschool.net/storage/${msg.attachment_path}`
-        : undefined,
+    imageUrl: msg.attachment_url ? msg.attachment_url : undefined,
 });
 
 const toTime = (timestamp: string | number) => {
-    console.log("toTime input:", timestamp, typeof timestamp);
-
     // Handle both Unix timestamps and ISO strings
     let date: Date;
 
@@ -61,20 +59,15 @@ const toTime = (timestamp: string | number) => {
         // Check if it's in seconds (Unix timestamp) or milliseconds
         if (timestamp < 10000000000) {
             // Assume it's seconds (Unix timestamp)
-            console.log("Converting from Unix seconds:", timestamp);
             date = new Date(timestamp * 1000);
         } else {
             // Assume it's already milliseconds
-            console.log("Using as milliseconds:", timestamp);
             date = new Date(timestamp);
         }
     } else {
         // Handle string input
-        console.log("Parsing string date:", timestamp);
         date = new Date(timestamp);
     }
-
-    console.log("Parsed date:", date, "isValid:", !isNaN(date.getTime()));
 
     // If date is invalid, return a fallback
     if (isNaN(date.getTime())) {
@@ -87,7 +80,6 @@ const toTime = (timestamp: string | number) => {
         minute: "2-digit",
     });
 
-    console.log("toTime output:", result);
     return result;
 };
 
@@ -95,10 +87,10 @@ const toTime = (timestamp: string | number) => {
 
 export const useGroupChats = () => {
     const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
-    const [replyingTo, setReplyingTo] = useState<MappedChatMessage | null>(
-        null,
-    );
     const [searchQuery, setSearchQuery] = useState("");
+
+    // Debounced search value to avoid excessive API calls
+    const debouncedSearch = useDebounce(searchQuery, 500);
 
     const { user } = useAuthStore();
     const queryClient = useQueryClient();
@@ -110,7 +102,7 @@ export const useGroupChats = () => {
         isLoading: groupsLoading,
         error: groupsError,
         refetch: refetchGroups,
-    } = useGroupsList({});
+    } = useGroupsList({ search: debouncedSearch });
 
     const {
         data: groupChatData,
@@ -147,16 +139,17 @@ export const useGroupChats = () => {
 
     // ── Mapped data ───────────────────────────────────────────────────────────
 
-    const mappedGroups: MappedGroup[] = useMemo(() => {
-        return groups.map((group: Group) => ({
+    const mappedGroups = useMemo(() => {
+        return groups.map((group) => ({
             id: group.id,
             name: group.name,
             avatar: group.teacher?.avatar || undefined,
-            lastMessage: "No messages yet", // This would come from a separate API
-            unreadCount: 0, // This would come from unread count API
-            time: toTime(
-                (group.updated_at || group.created_at || Date.now()).toString(),
-            ),
+            thumbnail: group.course?.thumbnail
+                ? group.course?.thumbnail
+                : undefined,
+            lastMessage: group.last_message || undefined,
+            unreadCount: group.unread_count || 0,
+            time: toTime(group.last_message?.created_at || ""),
         }));
     }, [groups]);
 
@@ -198,14 +191,6 @@ export const useGroupChats = () => {
         );
     }, [selectedGroupId, mappedGroups]);
 
-    const filteredGroups = useMemo(() => {
-        const q = searchQuery.toLowerCase();
-        if (!q) return mappedGroups;
-        return mappedGroups.filter((group) =>
-            group.name.toLowerCase().includes(q),
-        );
-    }, [mappedGroups, searchQuery]);
-
     // ── Handlers ──────────────────────────────────────────────────────────────
 
     const selectGroup = useCallback(
@@ -214,7 +199,6 @@ export const useGroupChats = () => {
 
             // Clear first so React sees a state change
             setSelectedGroupId(null);
-            setReplyingTo(null);
 
             // Remove cached data so the query starts fresh
             await queryClient.removeQueries({
@@ -231,7 +215,6 @@ export const useGroupChats = () => {
 
     const clearSelection = useCallback(() => {
         setSelectedGroupId(null);
-        setReplyingTo(null);
     }, []);
 
     const sendMessage = useCallback(
@@ -240,7 +223,6 @@ export const useGroupChats = () => {
 
             try {
                 await sendMessageMutation.mutateAsync({ text, imageUri });
-                setReplyingTo(null);
             } catch (error) {
                 console.error("Failed to send message:", error);
             }
@@ -257,7 +239,6 @@ export const useGroupChats = () => {
     return {
         // Data
         groups: mappedGroups,
-        filteredGroups,
         selectedGroup,
         messages,
         selectedGroupId,
@@ -274,10 +255,6 @@ export const useGroupChats = () => {
         // Search
         searchQuery,
         setSearchQuery,
-
-        // Reply functionality
-        replyingTo,
-        setReplyingTo,
 
         // Actions
         selectGroup,

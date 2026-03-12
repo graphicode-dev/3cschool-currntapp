@@ -11,7 +11,7 @@
 import GroupsList from "@/components/groups/groups-list";
 import GroupsMyTasks from "@/components/groups/groups-my-todo";
 import { ProgressCard } from "@/components/groups/groups-progress-card";
-import { GroupsSearchFilter } from "@/components/groups/groups-search-filter";
+import { GroupsSearch } from "@/components/groups/groups-search";
 import { SessionCard } from "@/components/groups/groups-session-card";
 import { RenderSection } from "@/components/RenderSection";
 import ScreenWrapper from "@/components/ScreenWrapper";
@@ -66,7 +66,6 @@ function pickBannerSession(upcoming: Session[]): Session | null {
 export default function GroupsScreen() {
     // Search and filter state
     const [searchText, setSearchText] = useState("");
-    const [filterText, setFilterText] = useState("");
 
     // Debounced search value to avoid excessive API calls
     const debouncedSearch = useDebounce(searchText, 500);
@@ -77,11 +76,8 @@ export default function GroupsScreen() {
         if (debouncedSearch.trim()) {
             params.search = debouncedSearch.trim();
         }
-        if (filterText.trim()) {
-            params.filter = filterText.trim();
-        }
         return params;
-    }, [debouncedSearch, filterText]);
+    }, [debouncedSearch]);
 
     const {
         data: groups = [],
@@ -207,16 +203,10 @@ export default function GroupsScreen() {
                         My Groups
                     </ThemedText>
 
-                    {/* Search & Filter */}
-                    <GroupsSearchFilter
+                    {/* Search */}
+                    <GroupsSearch
                         searchValue={searchText}
                         onSearchChange={setSearchText}
-                        filterValue={filterText}
-                        onFilterChange={setFilterText}
-                        onFilterPress={() => {
-                            // TODO: Show filter modal/picker
-                            console.log("Filter pressed");
-                        }}
                     />
 
                     <RenderSection

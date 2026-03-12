@@ -31,8 +31,6 @@ export default function ChatConversationScreen() {
         isLoadingMore,
         loadMoreMessages,
         sendMessage,
-        replyingTo,
-        setReplyingTo,
     } = useGroupChats();
 
     // Select the group when component mounts
@@ -94,6 +92,7 @@ export default function ChatConversationScreen() {
                     ),
                     size: 30,
                 }}
+                href="/(app)/(tabs)/chats"
             />
 
             <FlatList
@@ -107,8 +106,6 @@ export default function ChatConversationScreen() {
                         chatType="group"
                         showAvatar
                         showSenderName
-                        onNavigateToMessage={() => {}}
-                        highlightedMessageId={undefined}
                     />
                 )}
                 contentContainerStyle={styles.list}
@@ -130,12 +127,7 @@ export default function ChatConversationScreen() {
             />
 
             <View style={styles.inputWrap}>
-                <ChatInput
-                    onSend={handleSendMessage}
-                    replyTo={replyingTo}
-                    onClearReply={() => setReplyingTo(null)}
-                    isSending={isSending}
-                />
+                <ChatInput onSend={handleSendMessage} isSending={isSending} />
             </View>
         </ScreenWrapper>
     );

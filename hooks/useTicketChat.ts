@@ -2,7 +2,7 @@ import { useAuthStore } from "@/services/auth/auth.store";
 import { ticketsApi } from "@/services/tickets/tickets.api";
 import { ticketsKeys } from "@/services/tickets/tickets.keys";
 import { useTicket, useTicketsList } from "@/services/tickets/tickets.queries";
-import { Ticket, TicketMessage } from "@/services/tickets/tickets.types";
+import { TicketMessage } from "@/services/tickets/tickets.types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useMemo, useState } from "react";
 
@@ -33,32 +33,62 @@ export interface MappedTicket {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const toChatMessage = (
-    msg: TicketMessage,
-    myId: number,
-): MappedChatMessage => ({
-    id: String(msg.id),
-    text: msg.message ?? "",
-    sender: msg.sender_id === myId ? "me" : "user",
-    createdAt: new Date(msg.created_at * 1000).toISOString(),
-    avatar: msg.sender?.avatar ?? undefined,
-    senderName: msg.sender?.full_name,
-    imageUri: msg.attachment ?? undefined,
-});
+const toChatMessage = (msg: TicketMessage, myId: number): MappedChatMessage => {
+    let createdAt = "";
+    try {
+        // Handle different timestamp formats
+        let date: Date;
+        if (typeof msg.created_at === "number") {
+            // Unix timestamp (seconds or milliseconds)
+            if (msg.created_at < 10000000000) {
+                // Assume seconds
+                date = new Date(msg.created_at * 1000);
+            } else {
+                // Assume milliseconds
+                date = new Date(msg.created_at);
+            }
+        } else {
+            // String timestamp
+            date = new Date(msg.created_at);
+        }
 
-const toTime = (iso: string) =>
-    new Date(iso).toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-    });
+        if (!isNaN(date.getTime())) {
+            createdAt = date.toISOString();
+        }
+    } catch {
+        // Fallback to empty string if date parsing fails
+    }
+
+    return {
+        id: String(msg.id),
+        text: msg.message ?? "",
+        sender: msg.sender_id === myId ? "me" : "user",
+        createdAt,
+        avatar: msg.sender?.avatar ?? undefined,
+        senderName: msg.sender?.full_name,
+        imageUri: msg.attachment ?? undefined,
+    };
+};
+
+const toTime = (iso: string) => {
+    try {
+        const date = new Date(iso);
+        if (isNaN(date.getTime())) {
+            return "";
+        }
+        return date.toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+        });
+    } catch {
+        return "";
+    }
+};
 
 // ─── Hook ─────────────────────────────────────────────────────────────────────
 
 export const useTicketChat = () => {
     const [selectedTicketId, setSelectedTicketId] = useState<string | null>(
-        null,
-    );
-    const [replyingTo, setReplyingTo] = useState<MappedChatMessage | null>(
         null,
     );
     const [searchQuery, setSearchQuery] = useState("");
@@ -108,7 +138,7 @@ export const useTicketChat = () => {
     // ── Mapped data ─────────────────────────────────────────────────────────--
 
     const mappedTickets: MappedTicket[] = useMemo(() => {
-        return tickets.map((ticket: Ticket) => ({
+        return tickets.map((ticket) => ({
             id: ticket.id,
             title: ticket.title,
             description: ticket.description,
@@ -117,7 +147,7 @@ export const useTicketChat = () => {
             avatar: ticket.instructor?.avatar || undefined,
             lastMessage: ticket.latest_message?.message || "No messages yet",
             unreadCount: ticket.unread_count,
-            time: toTime(new Date(ticket.created_at * 1000).toISOString()),
+            time: toTime(ticket.created_at?.toString() || ""),
         }));
     }, [tickets]);
 
@@ -140,11 +170,9 @@ export const useTicketChat = () => {
             status: ticket.status,
             priority: ticket.priority,
             avatar: ticket.instructor?.avatar || undefined,
-            lastMessage:
-                ticket.messages?.[ticket.messages.length - 1]?.message ||
-                "No messages yet",
+            lastMessage: ticket.latest_message?.message || "No messages yet",
             unreadCount: ticket.unread_count,
-            time: toTime(new Date(ticket.updated_at * 1000).toISOString()),
+            time: toTime(ticket.updated_at?.toString() || ""),
         } as MappedTicket;
     }, [ticket]);
 
@@ -174,7 +202,6 @@ export const useTicketChat = () => {
 
             // Clear first so React sees a state change
             setSelectedTicketId(null);
-            setReplyingTo(null);
 
             // Remove cached data so the query starts fresh
             await queryClient.removeQueries({
@@ -191,7 +218,6 @@ export const useTicketChat = () => {
 
     const clearSelection = useCallback(() => {
         setSelectedTicketId(null);
-        setReplyingTo(null);
     }, []);
 
     const sendMessage = useCallback(
@@ -200,7 +226,6 @@ export const useTicketChat = () => {
 
             try {
                 await sendMessageMutation.mutateAsync({ text, imageUri });
-                setReplyingTo(null);
                 // Refetch ticket data to get the new message
                 refetchTicket();
             } catch (error) {
@@ -230,10 +255,6 @@ export const useTicketChat = () => {
         // Search
         searchQuery,
         setSearchQuery,
-
-        // Reply functionality
-        replyingTo,
-        setReplyingTo,
 
         // Actions
         selectTicket,

@@ -1,6 +1,5 @@
 import { Icons } from "@/constants/icons";
 import { Palette } from "@/constants/theme";
-import { ChatMessage } from "@/services/chats/chat.types";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
@@ -9,12 +8,10 @@ import { StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 
 interface Props {
     onSend: (text: string, imageUri?: string) => void;
-    replyTo?: ChatMessage | null;
-    onClearReply?: () => void;
     isSending?: boolean;
 }
 
-const ChatInput = ({ onSend, replyTo, onClearReply, isSending }: Props) => {
+const ChatInput = ({ onSend, isSending }: Props) => {
     const [text, setText] = useState("");
     const [imageUri, setImageUri] = useState<string | null>(null);
 
@@ -40,27 +37,10 @@ const ChatInput = ({ onSend, replyTo, onClearReply, isSending }: Props) => {
         onSend(text.trim(), imageUri ?? undefined);
         setText("");
         setImageUri(null);
-        onClearReply?.();
-    }, [canSend, text, imageUri, onSend, onClearReply]);
+    }, [canSend, text, imageUri, onSend]);
 
     return (
         <View style={styles.wrapper}>
-            {/* Reply preview */}
-            {replyTo && (
-                <View style={styles.replyBar}>
-                    <View style={styles.replyAccent} />
-                    <View style={styles.replyContent}>
-                        <Icons.XIcon size={14} color={Palette.slate400} />
-                    </View>
-                    <TouchableOpacity
-                        style={styles.replyClose}
-                        onPress={onClearReply}
-                    >
-                        <Icons.XIcon size={14} color={Palette.slate400} />
-                    </TouchableOpacity>
-                </View>
-            )}
-
             {/* Image preview strip */}
             {imageUri && (
                 <View style={styles.previewStrip}>

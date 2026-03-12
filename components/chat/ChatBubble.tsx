@@ -1,6 +1,7 @@
 import { Palette, Radii } from "@/constants/theme";
 import { MappedChatMessage } from "@/hooks/useGroupChats";
-import { useAuthStore } from "@/services/auth/auth.store";
+import { useProfile } from "@/services/auth";
+import { formatMessageTime } from "@/utils";
 import { memo, useState } from "react";
 import {
     Image,
@@ -13,53 +14,6 @@ import {
 import Avatar from "../avatar";
 import { ThemedText } from "../themed-text";
 
-// ─── Timestamp formatter ──────────────────────────────────────────────────────
-
-/**
- * Returns a human-readable timestamp for a message.
- *
- * Format:  "<time>  ·  <date>"
- *   time  →  "3:45 pm"
- *   date  →  "Today" | "Yesterday" | "dd/mm/yy"
- */
-function formatMessageTime(isoString: string, isMe: boolean): string {
-    const date = new Date(isoString);
-    if (isNaN(date.getTime())) return "";
-
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const msgDay = new Date(
-        date.getFullYear(),
-        date.getMonth(),
-        date.getDate(),
-    );
-    const diffDays = Math.round(
-        (today.getTime() - msgDay.getTime()) / (1000 * 60 * 60 * 24),
-    );
-
-    const time = date
-        .toLocaleTimeString([], {
-            hour: "numeric",
-            minute: "2-digit",
-            hour12: true,
-        })
-        .toLowerCase();
-
-    let label: string;
-    if (diffDays === 0) {
-        label = "Today";
-    } else if (diffDays === 1) {
-        label = "Yesterday";
-    } else {
-        const dd = String(date.getDate()).padStart(2, "0");
-        const mm = String(date.getMonth() + 1).padStart(2, "0");
-        const yy = String(date.getFullYear()).slice(2);
-        label = `${dd}/${mm}/${yy}`;
-    }
-
-    return isMe ? `${label}  ·  ${time}` : `${time}  ·  ${label}`;
-}
-
 // ─── Component ────────────────────────────────────────────────────────────────
 
 interface Props {
@@ -67,8 +21,6 @@ interface Props {
     chatType?: "private" | "group";
     showAvatar?: boolean;
     showSenderName?: boolean;
-    onNavigateToMessage?: (messageId: string) => void;
-    highlightedMessageId?: string;
 }
 
 const ChatBubble = ({
@@ -76,17 +28,15 @@ const ChatBubble = ({
     chatType = "private",
     showAvatar = true,
     showSenderName = false,
-    onNavigateToMessage,
-    highlightedMessageId,
 }: Props) => {
-    const { user } = useAuthStore();
+    const { data: user } = useProfile();
     const isMe = message.sender === "me";
     const isInstructor = message.sender === "user";
     const [imagePreviewVisible, setImagePreviewVisible] = useState(false);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
     // Handle single image or array of images
-    const images = message.imageUri ? [message.imageUri] : [];
+    const images = message.imageUrl ? [message.imageUrl] : [];
 
     const timestamp = formatMessageTime(message.createdAt, isMe);
     const shouldShowSenderName =

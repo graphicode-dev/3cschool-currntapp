@@ -1,25 +1,19 @@
 import { ChatListItem } from "@/components/chat/ChatListItem";
+import { GroupsSearch } from "@/components/groups/groups-search";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import { ThemedText } from "@/components/themed-text";
 import { Error } from "@/components/ui/Error";
 import { Loading } from "@/components/ui/Loading";
 import { PullToRefreshScrollView } from "@/components/ui/Pulltorefresh";
-import { Palette, Radii, Spacing } from "@/constants/theme";
+import { Palette, Spacing } from "@/constants/theme";
 import { useGroupChats } from "@/hooks/useGroupChats";
 import { router } from "expo-router";
 import React from "react";
-import { FlatList, StyleSheet, TextInput, View } from "react-native";
+import { FlatList, StyleSheet, View } from "react-native";
 
 const ChatListScreen = () => {
-    const {
-        groups,
-        filteredGroups,
-        isLoading,
-        error,
-        searchQuery,
-        setSearchQuery,
-        refetch,
-    } = useGroupChats();
+    const { groups, isLoading, error, searchQuery, setSearchQuery, refetch } =
+        useGroupChats();
 
     const handleChatPress = (group: any) => {
         router.push({
@@ -32,7 +26,7 @@ const ChatListScreen = () => {
         });
     };
 
-    if (isLoading) return <Loading />;
+    // if (isLoading) return <Loading />;
     if (error) return <Error message={error} />;
 
     return (
@@ -53,19 +47,14 @@ const ChatListScreen = () => {
                     </View>
                 </View>
 
-                <View style={styles.searchWrap}>
-                    <ThemedText style={styles.searchIcon}>🔍</ThemedText>
-                    <TextInput
-                        style={styles.searchInput}
-                        placeholder="Search Conversations"
-                        placeholderTextColor={Palette.slate400}
-                        value={searchQuery}
-                        onChangeText={setSearchQuery}
-                    />
-                </View>
+                {/* Search */}
+                <GroupsSearch
+                    searchValue={searchQuery}
+                    onSearchChange={setSearchQuery}
+                />
 
                 <FlatList
-                    data={filteredGroups}
+                    data={isLoading ? [] : groups}
                     keyExtractor={(c) => c.id.toString()}
                     renderItem={({ item }) => (
                         <ChatListItem
@@ -78,12 +67,18 @@ const ChatListScreen = () => {
                     showsVerticalScrollIndicator={false}
                     scrollEnabled={false}
                     ListEmptyComponent={
-                        <View style={styles.empty}>
-                            <ThemedText style={styles.emptyIcon}>💬</ThemedText>
-                            <ThemedText style={styles.emptyTitle}>
-                                No Conversations Yet
-                            </ThemedText>
-                        </View>
+                        isLoading ? (
+                            <Loading />
+                        ) : (
+                            <View style={styles.empty}>
+                                <ThemedText style={styles.emptyIcon}>
+                                    💬
+                                </ThemedText>
+                                <ThemedText style={styles.emptyTitle}>
+                                    No Conversations Yet
+                                </ThemedText>
+                            </View>
+                        )
                     }
                 />
             </PullToRefreshScrollView>
@@ -128,22 +123,6 @@ const styles = StyleSheet.create({
         fontSize: 12,
         color: Palette.slate400,
         marginTop: 2,
-    },
-    searchWrap: {
-        flexDirection: "row",
-        alignItems: "center",
-        margin: 16,
-        backgroundColor: Palette.slate50,
-        borderRadius: Radii.xl,
-        paddingHorizontal: 14,
-        paddingVertical: 10,
-        gap: 8,
-    },
-    searchIcon: { fontSize: 14 },
-    searchInput: {
-        flex: 1,
-        fontSize: 14,
-        color: Palette.slate700,
     },
     list: {
         flex: 1,

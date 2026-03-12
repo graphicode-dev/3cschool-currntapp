@@ -41,15 +41,6 @@ export function DonutChart({
     total: number;
     nextSessionDate?: Date;
 }) {
-    console.log("🍩 DonutChart Props:", {
-        elapsed,
-        total,
-        nextSessionDate,
-        nextSessionDateType: typeof nextSessionDate,
-        nextSessionDateValid: nextSessionDate instanceof Date,
-        nextSessionDateValue: nextSessionDate?.toString(),
-    });
-
     const SIZE = 64;
     const STROKE = 7;
     const R = (SIZE - STROKE) / 2;
@@ -60,16 +51,6 @@ export function DonutChart({
     const filled = pct * CIRC;
     const cx = SIZE / 2;
 
-    console.log("📊 DonutChart Progress Calculation:", {
-        elapsed,
-        total,
-        pct,
-        pctPercentage: pct * 100,
-        filled,
-        CIRC,
-        progressPercentage: `${(pct * 100).toFixed(2)}%`,
-    });
-
     // Live countdown — ticks every minute
     const [msLeft, setMsLeft] = useState<number>(() =>
         nextSessionDate ? nextSessionDate.getTime() - Date.now() : -1,
@@ -77,24 +58,12 @@ export function DonutChart({
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     useEffect(() => {
-        console.log("⏰ DonutChart useEffect for countdown:", {
-            nextSessionDate,
-            hasDate: !!nextSessionDate,
-            dateValue: nextSessionDate?.toString(),
-            initialMsLeft: msLeft,
-        });
-
         if (!nextSessionDate) {
             setMsLeft(-1);
             return;
         }
         const tick = () => {
             const newMsLeft = nextSessionDate.getTime() - Date.now();
-            console.log("🕐 DonutChart tick:", {
-                newMsLeft,
-                minutesLeft: Math.floor(newMsLeft / 60000),
-                hoursLeft: Math.floor(newMsLeft / 3600000),
-            });
             setMsLeft(newMsLeft);
         };
         tick();
@@ -108,12 +77,6 @@ export function DonutChart({
     const { top, bottom } = nextSessionDate
         ? formatCountdown(msLeft)
         : { top: "--", bottom: "" };
-
-    console.log("🎯 DonutChart Display:", {
-        msLeft,
-        formattedCountdown: { top, bottom },
-        hasCountdown: !!nextSessionDate,
-    });
 
     return (
         <View style={styles.wrap}>

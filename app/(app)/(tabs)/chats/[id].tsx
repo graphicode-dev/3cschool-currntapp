@@ -3,36 +3,44 @@ import ChatInput from "@/components/chat/ChatInput";
 import CustomHeader from "@/components/custom-header";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import { ThemedText } from "@/components/themed-text";
+import { Icons } from "@/constants/icons";
 import { Images } from "@/constants/images";
-import { useTicketChat } from "@/hooks/useTicketChat";
+import { Palette } from "@/constants/theme";
+import { useGroupChats } from "@/hooks/useGroupChats";
 import { useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useRef } from "react";
 import { ActivityIndicator, FlatList, StyleSheet, View } from "react-native";
 
-export default function TicketChatScreen() {
-    const { id } = useLocalSearchParams<{ id: string }>();
+export default function ChatConversationScreen() {
+    const params = useLocalSearchParams<{
+        groupId?: string;
+        id?: string;
+        groupName?: string;
+    }>();
+
+    const resolvedGroupId = params.groupId ?? params.id ?? "";
     const flatListRef = useRef<FlatList>(null);
 
     const {
-        selectTicket,
-        selectedTicket,
+        selectGroup,
+        selectedGroup,
         messages,
         isLoading,
-        isLoadingTicket,
+        isLoadingMessages,
         isSending,
+        isLoadingMore,
+        loadMoreMessages,
         sendMessage,
         replyingTo,
         setReplyingTo,
-        ticketError,
-        error,
-    } = useTicketChat();
+    } = useGroupChats();
 
-    // Select the ticket when component mounts
+    // Select the group when component mounts
     useEffect(() => {
-        if (id) {
-            selectTicket(id);
+        if (resolvedGroupId) {
+            selectGroup(resolvedGroupId);
         }
-    }, [id, selectTicket]);
+    }, [resolvedGroupId, selectGroup]);
 
     const handleSendMessage = useCallback(
         async (text: string, imageUri?: string) => {
@@ -41,6 +49,10 @@ export default function TicketChatScreen() {
         [sendMessage],
     );
 
+    const handleLoadMore = useCallback(() => {
+        loadMoreMessages();
+    }, [loadMoreMessages]);
+
     // Scroll to bottom when new messages arrive
     useEffect(() => {
         if (messages.length > 0) {
@@ -48,66 +60,38 @@ export default function TicketChatScreen() {
         }
     }, [messages.length]);
 
-    if (isLoading || isLoadingTicket) {
+    if (isLoading || isLoadingMessages) {
         return (
             <ScreenWrapper>
                 <View style={styles.center}>
-                    <ActivityIndicator size="large" color="#1890FF" />
+                    <ActivityIndicator
+                        size="large"
+                        color={Palette.brand[500]}
+                    />
                 </View>
             </ScreenWrapper>
         );
     }
 
-    // Show general error if there's one
-    if (error) {
+    if (!selectedGroup) {
         return (
             <ScreenWrapper>
                 <View style={styles.center}>
-                    <ThemedText style={styles.errorText}>
-                        Something went wrong
-                    </ThemedText>
-                    <ThemedText style={styles.errorSubText}>{error}</ThemedText>
+                    <ThemedText>Chat not found</ThemedText>
                 </View>
             </ScreenWrapper>
         );
     }
-
-    // Show error if there's a ticket-specific error
-    if (ticketError) {
-        return (
-            <ScreenWrapper>
-                <View style={styles.center}>
-                    <ThemedText style={styles.errorText}>
-                        Error loading ticket
-                    </ThemedText>
-                    <ThemedText style={styles.errorSubText}>
-                        {ticketError}
-                    </ThemedText>
-                </View>
-            </ScreenWrapper>
-        );
-    }
-
-    if (!selectedTicket) {
-        return (
-            <ScreenWrapper>
-                <View style={styles.center}>
-                    <ThemedText>Ticket not found</ThemedText>
-                </View>
-            </ScreenWrapper>
-        );
-    }
-
-    const headerTitle = selectedTicket.title;
 
     return (
         <ScreenWrapper bgImage={Images.chatBg}>
             <CustomHeader
-                title={headerTitle}
+                title={params.groupName ?? selectedGroup.name ?? "Group Chat"}
                 divider
                 avatar={{
-                    name: selectedTicket.avatar || "S",
-                    image: selectedTicket.avatar,
+                    icon: (
+                        <Icons.ChatIcon size={22} color={Palette.brand[500]} />
+                    ),
                     size: 30,
                 }}
             />
@@ -120,9 +104,9 @@ export default function TicketChatScreen() {
                 renderItem={({ item }) => (
                     <ChatBubble
                         message={item}
-                        chatType="private"
+                        chatType="group"
                         showAvatar
-                        showSenderName={false}
+                        showSenderName
                         onNavigateToMessage={() => {}}
                         highlightedMessageId={undefined}
                     />
@@ -130,6 +114,18 @@ export default function TicketChatScreen() {
                 contentContainerStyle={styles.list}
                 showsVerticalScrollIndicator={false}
                 style={styles.chat}
+                onEndReached={handleLoadMore}
+                onEndReachedThreshold={0.3}
+                ListFooterComponent={
+                    isLoadingMore ? (
+                        <View style={styles.loadingMore}>
+                            <ActivityIndicator
+                                size="small"
+                                color={Palette.brand[500]}
+                            />
+                        </View>
+                    ) : null
+                }
                 onScrollToIndexFailed={() => {}}
             />
 
@@ -151,19 +147,8 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
     },
-    errorText: {
-        fontSize: 16,
-        color: "#ff4444",
-        fontWeight: "600",
-        marginBottom: 8,
-    },
-    errorSubText: {
-        fontSize: 14,
-        color: "#666",
-        textAlign: "center",
-        paddingHorizontal: 32,
-    },
     chat: { flex: 1 },
     list: { paddingVertical: 16 },
     inputWrap: { paddingBottom: 50, backgroundColor: "transparent" },
+    loadingMore: { paddingVertical: 16, alignItems: "center" },
 });

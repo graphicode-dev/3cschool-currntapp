@@ -21,6 +21,10 @@ export interface Session {
         full_name: string;
         avatar: string | null;
     };
+    session_info: {
+        id: number;
+        title: string;
+    };
 }
 
 export interface SessionWithInfo extends Session {

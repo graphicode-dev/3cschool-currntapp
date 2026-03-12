@@ -1,13 +1,18 @@
-/* eslint-disable react/display-name */
 import { Palette } from "@/constants/theme";
 import React, {
     useCallback,
     useEffect,
     useImperativeHandle,
+    useMemo,
     useRef,
     useState,
 } from "react";
-import { Platform, StyleSheet, TouchableOpacity, View } from "react-native";
+import {
+    Platform,
+    StyleSheet,
+    TouchableOpacity,
+    View,
+} from "react-native";
 import Animated, {
     SlideInUp,
     SlideOutUp,
@@ -121,7 +126,7 @@ const borderColorMap: Record<ToastType, string> = {
     warning: "#FF9500",
 };
 
-function ToastItem({
+function ToastItemComponent({
     item,
     onDismiss,
 }: {
@@ -138,7 +143,7 @@ function ToastItem({
             item.onDismiss?.();
         }, duration);
         return () => clearTimeout(timer);
-    }, []);
+    }, [item, onDismiss, progress]);
 
     const progressStyle = useAnimatedStyle(() => ({
         width: `${progress.value * 100}%`,
@@ -148,7 +153,7 @@ function ToastItem({
 
     return (
         <Animated.View
-            entering={SlideInUp.springify().damping(18).stiffness(140)}
+            entering={SlideInUp.damping(18).stiffness(140)}
             exiting={SlideOutUp.duration(250)}
             style={[
                 styles.toast,
@@ -224,7 +229,7 @@ export const toast = {
 export const ToastProvider = React.forwardRef<
     ToastRef,
     { children: React.ReactNode }
->(({ children }, ref) => {
+>(function ToastProviderComponent({ children }, ref) {
     const insets = useSafeAreaInsets();
     const [toasts, setToasts] = useState<ToastItem[]>([]);
     const idCounter = useRef(0);
@@ -238,20 +243,27 @@ export const ToastProvider = React.forwardRef<
         setToasts((prev) => prev.filter((t) => t.id !== id));
     }, []);
 
-    const api: ToastRef = {
-        show,
-        success: (title, message) => show({ type: "success", title, message }),
-        error: (title, message) => show({ type: "error", title, message }),
-        info: (title, message) => show({ type: "info", title, message }),
-        warning: (title, message) => show({ type: "warning", title, message }),
-    };
+    const api = useMemo(
+        () => ({
+            show,
+            success: (title: string, message?: string) =>
+                show({ type: "success", title, message }),
+            error: (title: string, message?: string) =>
+                show({ type: "error", title, message }),
+            info: (title: string, message?: string) =>
+                show({ type: "info", title, message }),
+            warning: (title: string, message?: string) =>
+                show({ type: "warning", title, message }),
+        }),
+        [show],
+    );
 
     useImperativeHandle(ref, () => api);
 
     useEffect(() => {
         setGlobalToastRef(api);
         return () => setGlobalToastRef(null);
-    }, []);
+    }, [api]);
 
     return (
         <View style={{ flex: 1 }}>
@@ -261,12 +273,18 @@ export const ToastProvider = React.forwardRef<
                 pointerEvents="box-none"
             >
                 {toasts.map((item) => (
-                    <ToastItem key={item.id} item={item} onDismiss={dismiss} />
+                    <ToastItemComponent
+                        key={item.id}
+                        item={item}
+                        onDismiss={dismiss}
+                    />
                 ))}
             </View>
         </View>
     );
 });
+
+ToastProvider.displayName = "ToastProvider";
 
 const styles = StyleSheet.create({
     container: {

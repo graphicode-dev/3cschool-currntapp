@@ -1,7 +1,7 @@
 import { ThemedText } from "@/components/themed-text";
 import { Group } from "@/services/groups/groups.types";
 import React from "react";
-import { FlatList, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import GroupsListItem from "./groups-list-item";
 
 interface GroupsListProps {

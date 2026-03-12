@@ -1,7 +1,10 @@
 export interface NotificationData {
-    type: string;
     group_id?: string;
     sender_id?: number;
+    group_name?: string;
+    message_id?: number;
+    has_attachment?: boolean;
+    attachment_type?: string;
     [key: string]: unknown;
 }
 

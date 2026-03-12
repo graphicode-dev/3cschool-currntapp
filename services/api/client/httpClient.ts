@@ -13,6 +13,7 @@
 
 import { authStore } from "@/services/auth/auth.store";
 import { tokenService } from "@/services/auth/tokenService";
+import { logger } from "@/utils";
 import axios, {
     type AxiosError,
     type AxiosInstance,
@@ -106,29 +107,6 @@ const setupEnhancedRequestInterceptors = (instance: AxiosInstance): void => {
             }
             extConfig[META_PROCESSED] = true;
 
-            // Log request details
-            console.log(
-                "🚀 HTTP Request:",
-                JSON.stringify(
-                    {
-                        method: config.method?.toUpperCase(),
-                        url: `${config.baseURL || ""}${config.url}`,
-                        headers: {
-                            ...config.headers,
-                            Authorization: config.headers.Authorization
-                                ? "[REDACTED]"
-                                : undefined,
-                        },
-                        data: config.data,
-                        params: config.params,
-                        baseURL: config.baseURL,
-                        timeout: config.timeout,
-                    },
-                    null,
-                    2,
-                ),
-            );
-
             // Handle auth based on mode
             if (shouldIncludeAuth(extConfig)) {
                 const token = tokenService.getSync();
@@ -144,7 +122,7 @@ const setupEnhancedRequestInterceptors = (instance: AxiosInstance): void => {
 
             // Add request ID
             const requestId =
-                extConfig?.meta?.requestId || generateRequestId(config);
+                extConfig.meta?.requestId || generateRequestId(config);
             config.headers["X-Request-ID"] = requestId;
 
             // Add language header
@@ -153,13 +131,7 @@ const setupEnhancedRequestInterceptors = (instance: AxiosInstance): void => {
 
             return config;
         },
-        (error) => {
-            console.log(
-                "❌ HTTP Request Error:",
-                JSON.stringify(error, null, 2),
-            );
-            return Promise.reject(error);
-        },
+        (error) => Promise.reject(error),
     );
 };
 
@@ -168,49 +140,8 @@ const setupEnhancedRequestInterceptors = (instance: AxiosInstance): void => {
  */
 const setupEnhancedResponseInterceptors = (instance: AxiosInstance): void => {
     instance.interceptors.response.use(
-        (response: AxiosResponse) => {
-            // Log successful response
-            console.log(
-                "✅ HTTP Response:",
-                JSON.stringify(
-                    {
-                        status: response.status,
-                        statusText: response.statusText,
-                        url: response.config.url,
-                        method: response.config.method?.toUpperCase(),
-                        headers: response.headers,
-                        data: response.data,
-                    },
-                    null,
-                    2,
-                ),
-            );
-            return response;
-        },
+        (response: AxiosResponse) => response,
         async (error: AxiosError) => {
-            // Log error response
-            console.log(
-                "❌ HTTP Response Error:",
-                JSON.stringify(
-                    {
-                        message: error.message,
-                        code: error.code,
-                        status: error.response?.status,
-                        statusText: error.response?.statusText,
-                        url: error.config?.url,
-                        method: error.config?.method?.toUpperCase(),
-                        responseData: error.response?.data,
-                        isNetworkError: !error.response,
-                        isTimeout:
-                            error.code === "ECONNABORTED" ||
-                            error.code === "ETIMEDOUT",
-                        isCancel: axios.isCancel(error),
-                    },
-                    null,
-                    2,
-                ),
-            );
-
             const originalRequest = error.config as ExtendedAxiosConfig;
 
             // Skip logout requests
@@ -452,6 +383,58 @@ export const getFieldError = (
     return errors[0];
 };
 
+export function throwApiError(error: ApiError, fallback: string): never {
+    throw error.message ? error : { ...error, message: fallback };
+}
+
+export async function postFormData<T>(
+    endpoint: string,
+    formData: FormData,
+): Promise<ApiResponse<T>> {
+    try {
+        const token = await tokenService.get();
+        const response = await fetch(`${API_CONFIG.BASE_URL}${endpoint}`, {
+            method: "POST",
+            headers: {
+                Accept: "application/json",
+                ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+            body: formData,
+        });
+
+        if (!response.ok) {
+            const errorBody = await response.json().catch(() => ({}));
+            return {
+                success: false,
+                message: errorBody?.message ?? `HTTP ${response.status}`,
+                data: {} as T,
+                error: {
+                    message: errorBody?.message ?? `HTTP ${response.status}`,
+                    status: response.status,
+                },
+            };
+        }
+
+        const json = await response.json();
+        const data: T = json?.data ?? json;
+        return {
+            success: true,
+            message: "",
+            data,
+            error: null,
+        };
+    } catch (error) {
+        const apiError = transformError(error as AxiosError);
+        console.error("apiError:", error);
+        return {
+            success: false,
+            message: apiError.message,
+            data: {} as T,
+            error: apiError,
+        };
+    }
+}
+
 /**
  * The enhanced HTTP client instance
  */
@@ -502,8 +485,14 @@ export const api = {
         url: string,
         config?: EnhancedRequestConfig,
     ): Promise<ApiResponse<T>> {
+        logger.log("🚀 HTTP GET Request:", "", { url, config });
         try {
             const response = await enhancedHttpClient.get<T>(url, config);
+            logger.log("✅ HTTP GET Response:", "", {
+                url,
+                status: response.status,
+                data: response.data,
+            });
             return {
                 success: true,
                 message: "",
@@ -511,6 +500,7 @@ export const api = {
                 error: null,
             };
         } catch (error) {
+            logger.error("❌ HTTP GET Error:", "", { url, error });
             const apiError = transformError(error as AxiosError);
             return {
                 success: false,
@@ -529,12 +519,21 @@ export const api = {
         data?: unknown,
         config?: EnhancedRequestConfig,
     ): Promise<ApiResponse<T>> {
+        logger.log(
+            "🚀 HTTP POST Request:",
+            JSON.stringify({ url, data, config }, null, 2),
+        );
         try {
             const response = await enhancedHttpClient.post<T>(
                 url,
                 data,
                 config,
             );
+            logger.log("✅ HTTP POST Response:", "", {
+                url,
+                status: response.status,
+                data: response.data,
+            });
             return {
                 success: true,
                 message: "",
@@ -542,60 +541,8 @@ export const api = {
                 error: null,
             };
         } catch (error) {
+            logger.error("❌ HTTP POST Error:", "", { url, error });
             const apiError = transformError(error as AxiosError);
-            console.error("apiError:", error);
-
-            return {
-                success: false,
-                message: apiError.message,
-                data: {} as T,
-                error: apiError,
-            };
-        }
-    },
-
-    /**
-     * POST request with FormData
-     */
-    async postFormData<T>(
-        endpoint: string,
-        formData: FormData,
-    ): Promise<ApiResponse<T>> {
-        try {
-            const token = await tokenService.get();
-            const response = await fetch(`${API_CONFIG.BASE_URL}${endpoint}`, {
-                method: "POST",
-                headers: {
-                    Accept: "application/json",
-                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-                },
-                body: formData,
-            });
-
-            if (!response.ok) {
-                const errorBody = await response.json().catch(() => ({}));
-                return {
-                    success: false,
-                    message: errorBody?.message ?? `HTTP ${response.status}`,
-                    data: {} as T,
-                    error: {
-                        message: errorBody?.message ?? `HTTP ${response.status}`,
-                        status: response.status,
-                    },
-                };
-            }
-
-            const json = await response.json();
-            const data: T = json?.data ?? json;
-            return {
-                success: true,
-                message: "",
-                data,
-                error: null,
-            };
-        } catch (error) {
-            const apiError = transformError(error as AxiosError);
-            console.error("apiError:", error);
             return {
                 success: false,
                 message: apiError.message,
@@ -613,8 +560,14 @@ export const api = {
         data?: unknown,
         config?: EnhancedRequestConfig,
     ): Promise<ApiResponse<T>> {
+        logger.log("🚀 HTTP PUT Request:", "", { url, data, config });
         try {
             const response = await enhancedHttpClient.put<T>(url, data, config);
+            logger.log("✅ HTTP PUT Response:", "", {
+                url,
+                status: response.status,
+                data: response.data,
+            });
             return {
                 success: true,
                 message: "",
@@ -622,6 +575,7 @@ export const api = {
                 error: null,
             };
         } catch (error) {
+            logger.error("❌ HTTP PUT Error:", "", { url, error });
             const apiError = transformError(error as AxiosError);
             return {
                 success: false,
@@ -640,12 +594,18 @@ export const api = {
         data?: unknown,
         config?: EnhancedRequestConfig,
     ): Promise<ApiResponse<T>> {
+        logger.log("🚀 HTTP PATCH Request:", "", { url, data, config });
         try {
             const response = await enhancedHttpClient.patch<T>(
                 url,
                 data,
                 config,
             );
+            logger.log("✅ HTTP PATCH Response:", "", {
+                url,
+                status: response.status,
+                data: response.data,
+            });
             return {
                 success: true,
                 message: "",
@@ -653,6 +613,7 @@ export const api = {
                 error: null,
             };
         } catch (error) {
+            logger.error("❌ HTTP PATCH Error:", "", { url, error });
             const apiError = transformError(error as AxiosError);
             return {
                 success: false,
@@ -670,8 +631,14 @@ export const api = {
         url: string,
         config?: EnhancedRequestConfig,
     ): Promise<ApiResponse<T>> {
+        logger.log("🚀 HTTP DELETE Request:", "", { url, config });
         try {
             const response = await enhancedHttpClient.delete<T>(url, config);
+            logger.log("✅ HTTP DELETE Response:", "", {
+                url,
+                status: response.status,
+                data: response.data,
+            });
             return {
                 success: true,
                 message: "",
@@ -679,6 +646,7 @@ export const api = {
                 error: null,
             };
         } catch (error) {
+            logger.error("❌ HTTP DELETE Error:", "", { url, error });
             const apiError = transformError(error as AxiosError);
             return {
                 success: false,

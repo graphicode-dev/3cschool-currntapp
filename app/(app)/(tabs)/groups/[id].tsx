@@ -1,5 +1,4 @@
 import CustomHeader from "@/components/custom-header";
-import GroupsFloatingMessageButton from "@/components/groups/groups-floating-message-button";
 import { RenderSection } from "@/components/RenderSection";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import SessionsList from "@/components/sessions/sessions-list";
@@ -49,9 +48,9 @@ const GroupDetailsScreen = () => {
                 </RenderSection>
             </PullToRefreshScrollView>
 
-            <GroupsFloatingMessageButton
+            {/* <GroupsFloatingMessageButton
                 groupId={groupDetail!.group.id.toString()}
-            />
+            /> */}
         </ScreenWrapper>
     );
 };

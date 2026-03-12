@@ -66,25 +66,25 @@ const GroupsListItem = ({ group }: GroupsListItemProps) => {
             params: { id: String(group.id) },
         });
 
-    const onAskInstructor = () =>
-        router.push({
-            pathname: "/(app)/(tabs)/groups/chat/instructor",
-            params: {
-                groupId: String(group.id),
-                instructorId: String(group.teacher_id),
-                instructorName: group.teacher?.full_name ?? "",
-                instructorAvatar: group.teacher?.avatar ?? "",
-            },
-        });
+    // const onAskInstructor = () =>
+    //     router.push({
+    //         pathname: "/(app)/(tabs)/groups/chat/instructor",
+    //         params: {
+    //             groupId: String(group.id),
+    //             instructorId: String(group.teacher_id),
+    //             instructorName: group.teacher?.full_name ?? "",
+    //             instructorAvatar: group.teacher?.avatar ?? "",
+    //         },
+    //     });
 
-    const onChatGroup = () =>
-        router.push({
-            pathname: "/(app)/(tabs)/groups/chat/group",
-            params: {
-                groupId: String(group.id),
-                groupName: group.name,
-            },
-        });
+    // const onChatGroup = () =>
+    //     router.push({
+    //         pathname: "/(app)/(tabs)/groups/chat/group",
+    //         params: {
+    //             groupId: String(group.id),
+    //             groupName: group.name,
+    //         },
+    //     });
 
     return (
         <View style={styles.container}>
@@ -157,7 +157,7 @@ const GroupsListItem = ({ group }: GroupsListItemProps) => {
             {/* Bottom actions */}
             <View style={styles.bottomRow}>
                 <View style={styles.actionsLeft}>
-                    <TouchableOpacity
+                    {/* <TouchableOpacity
                         style={styles.actionBtn}
                         onPress={onAskInstructor}
                         activeOpacity={0.7}
@@ -177,7 +177,7 @@ const GroupsListItem = ({ group }: GroupsListItemProps) => {
                         <ThemedText style={styles.actionText}>
                             Chat Group
                         </ThemedText>
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
                 </View>
 
                 <TouchableOpacity

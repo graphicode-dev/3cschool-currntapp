@@ -1,5 +1,6 @@
 import { Icons } from "@/constants/icons";
 import { Palette } from "@/constants/theme";
+import { router } from "expo-router";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { ThemedText } from "../themed-text";
 
@@ -28,6 +29,7 @@ const HomeInfoSection = ({
                     <TouchableOpacity
                         activeOpacity={0.8}
                         style={styles.continueButton}
+                        onPress={() => router.push("/(app)/(tabs)/groups")}
                     >
                         <ThemedText style={styles.continueButtonText}>
                             {continueButtonText}

@@ -1,0 +1,244 @@
+import { useAuthStore } from "@/services/auth/auth.store";
+import { ticketsApi } from "@/services/tickets/tickets.api";
+import { ticketsKeys } from "@/services/tickets/tickets.keys";
+import { useTicket, useTicketsList } from "@/services/tickets/tickets.queries";
+import { Ticket, TicketMessage } from "@/services/tickets/tickets.types";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useCallback, useMemo, useState } from "react";
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+export interface MappedChatMessage {
+    id: string;
+    text: string;
+    sender: "me" | "user";
+    createdAt: string;
+    avatar?: string;
+    senderName?: string;
+    imageUri?: string;
+    replyTo?: MappedChatMessage;
+}
+
+export interface MappedTicket {
+    id: number;
+    title: string;
+    description: string;
+    status: string;
+    priority: string;
+    avatar?: string;
+    lastMessage?: string;
+    unreadCount: number;
+    time: string;
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+const toChatMessage = (
+    msg: TicketMessage,
+    myId: number,
+): MappedChatMessage => ({
+    id: String(msg.id),
+    text: msg.message ?? "",
+    sender: msg.sender_id === myId ? "me" : "user",
+    createdAt: new Date(msg.created_at * 1000).toISOString(),
+    avatar: msg.sender?.avatar ?? undefined,
+    senderName: msg.sender?.full_name,
+    imageUri: msg.attachment ?? undefined,
+});
+
+const toTime = (iso: string) =>
+    new Date(iso).toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+    });
+
+// ─── Hook ─────────────────────────────────────────────────────────────────────
+
+export const useTicketChat = () => {
+    const [selectedTicketId, setSelectedTicketId] = useState<string | null>(
+        null,
+    );
+    const [replyingTo, setReplyingTo] = useState<MappedChatMessage | null>(
+        null,
+    );
+    const [searchQuery, setSearchQuery] = useState("");
+
+    const { user } = useAuthStore();
+    const queryClient = useQueryClient();
+
+    // ── Queries ───────────────────────────────────────────────────────────────
+
+    const {
+        data: tickets = [],
+        isLoading: ticketsLoading,
+        error: ticketsError,
+        refetch: refetchTickets,
+    } = useTicketsList({});
+
+    const {
+        data: ticket,
+        isLoading: ticketLoading,
+        error: ticketError,
+        refetch: refetchTicket,
+    } = useTicket(selectedTicketId!, {
+        enabled: !!selectedTicketId,
+    });
+
+    // ── Mutations ─────────────────────────────────────────────────────────────
+
+    const sendMessageMutation = useMutation({
+        mutationFn: ({ text, imageUri }: { text: string; imageUri?: string }) =>
+            ticketsApi.sendMessage(selectedTicketId!, {
+                message: text || undefined,
+                attachmentUri: imageUri,
+            }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ticketsKeys.detail(selectedTicketId!),
+            });
+            queryClient.invalidateQueries({
+                queryKey: ticketsKeys.lists(),
+            });
+        },
+        onError: (error) => {
+            console.error("Failed to send ticket message:", error);
+        },
+    });
+
+    // ── Mapped data ─────────────────────────────────────────────────────────--
+
+    const mappedTickets: MappedTicket[] = useMemo(() => {
+        return tickets.map((ticket: Ticket) => ({
+            id: ticket.id,
+            title: ticket.title,
+            description: ticket.description,
+            status: ticket.status,
+            priority: ticket.priority,
+            avatar: ticket.instructor?.avatar || undefined,
+            lastMessage: ticket.latest_message?.message || "No messages yet",
+            unreadCount: ticket.unread_count,
+            time: toTime(new Date(ticket.created_at * 1000).toISOString()),
+        }));
+    }, [tickets]);
+
+    const filteredTickets: MappedTicket[] = useMemo(() => {
+        const q = searchQuery.toLowerCase();
+        if (!q) return mappedTickets;
+        return mappedTickets.filter(
+            (ticket) =>
+                ticket.title.toLowerCase().includes(q) ||
+                ticket.description.toLowerCase().includes(q),
+        );
+    }, [mappedTickets, searchQuery]);
+
+    const selectedTicket = useMemo(() => {
+        if (!ticket) return null;
+        return {
+            id: ticket.id,
+            title: ticket.title,
+            description: ticket.description,
+            status: ticket.status,
+            priority: ticket.priority,
+            avatar: ticket.instructor?.avatar || undefined,
+            lastMessage:
+                ticket.messages?.[ticket.messages.length - 1]?.message ||
+                "No messages yet",
+            unreadCount: ticket.unread_count,
+            time: toTime(new Date(ticket.updated_at * 1000).toISOString()),
+        } as MappedTicket;
+    }, [ticket]);
+
+    const messages: MappedChatMessage[] = useMemo(() => {
+        if (!ticket?.messages || !user) return [];
+
+        try {
+            return ticket.messages
+                .filter((msg: TicketMessage) => msg && msg.id)
+                .sort(
+                    (a: TicketMessage, b: TicketMessage) =>
+                        a.created_at - b.created_at,
+                )
+                .map((m: TicketMessage) => toChatMessage(m, user.id))
+                .reverse();
+        } catch (error) {
+            console.error("Error processing messages:", error);
+            return [];
+        }
+    }, [ticket?.messages, user]);
+
+    // ── Handlers ─────────────────────────────────────────────────────────────-
+
+    const selectTicket = useCallback(
+        async (ticketId: string | number) => {
+            const ticketIdStr = String(ticketId);
+
+            // Clear first so React sees a state change
+            setSelectedTicketId(null);
+            setReplyingTo(null);
+
+            // Remove cached data so the query starts fresh
+            await queryClient.removeQueries({
+                queryKey: ticketsKeys.detail(ticketIdStr),
+            });
+
+            // Set the ID in next microtask
+            queueMicrotask(() => {
+                setSelectedTicketId(ticketIdStr);
+            });
+        },
+        [queryClient],
+    );
+
+    const clearSelection = useCallback(() => {
+        setSelectedTicketId(null);
+        setReplyingTo(null);
+    }, []);
+
+    const sendMessage = useCallback(
+        async (text: string, imageUri?: string) => {
+            if (!selectedTicketId || (!text.trim() && !imageUri)) return;
+
+            try {
+                await sendMessageMutation.mutateAsync({ text, imageUri });
+                setReplyingTo(null);
+                // Refetch ticket data to get the new message
+                refetchTicket();
+            } catch (error) {
+                console.error("Failed to send message:", error);
+            }
+        },
+        [selectedTicketId, sendMessageMutation, refetchTicket],
+    );
+
+    return {
+        // Data
+        tickets: mappedTickets,
+        filteredTickets,
+        selectedTicket,
+        messages,
+        selectedTicketId,
+
+        // Loading states
+        isLoading: ticketsLoading,
+        isLoadingTicket: ticketLoading,
+        isSending: sendMessageMutation.isPending,
+
+        // Error handling
+        error: (ticketsError as Error | null)?.message ?? null,
+        ticketError: (ticketError as Error | null)?.message ?? null,
+
+        // Search
+        searchQuery,
+        setSearchQuery,
+
+        // Reply functionality
+        replyingTo,
+        setReplyingTo,
+
+        // Actions
+        selectTicket,
+        clearSelection,
+        sendMessage,
+        refetch: refetchTickets,
+    };
+};

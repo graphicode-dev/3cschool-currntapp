@@ -43,7 +43,6 @@ export function useTicketsList(
     return useQuery({
         queryKey: ticketsKeys.list(),
         queryFn: ({ signal }) => ticketsApi.getList(signal),
-        staleTime: 1000 * 60 * 5, // 5 minutes
         ...options,
     });
 }
@@ -69,7 +68,6 @@ export function useTicket(
         queryKey: ticketsKeys.detail(id),
         queryFn: ({ signal }) => ticketsApi.getById(id, signal),
         enabled: !!id,
-        staleTime: 1000 * 60 * 5, // 5 minutes
         ...options,
     });
 }

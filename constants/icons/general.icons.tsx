@@ -251,3 +251,57 @@ export function MagnifyingGlassIcon({ size, color }: TabIconProps) {
         </Svg>
     );
 }
+
+export function BellIcon({
+    size = 20,
+    color = "#24ADE3",
+}: {
+    size?: number;
+    color?: string;
+}) {
+    return (
+        <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+            <Path
+                d="M18 8A6 6 0 1 0 6 8c0 7-3 9-3 9h18s-3-2-3-9Z"
+                stroke={color}
+                strokeWidth={1.5}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+            />
+            <Path
+                d="M13.73 21a2 2 0 0 1-3.46 0"
+                stroke={color}
+                strokeWidth={1.5}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+            />
+        </Svg>
+    );
+}
+
+export function TrashIcon({
+    size = 20,
+    color = "#393838",
+}: {
+    size?: number;
+    color?: string;
+}) {
+    return (
+        <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+            <Path
+                d="M3 6H5H21"
+                stroke={color}
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+            />
+            <Path
+                d="M8 6V4C8 3.44772 8.44772 3 9 3H15C15.5523 3 16 3.44772 16 4V6M19 6V20C19 20.5523 18.5523 21 18 21H6C5.44772 21 5 20.5523 5 20V6H19Z"
+                stroke={color}
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+            />
+        </Svg>
+    );
+}

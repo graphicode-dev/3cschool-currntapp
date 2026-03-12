@@ -1,11 +1,16 @@
 import { Icons } from "@/constants/icons";
 import { Palette } from "@/constants/theme";
 import { User } from "@/services/auth/auth.types";
+import { useUnreadCount } from "@/services/notifications";
+import { router } from "expo-router";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import Avatar from "../avatar";
 import { ThemedText } from "../themed-text";
 
 const HomeHeader = ({ user }: { user: User }) => {
+    const { data: unreadData } = useUnreadCount();
+    const unreadCount = unreadData?.count ?? 0;
+
     return (
         <View style={styles.container}>
             {/* Left Side */}
@@ -24,9 +29,18 @@ const HomeHeader = ({ user }: { user: User }) => {
             </View>
 
             {/* Right Side - Notification Icon */}
-            <TouchableOpacity style={styles.notificationContainer}>
+            <TouchableOpacity
+                style={styles.notificationContainer}
+                onPress={() => router.push("/(app)/notifications")}
+            >
                 <Icons.BellIcon color="black" size={25} />
-                <View style={styles.notificationBadge} />
+                {unreadCount > 0 && (
+                    <View style={styles.notificationBadge}>
+                        <ThemedText style={styles.badgeText}>
+                            {unreadCount > 99 ? "99+" : unreadCount}
+                        </ThemedText>
+                    </View>
+                )}
             </TouchableOpacity>
         </View>
     );
@@ -64,16 +78,22 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
     },
-    notificationIcon: {
-        width: "100%",
-        height: "100%",
-    },
     notificationBadge: {
         position: "absolute",
-        top: 0,
-        right: 0,
-        width: 8,
-        height: 8,
-        borderRadius: 5,
+        top: -4,
+        right: -4,
+        backgroundColor: "#FF3B30",
+        borderRadius: 50,
+        width: 15,
+        height: 15,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    badgeText: {
+        fontSize: 10,
+        color: "white",
+        fontWeight: "600",
+        textAlign: "center",
+        lineHeight: 10,
     },
 });

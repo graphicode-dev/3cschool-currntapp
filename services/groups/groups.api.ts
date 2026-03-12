@@ -10,6 +10,7 @@ import {
     MessageSendResponse,
     UnreadMessagesResponse,
 } from "./groups.types";
+import { postFormData } from "../api/client/httpClient";
 
 const BASE_URL = "/groups";
 
@@ -88,7 +89,7 @@ export const groupsApi = {
                     "application/octet-stream",
             } as any);
 
-            const response = await api.postFormData<MessageSendResponse>(
+            const response = await postFormData<MessageSendResponse>(
                 `/groups/${groupId}/chat`,
                 formData,
             );
@@ -133,11 +134,6 @@ export const groupsApi = {
         userId: string | number,
         payload: MessageSendPayload,
     ): Promise<MessageSendResponse> => {
-        console.log("🚀 sendPrivateMessage called:", {
-            groupId,
-            userId,
-            payload,
-        });
         // Use the working pattern from the reference code with postFormData
         const formData = new FormData();
         if (payload.message && payload.message.trim().length > 0) {
@@ -153,18 +149,12 @@ export const groupsApi = {
                     "application/octet-stream",
             } as any);
         }
-
-        console.log(
-            "📤 Sending FormData to:",
-            `/groups/${groupId}/messages/${userId}`,
-        );
-        const response = await api.postFormData<MessageSendResponse>(
+        const response = await postFormData<MessageSendResponse>(
             `/groups/${groupId}/messages/${userId}`,
             formData,
         );
         if (response.error) throw response.error;
         if (!response.data) throw new Error("No data returned from server");
-        console.log("✅ sendPrivateMessage success:", response.data);
         return response.data;
     },
 

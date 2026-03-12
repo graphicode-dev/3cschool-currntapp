@@ -14,6 +14,7 @@ function TabLayoutInner() {
         >
             <Tabs.Screen name="home" />
             <Tabs.Screen name="groups" />
+            <Tabs.Screen name="chats" />
             <Tabs.Screen name="support" />
             <Tabs.Screen name="profile" />
         </Tabs>

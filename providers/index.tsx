@@ -19,7 +19,12 @@ function Providers({ children }: { children: ReactNode }) {
                 <ThemeProvider
                     value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
                 >
-                    <ToastProvider>{children}</ToastProvider>
+                    <ToastProvider>
+                        {/* <NotificationProvider> */}
+                        {children}
+
+                        {/* </NotificationProvider> */}
+                    </ToastProvider>
                 </ThemeProvider>
             </LanguageProvider>
         </QueryClientProvider>

@@ -43,7 +43,6 @@ export function useSpeakersMetadata(
     return useQuery({
         queryKey: speakersKeys.metadata(),
         queryFn: ({ signal }) => speakersApi.getMetadata(signal),
-        staleTime: 1000 * 60 * 30, // 30 minutes - metadata rarely changes
         ...options,
     });
 }
@@ -67,7 +66,6 @@ export function useSpeakersList(
     return useQuery({
         queryKey: speakersKeys.list(params),
         queryFn: ({ signal }) => speakersApi.getList(params, signal),
-        staleTime: 1000 * 60 * 5, // 5 minutes
         ...options,
     });
 }
@@ -93,7 +91,6 @@ export function useSpeaker(
         queryKey: speakersKeys.detail(id),
         queryFn: ({ signal }) => speakersApi.getById(id, signal),
         enabled: !!id,
-        staleTime: 1000 * 60 * 5, // 5 minutes
         ...options,
     });
 }

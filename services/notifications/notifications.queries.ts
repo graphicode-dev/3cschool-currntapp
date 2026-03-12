@@ -17,39 +17,56 @@
  * ```
  */
 
-import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
+import {
+    useInfiniteQuery,
+    useQuery,
+    type UseInfiniteQueryOptions,
+    type UseQueryOptions,
+} from "@tanstack/react-query";
 import { notificationsApi } from "./notifications.api";
 import { notificationsKeys } from "./notifications.keys";
-import type { Notification, UnreadCountResponse } from "./notifications.types";
+import type { UnreadCountResponse } from "./notifications.types";
 
 // ============================================================================
 // Query Hooks
 // ============================================================================
 
 /**
- * Hook to fetch list of notifications
+ * Hook to fetch paginated list of notifications with infinite scroll
  *
  * @param options - Additional query options
  *
  * @example
  * ```tsx
- * const { data } = useNotificationsList();
- * const notifications = data ?? [];
+ * const { data, fetchNextPage, hasNextPage } = useNotificationsList();
+ * const notifications = data?.pages.flatMap(page => page.data) ?? [];
  * ```
  */
 export function useNotificationsList(
-    options?: Partial<UseQueryOptions<Notification[], Error>>,
+    options?: Partial<UseInfiniteQueryOptions<any, Error>>,
 ) {
-    return useQuery({
+    return useInfiniteQuery({
         queryKey: notificationsKeys.list(),
-        queryFn: async ({ signal }) => {
-            const response = await notificationsApi.getNotifications(signal);
+        queryFn: async ({ pageParam = 1, signal }) => {
+            const response = await notificationsApi.getNotifications(
+                pageParam as number,
+                20,
+                signal,
+            );
             if (response.error) {
                 throw response.error;
             }
-            return response.data ?? [];
+            return response.data;
         },
-        staleTime: 1000 * 60 * 5, // 5 minutes
+        initialPageParam: 1,
+        getNextPageParam: (lastPage) => {
+            if (
+                lastPage.pagination.current_page < lastPage.pagination.last_page
+            ) {
+                return lastPage.pagination.current_page + 1;
+            }
+            return undefined;
+        },
         ...options,
     });
 }
@@ -80,7 +97,6 @@ export function useUnreadCount(
             }
             return response.data;
         },
-        staleTime: 1000 * 60 * 2, // 2 minutes
         ...options,
     });
 }

@@ -28,12 +28,69 @@ import type {
  */
 export const notificationsApi = {
     /**
-     * Get list of all notifications
+     * Get list of all notifications with pagination
      */
     getNotifications: async (
+        page: number = 1,
+        limit: number = 20,
         signal?: AbortSignal,
-    ): Promise<ApiResponse<Notification[]>> => {
-        return api.get<Notification[]>("/notifications", { signal });
+    ): Promise<
+        ApiResponse<{
+            data: Notification[];
+            pagination: {
+                current_page: number;
+                last_page: number;
+                per_page: number;
+                total: number;
+            };
+        }>
+    > => {
+        console.log("Making API call to /notifications with page:", page);
+        const response = await api.get<{
+            code: number;
+            message: string;
+            data: Notification[];
+            pagination: {
+                current_page: number;
+                last_page: number;
+                per_page: number;
+                total: number;
+            };
+        }>("/notifications", {
+            params: { page, limit },
+            signal,
+        });
+        console.log("API response:", response);
+
+        // Extract the notifications array from the wrapped response
+        if (response.data && response.data.data) {
+            return {
+                success: true,
+                message:
+                    response.data.message ||
+                    "Notifications retrieved successfully",
+                data: {
+                    data: response.data.data,
+                    pagination: response.data.pagination,
+                },
+                error: null,
+            };
+        }
+
+        return {
+            success: false,
+            message: "No notifications data found",
+            data: {
+                data: [],
+                pagination: {
+                    current_page: 1,
+                    last_page: 1,
+                    per_page: limit,
+                    total: 0,
+                },
+            },
+            error: null,
+        };
     },
 
     /**

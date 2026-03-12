@@ -26,17 +26,6 @@ export function ProgressCard({
     total,
     nextSessionDate,
 }: ProgressCardProps) {
-    console.log("🔍 ProgressCard Props:", {
-        label,
-        highlight,
-        elapsed,
-        total,
-        nextSessionDate,
-        nextSessionDateType: typeof nextSessionDate,
-        nextSessionDateValid: nextSessionDate instanceof Date,
-        nextSessionDateValue: nextSessionDate?.toString(),
-    });
-
     const [timeLeft, setTimeLeft] = useState<TimeLeft | null>(null);
     const [countdownMode, setCountdownMode] = useState<
         "upcoming" | "current" | "ended"
@@ -44,15 +33,8 @@ export function ProgressCard({
 
     // Calculate time left for countdown
     useEffect(() => {
-        console.log("⏰ Countdown useEffect triggered:", {
-            nextSessionDate,
-            hasDate: !!nextSessionDate,
-            dateValue: nextSessionDate?.toString(),
-            timestamp: nextSessionDate?.getTime(),
-        });
-
         if (!nextSessionDate) {
-            console.log("❌ No nextSessionDate provided");
+            console.error("❌ No nextSessionDate provided");
             setTimeLeft(null);
             setCountdownMode("ended");
             return;
@@ -60,21 +42,9 @@ export function ProgressCard({
 
         const calculateTimeLeft = () => {
             const now = new Date();
-            console.log("🕐 Calculating time left:", {
-                now: now.toString(),
-                nextSessionDate: nextSessionDate.toString(),
-                nowTimestamp: now.getTime(),
-                nextTimestamp: nextSessionDate.getTime(),
-            });
 
             const target = now < nextSessionDate ? nextSessionDate : null;
             const mode = now < nextSessionDate ? "upcoming" : "ended";
-
-            console.log("📊 Time calculation:", {
-                nowBeforeTarget: now < nextSessionDate,
-                target,
-                mode,
-            });
 
             setCountdownMode(mode);
             if (!target) {
@@ -83,11 +53,6 @@ export function ProgressCard({
             }
 
             const difference = target.getTime() - now.getTime();
-            console.log("⏱️ Time difference:", {
-                difference,
-                differenceMinutes: Math.floor(difference / (1000 * 60)),
-                differenceHours: Math.floor(difference / (1000 * 60 * 60)),
-            });
 
             if (difference <= 0) {
                 setTimeLeft({
@@ -116,7 +81,6 @@ export function ProgressCard({
                 seconds,
                 total: difference,
             };
-            console.log("🕰️ New time left calculated:", newTimeLeft);
             setTimeLeft(newTimeLeft);
         };
 

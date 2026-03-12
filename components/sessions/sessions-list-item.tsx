@@ -30,7 +30,7 @@ function fmtTime(timeStr: string) {
     }
 }
 
-const UpcomingSessionsListItem = ({ session }: Props) => {
+const SessionsListItem = ({ session }: Props) => {
     const title =
         session.session_info?.title ?? `Session #${session.session_number}`;
     const hasRecording = !!session.recording_url;
@@ -102,7 +102,7 @@ const UpcomingSessionsListItem = ({ session }: Props) => {
     );
 };
 
-export default UpcomingSessionsListItem;
+export default SessionsListItem;
 
 const styles = StyleSheet.create({
     container: {

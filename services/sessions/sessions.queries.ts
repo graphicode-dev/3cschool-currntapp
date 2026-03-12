@@ -46,7 +46,6 @@ export function useAllSessions(
     return useQuery({
         queryKey: sessionsKeys.allSessions(),
         queryFn: ({ signal }) => sessionsApi.getAllSessions(signal),
-        staleTime: 1000 * 60 * 5, // 5 minutes
         ...options,
     });
 }
@@ -72,7 +71,6 @@ export function useGroupSessions(
         queryKey: sessionsKeys.groupSessionsList(groupId),
         queryFn: ({ signal }) => sessionsApi.getGroupSessions(groupId, signal),
         enabled: !!groupId,
-        staleTime: 1000 * 60 * 5, // 5 minutes
         ...options,
     });
 }

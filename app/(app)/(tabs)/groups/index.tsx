@@ -96,15 +96,6 @@ export default function GroupsScreen() {
         refetch: refetchSessions,
     } = useAllSessions();
 
-    console.log("📅 Sessions Data:", {
-        sessionsData,
-        upcoming: sessionsData?.upcoming,
-        upcomingLength: sessionsData?.upcoming?.length,
-        past: sessionsData?.past,
-        pastLength: sessionsData?.past?.length,
-        totalUpcoming: sessionsData?.total_upcoming,
-    });
-
     const bannerSession = useMemo(
         () => pickBannerSession(sessionsData?.upcoming ?? []),
         [sessionsData?.upcoming],
@@ -118,11 +109,6 @@ export default function GroupsScreen() {
     // bannerSession may be ongoing or past — this always looks ahead.
     const nextSessionDate = useMemo(() => {
         const now = Date.now();
-        console.log("🕐 Calculating nextSessionDate:", {
-            now,
-            nowDate: new Date(now).toString(),
-            upcomingSessions: sessionsData?.upcoming,
-        });
 
         const future = (sessionsData?.upcoming ?? [])
             .filter((s) => {
@@ -146,21 +132,9 @@ export default function GroupsScreen() {
                     const sessionTime = sessionDate.getTime();
                     const isFuture = sessionTime > now;
 
-                    console.log(`📅 Session ${s.id}:`, {
-                        start_date: s.start_date,
-                        start_time: s.start_time,
-                        sessionDate: sessionDate.toString(),
-                        sessionTime,
-                        nowTime: now,
-                        isFuture,
-                        timeDiff: sessionTime - now,
-                        daysUntil: Math.floor(
-                            (sessionTime - now) / (1000 * 60 * 60 * 24),
-                        ),
-                    });
                     return isFuture;
                 } catch (error) {
-                    console.log(`❌ Invalid date for session ${s.id}:`, {
+                    console.error(`❌ Invalid date for session ${s.id}:`, {
                         start_date: s.start_date,
                         start_time: s.start_time,
                         error,
@@ -180,13 +154,8 @@ export default function GroupsScreen() {
                 return dateA - dateB;
             });
 
-        console.log("🔮 Future sessions after filtering:", {
-            futureCount: future.length,
-            futureSessions: future,
-        });
-
         if (!future.length) {
-            console.log("❌ No future sessions found");
+            console.error("❌ No future sessions found");
             return undefined;
         }
 
@@ -195,12 +164,6 @@ export default function GroupsScreen() {
             future[0].start_date.includes(":")
                 ? new Date(future[0].start_date)
                 : new Date(`${future[0].start_date}T${future[0].start_time}`);
-
-        console.log("✅ Next session found:", {
-            session: future[0],
-            nextSessionDate: nextSession.toString(),
-            nextSessionTimestamp: nextSession.getTime(),
-        });
 
         return nextSession;
     }, [sessionsData?.upcoming]);
@@ -227,16 +190,6 @@ export default function GroupsScreen() {
                     {/* Progress card sits on top of the banner's bottom edge */}
                     {!sessionsLoading && (
                         <>
-                            {console.log("🎯 ProgressCard will receive:", {
-                                label: "Next Session",
-                                highlight: `${nextSessionDate?.toLocaleDateString()} - ${nextSessionDate?.toLocaleTimeString()}`,
-                                elapsed: doneSessions,
-                                total: Math.max(totalSessions, 1),
-                                nextSessionDate,
-                                nextSessionDateType: typeof nextSessionDate,
-                                nextSessionDateValid:
-                                    nextSessionDate instanceof Date,
-                            })}
                             <ProgressCard
                                 label="Next Session"
                                 highlight={`${nextSessionDate?.toLocaleDateString()} - ${nextSessionDate?.toLocaleTimeString()}`}

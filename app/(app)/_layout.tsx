@@ -33,6 +33,10 @@ export default function AppLayout() {
                 name="(tabs)"
                 options={{ animation: "simple_push" }}
             />
+            <Stack.Screen
+                name="notifications"
+                options={{ animation: "simple_push" }}
+            />
         </Stack>
     );
 }

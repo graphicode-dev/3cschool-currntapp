@@ -5,13 +5,16 @@ import { PullToRefreshScrollView } from "@/components/ui/Pulltorefresh";
 import { Icons } from "@/constants/icons";
 import { Images } from "@/constants/images";
 import { Palette, Spacing } from "@/constants/theme";
-import { useTicketsList } from "@/services/tickets/tickets.queries";
-import { Ticket } from "@/services/tickets/tickets.types";
-import { ImageBackground } from "expo-image";
+import { useTicketChat } from "@/hooks/useTicketChat";
 import { router } from "expo-router";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
+import {
+    ImageBackground,
+    StyleSheet,
+    TouchableOpacity,
+    View,
+} from "react-native";
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// ─── Helpers ─────────────────────────────────────────────────────────────────-
 
 const priorityColor = (p: string) => {
     switch (p?.toLowerCase()) {
@@ -29,14 +32,13 @@ const priorityColor = (p: string) => {
 const statusColor = (s: string) => {
     switch (s?.toLowerCase()) {
         case "open":
-            return "#22c55e";
+            return { bg: "#e6f7ff", text: "#1890ff" };
         case "in_progress":
-        case "in progress":
-            return Palette.brand[500];
+            return { bg: "#fff7e6", text: "#fa8c16" };
         case "closed":
-            return Palette.slate400;
+            return { bg: "#f6ffed", text: "#52c41a" };
         default:
-            return Palette.slate500;
+            return { bg: Palette.slate100, text: Palette.slate500 };
     }
 };
 
@@ -48,9 +50,9 @@ const formatDate = (ts: number) =>
         minute: "2-digit",
     });
 
-// ─── Ticket card ─────────────────────────────────────────────────────────────
+// ─── Ticket Card Component ─────────────────────────────────────────────────────
 
-function TicketCard({ ticket }: { ticket: Ticket }) {
+const TicketCard = ({ ticket }: { ticket: any }) => {
     const pc = priorityColor(ticket.priority);
     const sc = statusColor(ticket.status);
 
@@ -71,7 +73,7 @@ function TicketCard({ ticket }: { ticket: Ticket }) {
                 <View
                     style={[styles.statusBadge, { backgroundColor: "#e9f7fc" }]}
                 >
-                    <ThemedText style={[styles.statusText, { color: sc }]}>
+                    <ThemedText style={[styles.statusText, { color: sc.text }]}>
                         {ticket.status.replace("_", " ")}
                     </ThemedText>
                 </View>
@@ -122,12 +124,12 @@ function TicketCard({ ticket }: { ticket: Ticket }) {
             </View>
         </View>
     );
-}
+};
 
 // ─── Screen ─────────────────────────────────────────────────────────────────--
 
 export default function SupportScreen() {
-    const { data: tickets = [], refetch, isLoading } = useTicketsList();
+    const { tickets, refetch, isLoading } = useTicketChat();
 
     const onNewTicketPress = () => {
         router.push("/(app)/(tabs)/support/create");

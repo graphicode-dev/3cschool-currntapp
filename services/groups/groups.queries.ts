@@ -22,7 +22,6 @@ export function useGroupsList(
     return useQuery({
         queryKey: groupsKeys.list(params),
         queryFn: ({ signal }) => groupsApi.getList(params, signal),
-        staleTime: 1000 * 60 * 5,
         ...options,
     });
 }
@@ -35,7 +34,6 @@ export function useGroup(
         queryKey: groupsKeys.detail(id),
         queryFn: ({ signal }) => groupsApi.getById(id, signal),
         enabled: !!id,
-        staleTime: 1000 * 60 * 5,
         ...options,
     });
 }
@@ -46,7 +44,6 @@ export function useUnreadMessages(
     return useQuery({
         queryKey: groupsKeys.unread(),
         queryFn: ({ signal }) => groupsApi.getUnreadMessages(signal),
-        staleTime: 1000 * 60 * 2,
         refetchInterval: 1000 * 60,
         ...options,
     });
@@ -77,7 +74,6 @@ export function useGroupChat(
         },
         initialPageParam: 1,
         enabled: !!groupId,
-        staleTime: 1000 * 60,
         refetchInterval: 1000 * 30,
         ...options,
     });
@@ -109,7 +105,6 @@ export function usePrivateMessages(
         },
         initialPageParam: 1,
         enabled: !!groupId && !!userId,
-        staleTime: 1000 * 60,
         refetchOnWindowFocus: false,
         refetchOnReconnect: true,
         ...options,

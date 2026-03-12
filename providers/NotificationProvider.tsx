@@ -1,6 +1,10 @@
+
 /* eslint-disable react-hooks/exhaustive-deps */
 import useNotificationHandler from "@/hooks/useNotificationHandler";
 import { useAuthStore } from "@/services/auth/auth.store";
+import { notificationsApi } from "@/services/notifications/notifications.api";
+import { notificationsKeys } from "@/services/notifications/notifications.keys";
+import { useQueryClient } from "@tanstack/react-query";
 import Constants, { ExecutionEnvironment } from "expo-constants";
 import * as Notifications from "expo-notifications";
 import React, {
@@ -73,7 +77,8 @@ class NotificationErrorBoundary extends Component<
 const NotificationProviderInner: React.FC<{ children: ReactNode }> = ({
     children,
 }) => {
-    const { user } = useAuthStore();
+    const { user, isAuthenticated } = useAuthStore();
+    const queryClient = useQueryClient();
     const projectId =
         Constants?.expoConfig?.extra?.eas?.projectId ??
         Constants?.easConfig?.projectId;
@@ -81,6 +86,8 @@ const NotificationProviderInner: React.FC<{ children: ReactNode }> = ({
     const [expoPushToken, setExpoPushToken] = useState<string | null>(null);
     const [notification, setNotification] =
         useState<Notifications.Notification | null>(null);
+
+    console.log("[Received Notification]:", notification);
 
     useNotificationHandler(notification);
 
@@ -109,11 +116,7 @@ const NotificationProviderInner: React.FC<{ children: ReactNode }> = ({
             // console.log("[NotificationProvider] Expo Token:", token);
             setExpoPushToken(token);
 
-            await fetch("/expo-token", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ token }),
-            });
+            await notificationsApi.savePushToken(token);
         } catch (error) {
             console.error(
                 "[NotificationProvider] Failed to register push token:",
@@ -127,11 +130,18 @@ const NotificationProviderInner: React.FC<{ children: ReactNode }> = ({
     ) => {
         if (!receivedNotification) return;
         setNotification(receivedNotification);
+
+        // Refresh notifications list and unread count when notification is received
+        queryClient.invalidateQueries({ queryKey: notificationsKeys.list() });
+        queryClient.invalidateQueries({
+            queryKey: notificationsKeys.unreadCount(),
+        });
+
         setTimeout(() => setNotification(null), 100);
     };
 
     useEffect(() => {
-        if (!user) return;
+        if (!user || !isAuthenticated) return;
 
         const listener =
             Notifications.addNotificationReceivedListener(handleNotification);
@@ -141,7 +151,7 @@ const NotificationProviderInner: React.FC<{ children: ReactNode }> = ({
         );
 
         return () => listener.remove();
-    }, [user]);
+    }, [user, isAuthenticated]);
 
     return (
         <NotificationContext.Provider

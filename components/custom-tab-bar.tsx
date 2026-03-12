@@ -21,14 +21,16 @@ const ICON_SIZE = 24;
 const BORDER_RADIUS = 22;
 const TAB_PADDING_H = 8;
 
-const TAB_ORDER = ["home", "groups", "support", "profile"];
+const TAB_ORDER = ["groups", "chats", "home", "support", "profile"];
 
 function getTabIcon(routeName: string, color: string) {
     switch (routeName) {
-        case "home":
-            return <Icons.HomeIcon size={ICON_SIZE} color={color} />;
         case "groups":
             return <Icons.GroupsIcon size={ICON_SIZE} color={color} />;
+        case "chats":
+            return <Icons.ChatIcon size={ICON_SIZE} color={color} />;
+        case "home":
+            return <Icons.HomeIcon size={ICON_SIZE} color={color} />;
         case "support":
             return <Icons.SupportIcon size={ICON_SIZE} color={color} />;
         case "profile":

@@ -2,7 +2,7 @@ import { Palette } from "@/constants/theme";
 import { SessionWithInfo } from "@/services/sessions/sessions.types";
 import { StyleSheet, View } from "react-native";
 import { ThemedText } from "../themed-text";
-import UpcomingSessionsListItem from "./sessions-list-item";
+import SessionsListItem from "./sessions-list-item";
 
 type Props = {
     sessions: SessionWithInfo[];
@@ -27,7 +27,7 @@ const SessionsList = ({ sessions, title, count }: Props) => {
             {sessions.map((session, i) => (
                 <View key={session.id}>
                     {i > 0 && <View style={styles.separator} />}
-                    <UpcomingSessionsListItem session={session} />
+                    <SessionsListItem session={session} />
                 </View>
             ))}
         </View>

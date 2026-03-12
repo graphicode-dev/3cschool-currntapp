@@ -1,7 +1,6 @@
 import { StyleSheet, Text, type TextProps } from "react-native";
 
 import { Fonts } from "@/constants/theme";
-import { useThemeColor } from "@/hooks/use-theme-color";
 import { useTranslation } from "react-i18next";
 
 export type ThemedTextProps = TextProps & {
@@ -17,7 +16,6 @@ export function ThemedText({
     type = "default",
     ...rest
 }: ThemedTextProps) {
-    const color = useThemeColor({ light: lightColor, dark: darkColor }, "text");
     const { i18n } = useTranslation();
     const lang = i18n.language === "ar" ? "ar" : "en";
 
@@ -43,7 +41,7 @@ export function ThemedText({
     return (
         <Text
             style={[
-                { color, fontFamily: getFontFamily() },
+                { fontFamily: getFontFamily() },
                 type === "default" ? styles.default : undefined,
                 type === "title" ? styles.title : undefined,
                 type === "defaultSemiBold" ? styles.defaultSemiBold : undefined,

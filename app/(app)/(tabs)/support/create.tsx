@@ -19,7 +19,7 @@ type Priority = "high" | "medium" | "low";
 
 interface FormData {
     title: string;
-    description: string;
+    message: string;
     priority: Priority;
 }
 
@@ -47,7 +47,7 @@ export default function SupportCreateScreen() {
         handleSubmit,
         formState: { errors },
     } = useForm<FormData>({
-        defaultValues: { title: "", description: "", priority: "high" },
+        defaultValues: { title: "", message: "", priority: "high" },
     });
 
     const onSubmit = async (data: FormData) => {
@@ -109,14 +109,14 @@ export default function SupportCreateScreen() {
                     <ThemedText style={styles.label}>Message</ThemedText>
                     <Controller
                         control={control}
-                        name="description"
+                        name="message"
                         rules={{ required: "Please describe your issue" }}
                         render={({ field: { onChange, value } }) => (
                             <View
                                 style={[
                                     styles.inputBox,
                                     styles.textAreaBox,
-                                    !!errors.description && styles.inputError,
+                                    !!errors.message && styles.inputError,
                                 ]}
                             >
                                 <TextInput
@@ -132,9 +132,9 @@ export default function SupportCreateScreen() {
                             </View>
                         )}
                     />
-                    {errors.description && (
+                    {errors.message && (
                         <ThemedText style={styles.errorText}>
-                            {errors.description.message}
+                            {errors.message.message}
                         </ThemedText>
                     )}
                 </View>

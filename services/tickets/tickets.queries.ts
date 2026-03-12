@@ -6,10 +6,7 @@
  *
  * @example
  * ```tsx
- * // Get tickets metadata
- * const { data: metadata } = useTicketsMetadata();
- *
- * // Get paginated list
+ * // Get tickets list
  * const { data } = useTicketsList();
  *
  * // Get single ticket
@@ -41,7 +38,7 @@ export function useTicketsList(
     options?: Partial<UseQueryOptions<Ticket[], Error>>,
 ) {
     return useQuery({
-        queryKey: ticketsKeys.list(),
+        queryKey: ticketsKeys.lists(),
         queryFn: ({ signal }) => ticketsApi.getList(signal),
         ...options,
     });

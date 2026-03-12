@@ -42,13 +42,35 @@ const statusColor = (s: string) => {
     }
 };
 
-const formatDate = (ts: number) =>
-    new Date(ts * 1000).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-    });
+const formatDate = (ts: number) => {
+    try {
+        let date: Date;
+
+        // Handle different timestamp formats
+        // Unix timestamps from API are in seconds, even if large
+        // JavaScript timestamps are in milliseconds (much larger)
+        if (ts < 1000000000000) {
+            // Assume seconds (Unix timestamp from API)
+            date = new Date(ts * 1000);
+        } else {
+            // Assume milliseconds (JavaScript timestamp)
+            date = new Date(ts);
+        }
+
+        if (isNaN(date.getTime())) {
+            return "Invalid date";
+        }
+
+        return date.toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+        });
+    } catch {
+        return "Invalid date";
+    }
+};
 
 // ─── Ticket Card Component ─────────────────────────────────────────────────────
 
@@ -70,12 +92,26 @@ const TicketCard = ({ ticket }: { ticket: any }) => {
                 <ThemedText style={styles.ticketTitle}>
                     {ticket.title}
                 </ThemedText>
-                <View
-                    style={[styles.statusBadge, { backgroundColor: "#e9f7fc" }]}
-                >
-                    <ThemedText style={[styles.statusText, { color: sc.text }]}>
-                        {ticket.status.replace("_", " ")}
-                    </ThemedText>
+                <View style={styles.headerRight}>
+                    {ticket.unreadCount > 0 && (
+                        <View style={styles.unreadBadge}>
+                            <ThemedText style={styles.unreadText}>
+                                {ticket.unreadCount}
+                            </ThemedText>
+                        </View>
+                    )}
+                    <View
+                        style={[
+                            styles.statusBadge,
+                            { backgroundColor: "#e9f7fc" },
+                        ]}
+                    >
+                        <ThemedText
+                            style={[styles.statusText, { color: sc.text }]}
+                        >
+                            {ticket.status.replace("_", " ")}
+                        </ThemedText>
+                    </View>
                 </View>
             </View>
             <ThemedText style={styles.ticketDescription}>
@@ -414,6 +450,26 @@ const styles = StyleSheet.create({
         fontSize: 13,
         fontFamily: "Poppins-Regular",
         color: Palette.slate300,
+        textAlign: "center",
+    },
+    headerRight: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 8,
+    },
+    unreadBadge: {
+        backgroundColor: "#ff4d4f",
+        borderRadius: 10,
+        minWidth: 20,
+        height: 20,
+        paddingHorizontal: 6,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    unreadText: {
+        fontSize: 10,
+        fontFamily: "Poppins_600SemiBold",
+        color: "white",
         textAlign: "center",
     },
 });

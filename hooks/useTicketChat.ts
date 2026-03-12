@@ -59,10 +59,13 @@ const toChatMessage = (msg: TicketMessage, myId: number): MappedChatMessage => {
         // Fallback to empty string if date parsing fails
     }
 
+    // Use msg.sender?.id since sender_id is not in the API response
+    const senderId = msg.sender?.id ?? msg.sender_id;
+
     return {
         id: String(msg.id),
         text: msg.message ?? "",
-        sender: msg.sender_id === myId ? "me" : "user",
+        sender: senderId === myId ? "me" : "user",
         createdAt,
         avatar: msg.sender?.avatar ?? undefined,
         senderName: msg.sender?.full_name,
@@ -170,8 +173,10 @@ export const useTicketChat = () => {
             status: ticket.status,
             priority: ticket.priority,
             avatar: ticket.instructor?.avatar || undefined,
-            lastMessage: ticket.latest_message?.message || "No messages yet",
-            unreadCount: ticket.unread_count,
+            lastMessage:
+                ticket.messages?.[ticket.messages.length - 1]?.message ||
+                "No messages yet",
+            unreadCount: 0, // TicketDetail doesn't have unread_count, default to 0
             time: toTime(ticket.updated_at?.toString() || ""),
         } as MappedTicket;
     }, [ticket]);

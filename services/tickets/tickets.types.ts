@@ -128,13 +128,23 @@ export interface Ticket {
     closed_at: number | null;
 }
 
-export interface TicketDetail extends Ticket {
-    course_group_id: number;
+export interface TicketDetail {
+    id: number;
+    title: string;
+    description: string;
+    status: string;
+    priority: string;
+    course_group: TicketCourseGroup | null;
+    student: TicketStudent;
+    instructor: TicketInstructor | null;
+    messages: TicketMessage[];
+    created_at: number;
+    closed_at: number | null;
+    course_group_id: number | null;
     student_id: number;
     instructor_id: number | null;
     source: string;
     updated_at: number;
-    messages: TicketMessage[];
 }
 
 export interface TicketMetadata {

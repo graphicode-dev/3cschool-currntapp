@@ -27,6 +27,7 @@
  * - list: ['tickets', 'list', params]
  * - details: ['tickets', 'detail']
  * - detail: ['tickets', 'detail', id]
+ * - create: ['tickets', 'create']
  */
 export const ticketsKeys = {
     /**
@@ -54,6 +55,11 @@ export const ticketsKeys = {
      */
     detail: (id: string | number) =>
         [...ticketsKeys.details(), String(id)] as const,
+
+    /**
+     * Key for create operations
+     */
+    create: () => [...ticketsKeys.all, "create"] as const,
 };
 
 /**
@@ -64,4 +70,5 @@ export type TicketsQueryKey =
     | ReturnType<typeof ticketsKeys.lists>
     | ReturnType<typeof ticketsKeys.list>
     | ReturnType<typeof ticketsKeys.details>
-    | ReturnType<typeof ticketsKeys.detail>;
+    | ReturnType<typeof ticketsKeys.detail>
+    | ReturnType<typeof ticketsKeys.create>;

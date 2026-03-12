@@ -1,14 +1,13 @@
 import { ApiResponse } from "@/services/api";
 import { api } from "@/services/api/client";
-import { API_CONFIG } from "@/services/api/config/env";
-import { tokenService } from "@/services/auth/tokenService";
+import { postFormData } from "@/services/api/client/httpClient";
 import { Ticket, TicketDetail, TicketMessage } from "./tickets.types";
 
 const BASE_URL = "/tickets";
 
 export interface CreateTicketPayload {
     title: string;
-    description: string;
+    message?: string;
     priority: "high" | "medium" | "low";
 }
 
@@ -16,6 +15,11 @@ export interface SendTicketMessagePayload {
     message?: string;
     /** Local file URI from expo-image-picker */
     attachmentUri?: string;
+}
+
+export interface CreateTicketResponse {
+    ticket: TicketDetail;
+    replies: TicketMessage[];
 }
 
 export const ticketsApi = {
@@ -43,8 +47,13 @@ export const ticketsApi = {
         return response.data.data;
     },
 
-    create: async (payload: CreateTicketPayload): Promise<Ticket> => {
-        const response = await api.post<ApiResponse<Ticket>>(BASE_URL, payload);
+    create: async (
+        payload: CreateTicketPayload,
+    ): Promise<CreateTicketResponse> => {
+        const response = await api.post<ApiResponse<CreateTicketResponse>>(
+            BASE_URL,
+            payload,
+        );
         if (response.error) throw response.error;
         if (!response.data?.data)
             throw new Error("No data returned from server");
@@ -52,14 +61,11 @@ export const ticketsApi = {
     },
 
     /**
-     * Send a ticket message.
+     * Send a ticket message reply.
      *
      * Strategy:
      *  - Text only  → plain JSON via Axios (reliable, no multipart quirks)
-     *  - With image → native `fetch()` with FormData
-     *    Axios has a known React Native bug where it JSON-serialises FormData
-     *    instead of sending it as multipart, even when Content-Type is removed.
-     *    The native fetch() XHR stack handles RN FormData correctly.
+     *  - With image → FormData via postFormData (handles React Native FormData correctly)
      */
     sendMessage: async (
         ticketId: string | number,
@@ -81,50 +87,44 @@ export const ticketsApi = {
     },
 
     /**
-     * Image upload via native fetch — bypasses Axios FormData serialisation bug.
+     * Image upload via FormData — handles React Native FormData correctly.
      */
     _sendMessageWithImage: async (
         ticketId: string | number,
         payload: SendTicketMessagePayload,
     ): Promise<TicketMessage> => {
-        const token = await tokenService.get();
-        const uri = payload.attachmentUri!;
-        const ext = uri.split(".").pop()?.toLowerCase() ?? "jpeg";
-
         const formData = new FormData();
         if (payload.message) {
             formData.append("message", payload.message);
         }
-        formData.append("attachment", {
-            uri,
-            name: `photo.${ext}`,
-            type: `image/${ext}`,
-        } as any);
 
-        const res = await fetch(
-            `${API_CONFIG.BASE_URL}${BASE_URL}/${ticketId}/messages`,
-            {
-                method: "POST",
-                headers: {
-                    Accept: "application/json",
-                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-                    // Do NOT set Content-Type — fetch sets it automatically with boundary
-                },
-                body: formData,
-            },
-        );
-
-        if (!res.ok) {
-            const errorBody = await res.json().catch(() => ({}));
-            throw new Error(
-                errorBody?.message ?? `HTTP ${res.status} uploading attachment`,
-            );
+        if (payload.attachmentUri) {
+            const uri = payload.attachmentUri;
+            const ext = uri.split(".").pop()?.toLowerCase() ?? "jpeg";
+            formData.append("attachment", {
+                uri,
+                name: `photo.${ext}`,
+                type: `image/${ext}`,
+            } as any);
         }
 
-        const json = await res.json();
-        const data: TicketMessage = json?.data ?? json;
-        if (!data) throw new Error("No data returned from server");
-        return data;
+        const response = await postFormData<TicketMessage>(
+            `${BASE_URL}/${ticketId}/reply`,
+            formData,
+        );
+        if (response.error) throw response.error;
+        if (!response.data) throw new Error("No data returned from server");
+        return response.data;
+    },
+
+    /**
+     * Close a ticket (admin only)
+     */
+    closeTicket: async (ticketId: string | number): Promise<void> => {
+        const response = await api.post<ApiResponse<void>>(
+            `${BASE_URL}/${ticketId}/close`,
+        );
+        if (response.error) throw response.error;
     },
 };
 

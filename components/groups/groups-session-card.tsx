@@ -31,12 +31,27 @@ function deriveStatus(session: Session): "upcoming" | "ongoing" | "completed" {
     // Fallback: compare to current time
     try {
         const now = new Date();
-        const start = new Date(`${session.start_date}T${session.start_time}`);
-        const diffMs = now.getTime() - start.getTime();
+
+        // Parse date and time more safely
+        const startDate = new Date(session.start_date);
+        const [hours, minutes] = session.start_time.split(":").map(Number);
+        startDate.setHours(hours, minutes, 0, 0);
+
+        const diffMs = now.getTime() - startDate.getTime();
+
+        // If session is within the last 3 hours, consider it ongoing
         if (diffMs > 0 && diffMs < 3 * 60 * 60 * 1000) return "ongoing";
-        if (start > now) return "upcoming";
-    } catch {}
-    return "completed";
+
+        // If session start time is in the future, it's upcoming
+        if (startDate > now) return "upcoming";
+
+        // If session was more than 3 hours ago, it's completed
+        return "completed";
+    } catch (error) {
+        console.log("Date parsing error:", error);
+        // Default to upcoming if we can't parse dates (safer than completed)
+        return "upcoming";
+    }
 }
 
 function fmtDate(dateStr: string) {

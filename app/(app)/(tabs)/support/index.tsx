@@ -5,7 +5,7 @@ import { PullToRefreshScrollView } from "@/components/ui/Pulltorefresh";
 import { Icons } from "@/constants/icons";
 import { Images } from "@/constants/images";
 import { Palette, Spacing } from "@/constants/theme";
-import { useTicketChat } from "@/hooks/useTicketChat";
+import { MappedTicket, useTicketChat } from "@/hooks/useTicketChat";
 import { router } from "expo-router";
 import {
     ImageBackground,
@@ -42,19 +42,24 @@ const statusColor = (s: string) => {
     }
 };
 
-const formatDate = (ts: number) => {
+const formatDate = (ts: number | string) => {
     try {
         let date: Date;
 
-        // Handle different timestamp formats
-        // Unix timestamps from API are in seconds, even if large
-        // JavaScript timestamps are in milliseconds (much larger)
-        if (ts < 1000000000000) {
-            // Assume seconds (Unix timestamp from API)
-            date = new Date(ts * 1000);
-        } else {
-            // Assume milliseconds (JavaScript timestamp)
+        if (typeof ts === "string") {
+            // Handle string dates like "2025-11-02 14:24:17"
             date = new Date(ts);
+        } else {
+            // Handle different timestamp formats
+            // Unix timestamps from API are in seconds, even if large
+            // JavaScript timestamps are in milliseconds (much larger)
+            if (ts < 1000000000000) {
+                // Assume seconds (Unix timestamp from API)
+                date = new Date(ts * 1000);
+            } else {
+                // Assume milliseconds (JavaScript timestamp)
+                date = new Date(ts);
+            }
         }
 
         if (isNaN(date.getTime())) {
@@ -74,12 +79,12 @@ const formatDate = (ts: number) => {
 
 // ─── Ticket Card Component ─────────────────────────────────────────────────────
 
-const TicketCard = ({ ticket }: { ticket: any }) => {
+const TicketCard = ({ ticket }: { ticket: MappedTicket }) => {
     const pc = priorityColor(ticket.priority);
     const sc = statusColor(ticket.status);
 
     return (
-        <View
+        <TouchableOpacity
             style={[
                 styles.ticketCard,
                 {
@@ -87,6 +92,12 @@ const TicketCard = ({ ticket }: { ticket: any }) => {
                     borderColor: Palette.slate200,
                 },
             ]}
+            onPress={() =>
+                router.push({
+                    pathname: "/(app)/(tabs)/support/[id]",
+                    params: { id: String(ticket.id) },
+                })
+            }
         >
             <View style={styles.ticketHeader}>
                 <ThemedText style={styles.ticketTitle}>
@@ -114,12 +125,14 @@ const TicketCard = ({ ticket }: { ticket: any }) => {
                     </View>
                 </View>
             </View>
-            <ThemedText style={styles.ticketDescription}>
+            {/* <ThemedText style={styles.ticketDescription}>
                 {ticket.description}
-            </ThemedText>
-            {ticket.latest_message && (
-                <ThemedText style={styles.lastMsg} numberOfLines={1}>
-                    {ticket.latest_message.message || "📎 Image"}
+            </ThemedText> */}
+            {ticket.lastMessage && (
+                <ThemedText style={styles.ticketDescription} numberOfLines={1}>
+                    {ticket.lastMessage.attachment
+                        ? "📎 " + (ticket.lastMessage.message || "Attachment")
+                        : ticket.lastMessage.message || "No message"}
                 </ThemedText>
             )}
             <View style={styles.ticketFooter}>
@@ -141,24 +154,16 @@ const TicketCard = ({ ticket }: { ticket: any }) => {
                         #{ticket.priority}
                     </ThemedText>
                 </View>
-                <TouchableOpacity
-                    style={styles.viewButton}
-                    onPress={() =>
-                        router.push({
-                            pathname: "/(app)/(tabs)/support/[id]",
-                            params: { id: String(ticket.id) },
-                        })
-                    }
-                >
+                <View style={styles.viewButton}>
                     <ThemedText style={styles.viewText}>View</ThemedText>
                     <Icons.ArrowIcon
                         size={16}
                         color={Palette.slate500}
                         direction={{ right: true }}
                     />
-                </TouchableOpacity>
+                </View>
             </View>
-        </View>
+        </TouchableOpacity>
     );
 };
 

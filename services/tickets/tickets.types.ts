@@ -105,7 +105,6 @@ export interface TicketMessage {
 
 export interface TicketLatestMessage {
     id: number;
-    ticket_id: number;
     sender_id: number;
     message: string;
     attachment: string | null;

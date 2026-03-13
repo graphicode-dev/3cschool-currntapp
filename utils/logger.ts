@@ -1,4 +1,4 @@
-const LOGGING_ENABLED = true;
+const LOGGING_ENABLED = false;
 
 export const logger = {
     log: (name: string, message: string, ...data: unknown[]) => {

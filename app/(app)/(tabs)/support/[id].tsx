@@ -5,9 +5,17 @@ import ScreenWrapper from "@/components/ScreenWrapper";
 import { ThemedText } from "@/components/themed-text";
 import { Images } from "@/constants/images";
 import { useTicketChat } from "@/hooks/useTicketChat";
+import { useCloseTicket } from "@/services/tickets/tickets.mutations";
 import { useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useRef } from "react";
-import { ActivityIndicator, FlatList, StyleSheet, View } from "react-native";
+import {
+    ActivityIndicator,
+    Alert,
+    FlatList,
+    StyleSheet,
+    TouchableOpacity,
+    View,
+} from "react-native";
 
 export default function TicketChatScreen() {
     const { id } = useLocalSearchParams<{ id: string }>();
@@ -25,6 +33,8 @@ export default function TicketChatScreen() {
         error,
     } = useTicketChat();
 
+    const closeTicket = useCloseTicket();
+
     // Select the ticket when component mounts
     useEffect(() => {
         if (id) {
@@ -38,6 +48,25 @@ export default function TicketChatScreen() {
         },
         [sendMessage],
     );
+
+    const handleCloseTicket = useCallback(() => {
+        Alert.alert(
+            "Close Ticket",
+            "Are you sure you want to close this ticket? You won't be able to send more messages.",
+            [
+                { text: "Cancel", style: "cancel" },
+                {
+                    text: "Close Ticket",
+                    style: "destructive",
+                    onPress: () => {
+                        if (id) {
+                            closeTicket.mutate(id);
+                        }
+                    },
+                },
+            ],
+        );
+    }, [id, closeTicket]);
 
     // Scroll to bottom when new messages arrive
     useEffect(() => {
@@ -97,6 +126,7 @@ export default function TicketChatScreen() {
     }
 
     const headerTitle = selectedTicket.title;
+    const isTicketClosed = selectedTicket.status === "closed";
 
     return (
         <ScreenWrapper bgImage={Images.chatBg}>
@@ -110,6 +140,24 @@ export default function TicketChatScreen() {
                 }}
                 href="/(app)/(tabs)/support"
             />
+
+            {!isTicketClosed && (
+                <TouchableOpacity
+                    style={styles.closeButton}
+                    onPress={handleCloseTicket}
+                    disabled={closeTicket.isPending}
+                >
+                    {closeTicket.isPending ? (
+                        <ActivityIndicator size="small" color="#fff" />
+                    ) : (
+                        <View style={styles.closeButtonWrapper}>
+                            <ThemedText style={styles.closeButtonText}>
+                                Close Ticket
+                            </ThemedText>
+                        </View>
+                    )}
+                </TouchableOpacity>
+            )}
 
             <FlatList
                 ref={flatListRef}
@@ -130,9 +178,20 @@ export default function TicketChatScreen() {
                 onScrollToIndexFailed={() => {}}
             />
 
-            <View style={styles.inputWrap}>
-                <ChatInput onSend={handleSendMessage} isSending={isSending} />
-            </View>
+            {isTicketClosed ? (
+                <View style={styles.closedBanner}>
+                    <ThemedText style={styles.closedText}>
+                        ✅ This ticket has been closed
+                    </ThemedText>
+                </View>
+            ) : (
+                <View style={styles.inputWrap}>
+                    <ChatInput
+                        onSend={handleSendMessage}
+                        isSending={isSending}
+                    />
+                </View>
+            )}
         </ScreenWrapper>
     );
 }
@@ -158,4 +217,40 @@ const styles = StyleSheet.create({
     chat: { flex: 1 },
     list: { paddingVertical: 16 },
     inputWrap: { paddingBottom: 50, backgroundColor: "transparent" },
+    closeButton: {
+        position: "absolute",
+        top: 60,
+        right: 20,
+        backgroundColor: "#ff4444",
+        alignItems: "center",
+        justifyContent: "center",
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 6,
+        zIndex: 10,
+    },
+    closeButtonWrapper: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 8,
+    },
+    closeButtonText: {
+        color: "white",
+        fontWeight: "600",
+        fontSize: 10,
+    },
+    closedBanner: {
+        backgroundColor: "#f0f9ff",
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        marginBottom: 70,
+        alignItems: "center",
+        borderTopWidth: 1,
+        borderTopColor: "#e6f7ff",
+    },
+    closedText: {
+        fontSize: 14,
+        color: "#52c41a",
+        fontWeight: "500",
+    },
 });

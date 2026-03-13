@@ -10,7 +10,6 @@ import { Palette, Spacing } from "@/constants/theme";
 import { useLanguage } from "@/contexts/language-context";
 import { useLogout } from "@/services/auth";
 import { useAuthStore } from "@/services/auth/auth.store";
-import { router } from "expo-router";
 import React from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 
@@ -20,9 +19,9 @@ function ProfileScreen() {
     const { user } = useAuthStore();
     const { language, toggleLanguage } = useLanguage();
 
-    const onEditPress = () => {
-        router.push("/profile/edit");
-    };
+    // const onEditPress = () => {
+    //     router.push("/profile/edit");
+    // };
 
     return (
         <ScreenWrapper bgImage={Images.profileBg}>
@@ -33,12 +32,12 @@ function ProfileScreen() {
                 contentContainerStyle={styles.scrollContent}
             >
                 {/* Edit button */}
-                <TouchableOpacity
+                {/* <TouchableOpacity
                     style={styles.editButton}
                     onPress={onEditPress}
                 >
                     <Icons.EditIcon size={24} color="black" />
-                </TouchableOpacity>
+                </TouchableOpacity> */}
 
                 {/* Avatar section */}
                 <View style={styles.avatarSection}>

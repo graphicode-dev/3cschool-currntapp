@@ -2,7 +2,10 @@ import { useAuthStore } from "@/services/auth/auth.store";
 import { ticketsApi } from "@/services/tickets/tickets.api";
 import { ticketsKeys } from "@/services/tickets/tickets.keys";
 import { useTicket, useTicketsList } from "@/services/tickets/tickets.queries";
-import { TicketMessage } from "@/services/tickets/tickets.types";
+import {
+    TicketLatestMessage,
+    TicketMessage,
+} from "@/services/tickets/tickets.types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useMemo, useState } from "react";
 
@@ -15,7 +18,7 @@ export interface MappedChatMessage {
     createdAt: string;
     avatar?: string;
     senderName?: string;
-    imageUri?: string;
+    imageUrl?: string;
     replyTo?: MappedChatMessage;
 }
 
@@ -26,9 +29,10 @@ export interface MappedTicket {
     status: string;
     priority: string;
     avatar?: string;
-    lastMessage?: string;
+    lastMessage?: TicketLatestMessage;
     unreadCount: number;
     time: string;
+    created_at: number;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -69,7 +73,7 @@ const toChatMessage = (msg: TicketMessage, myId: number): MappedChatMessage => {
         createdAt,
         avatar: msg.sender?.avatar ?? undefined,
         senderName: msg.sender?.full_name,
-        imageUri: msg.attachment ?? undefined,
+        imageUrl: msg.attachment ?? undefined,
     };
 };
 
@@ -148,9 +152,10 @@ export const useTicketChat = () => {
             status: ticket.status,
             priority: ticket.priority,
             avatar: ticket.instructor?.avatar || undefined,
-            lastMessage: ticket.latest_message?.message || "No messages yet",
+            lastMessage: ticket.latest_message || undefined,
             unreadCount: ticket.unread_count,
             time: toTime(ticket.created_at?.toString() || ""),
+            created_at: ticket.created_at,
         }));
     }, [tickets]);
 
@@ -166,6 +171,23 @@ export const useTicketChat = () => {
 
     const selectedTicket = useMemo(() => {
         if (!ticket) return null;
+
+        // Convert TicketMessage to TicketLatestMessage for consistency
+        const lastMessage = ticket.messages?.[ticket.messages.length - 1];
+        const latestMessage = lastMessage
+            ? {
+                  id: lastMessage.id,
+                  sender_id: lastMessage.sender?.id || 0,
+                  message: lastMessage.message || "",
+                  attachment: lastMessage.attachment || null,
+                  is_read: lastMessage.is_read || false,
+                  created_at:
+                      typeof lastMessage.created_at === "string"
+                          ? new Date(lastMessage.created_at).getTime() / 1000
+                          : lastMessage.created_at,
+              }
+            : undefined;
+
         return {
             id: ticket.id,
             title: ticket.title,
@@ -173,9 +195,7 @@ export const useTicketChat = () => {
             status: ticket.status,
             priority: ticket.priority,
             avatar: ticket.instructor?.avatar || undefined,
-            lastMessage:
-                ticket.messages?.[ticket.messages.length - 1]?.message ||
-                "No messages yet",
+            lastMessage: latestMessage,
             unreadCount: 0, // TicketDetail doesn't have unread_count, default to 0
             time: toTime(ticket.updated_at?.toString() || ""),
         } as MappedTicket;

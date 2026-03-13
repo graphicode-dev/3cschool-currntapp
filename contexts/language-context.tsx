@@ -13,7 +13,6 @@
  */
 
 import { applyRTL, loadSavedLanguage, saveLanguage } from "@/i18n";
-import * as Updates from "expo-updates";
 import React, {
     createContext,
     useCallback,
@@ -22,7 +21,7 @@ import React, {
     useState,
 } from "react";
 import { useTranslation } from "react-i18next";
-import { Alert, I18nManager } from "react-native";
+import { Alert } from "react-native";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -67,38 +66,20 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
      */
     const changeLanguage = useCallback(
         async (lang: string) => {
-            if (lang === language) return;
-
-            const directionWillChange = (lang === "ar") !== I18nManager.isRTL;
-
-            // Persist + update i18next immediately (text changes happen at once)
-            await saveLanguage(lang);
             await i18n.changeLanguage(lang);
+            applyRTL(lang);
+            await saveLanguage(lang);
             setLang(lang);
 
-            if (directionWillChange) {
-                // Queue the RTL/LTR flip — takes effect only after restart
-                applyRTL(lang);
-
-                Alert.alert(
-                    lang === "ar" ? "إعادة تشغيل التطبيق" : "Restart Required",
-                    lang === "ar"
-                        ? "سيتم إعادة تشغيل التطبيق لتطبيق اتجاه العربية."
-                        : "The app will restart to apply the language direction.",
-                    [
-                        {
-                            text: lang === "ar" ? "حسناً" : "OK",
-                            onPress: restartApp,
-                        },
-                    ],
-                    { cancelable: false },
-                );
-            } else {
-                // Same direction (shouldn't happen in a 2-language setup, but safe)
-                await i18n.changeLanguage(lang);
-            }
+            // Show alert to user to restart app for complete language change
+            Alert.alert(
+                lang === "ar" ? "تغيير اللغة" : "Language Changed",
+                lang === "ar"
+                    ? "يرجى إعادة تشغيل التطبيق لتطبيق التغييرات"
+                    : "Please restart the app to apply changes",
+            );
         },
-        [language, i18n],
+        [i18n],
     );
 
     const toggleLanguage = useCallback(() => {
@@ -121,27 +102,6 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
             {children}
         </LanguageContext.Provider>
     );
-}
-
-// ─── Restart helper ───────────────────────────────────────────────────────────
-
-/**
- * Restarts the React Native JS bundle.
- * - In production (EAS / standalone): expo-updates reloads the bundle.
- * - In development (Expo Go / Metro): falls back to the dev-only DevSettings.
- */
-async function restartApp(): Promise<void> {
-    try {
-        await Updates.reloadAsync();
-    } catch {
-        // expo-updates is not available in Expo Go dev mode — use DevSettings
-        try {
-            const { DevSettings } = require("react-native");
-            DevSettings.reload();
-        } catch {
-            // Last resort: no-op (shouldn't happen on a real device)
-        }
-    }
 }
 
 // ─── Hook ─────────────────────────────────────────────────────────────────────

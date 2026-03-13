@@ -1,102 +1,230 @@
 import { Icons } from "@/constants/icons";
+import { HomeIcon } from "@/constants/icons/tab.icons";
+import { Colors, Palette } from "@/constants/theme";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
+// import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
-import React, { useEffect, useRef, useState } from "react";
+import { LinearGradient } from "expo-linear-gradient";
+import React, { useEffect } from "react";
 import {
-    LayoutChangeEvent,
+    Dimensions,
     Platform,
     StyleSheet,
     TouchableOpacity,
     View,
 } from "react-native";
+
 import Animated, {
+    interpolateColor,
     useAnimatedStyle,
     useSharedValue,
     withSpring,
+    withTiming,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { ThemedText } from "./themed-text";
 
-const TAB_BAR_HEIGHT = 67;
-const ICON_SIZE = 24;
-const BORDER_RADIUS = 22;
-const TAB_PADDING_H = 8;
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
+const TAB_BAR_HEIGHT = 76;
+const CENTER_BUTTON_OFFSET = 20;
+
+// Responsive sizing based on screen width
+const getResponsiveSizes = () => {
+    if (SCREEN_WIDTH < 360) {
+        return {
+            iconSize: 20,
+            fontSize: 10,
+            badgeSize: 14,
+            centerButtonSize: 56,
+            tabItemMinWidth: 42,
+            sideGroupGap: 8,
+            sidePadding: 10,
+            centerSpacerExtra: 8,
+        };
+    } else if (SCREEN_WIDTH < 400) {
+        return {
+            iconSize: 22,
+            fontSize: 11,
+            badgeSize: 16,
+            centerButtonSize: 60,
+            tabItemMinWidth: 48,
+            sideGroupGap: 12,
+            sidePadding: 16,
+            centerSpacerExtra: 10,
+        };
+    } else {
+        return {
+            iconSize: 24,
+            fontSize: 12,
+            badgeSize: 18,
+            centerButtonSize: 68,
+            tabItemMinWidth: 53,
+            sideGroupGap: 21,
+            sidePadding: 24,
+            centerSpacerExtra: 10,
+        };
+    }
+};
+
+const R = getResponsiveSizes();
 
 const TAB_ORDER = ["groups", "chats", "home", "support", "profile"];
 
 function getTabIcon(routeName: string, color: string) {
     switch (routeName) {
         case "groups":
-            return <Icons.GroupsIcon size={ICON_SIZE} color={color} />;
+            return <Icons.GroupsIcon size={R.iconSize} color={color} />;
         case "chats":
-            return <Icons.ChatIcon size={ICON_SIZE} color={color} />;
+            return <Icons.ChatIcon size={R.iconSize} color={color} />;
         case "home":
-            return <Icons.HomeIcon size={ICON_SIZE} color={color} />;
+            return <Icons.HomeIcon size={R.iconSize} color={color} />;
         case "support":
-            return <Icons.SupportIcon size={ICON_SIZE} color={color} />;
+            return <Icons.SupportIcon size={R.iconSize} color={color} />;
         case "profile":
-            return <Icons.UserIcon size={ICON_SIZE} color={color} />;
+            return <Icons.UserIcon size={R.iconSize} color={color} />;
         default:
             return null;
     }
 }
 
-const SPRING_CONFIG = {
-    damping: 20,
-    stiffness: 180,
-    mass: 0.6,
-};
+function getTabLabel(routeName: string) {
+    switch (routeName) {
+        case "support":
+            return "Support";
+        case "groups":
+            return "Groups";
+        case "home":
+            return "Home";
+        case "chats":
+            return "Chats";
+        case "profile":
+            return "Profile";
+        default:
+            return routeName;
+    }
+}
 
-export function CustomTabBar({ state, navigation }: BottomTabBarProps) {
+const SPRING_CONFIG = { damping: 15, stiffness: 200, mass: 0.5 };
+
+function AnimatedTabItem({
+    isFocused,
+    routeName,
+    selectedColor,
+    defaultColor,
+    onPress,
+    onLongPress,
+    badge,
+}: {
+    isFocused: boolean;
+    routeName: string;
+    selectedColor: string;
+    defaultColor: string;
+    onPress: () => void;
+    onLongPress: () => void;
+    badge?: number;
+}) {
+    const progress = useSharedValue(isFocused ? 1 : 0);
+    const dotScale = useSharedValue(isFocused ? 1 : 0);
+    const dotOpacity = useSharedValue(isFocused ? 1 : 0);
+
+    useEffect(() => {
+        progress.value = withTiming(isFocused ? 1 : 0, { duration: 250 });
+        dotScale.value = withSpring(isFocused ? 1 : 0, SPRING_CONFIG);
+        dotOpacity.value = withTiming(isFocused ? 1 : 0, { duration: 200 });
+    }, [isFocused]);
+
+    const animatedLabelStyle = useAnimatedStyle(() => ({
+        color: interpolateColor(
+            progress.value,
+            [0, 1],
+            [defaultColor, selectedColor],
+        ),
+    }));
+
+    const animatedDotStyle = useAnimatedStyle(() => ({
+        transform: [{ scale: dotScale.value }],
+        opacity: dotOpacity.value,
+    }));
+
+    const color = isFocused ? selectedColor : defaultColor;
+
+    return (
+        <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={onPress}
+            onLongPress={onLongPress}
+            style={[styles.tabItem, { minWidth: R.tabItemMinWidth }]}
+        >
+            <View>
+                {getTabIcon(routeName, color)}
+                {!!badge && badge > 0 && (
+                    <View
+                        style={[
+                            styles.badge,
+                            { width: R.badgeSize, height: R.badgeSize },
+                        ]}
+                    >
+                        <ThemedText
+                            style={[
+                                styles.badgeText,
+                                { fontSize: R.fontSize - 2 },
+                            ]}
+                        >
+                            {badge > 99 ? "99+" : badge}
+                        </ThemedText>
+                    </View>
+                )}
+            </View>
+            <Animated.Text
+                style={[
+                    styles.tabLabel,
+                    animatedLabelStyle,
+                    { fontSize: R.fontSize },
+                ]}
+                numberOfLines={1}
+            >
+                {getTabLabel(routeName)}
+            </Animated.Text>
+            <Animated.View style={[styles.tabActiveDot, animatedDotStyle]} />
+        </TouchableOpacity>
+    );
+}
+
+function AnimatedCenterDot({ isActive }: { isActive: boolean }) {
+    const dotScale = useSharedValue(isActive ? 1 : 0);
+    const dotOpacity = useSharedValue(isActive ? 1 : 0);
+
+    useEffect(() => {
+        dotScale.value = withSpring(isActive ? 1 : 0, SPRING_CONFIG);
+        dotOpacity.value = withTiming(isActive ? 1 : 0, { duration: 200 });
+    }, [isActive]);
+
+    const animatedStyle = useAnimatedStyle(() => ({
+        transform: [{ scale: dotScale.value }],
+        opacity: dotOpacity.value,
+    }));
+
+    return <Animated.View style={[styles.activeDot, animatedStyle]} />;
+}
+
+export function CustomTabBar({
+    state,
+    descriptors,
+    navigation,
+}: BottomTabBarProps) {
     const insets = useSafeAreaInsets();
-
-    // Track each tab's x position and width after layout
-    const [tabLayouts, setTabLayouts] = useState<
-        { x: number; width: number }[]
-    >([]);
-    const containerRef = useRef<View>(null);
-
-    // Animated x position and width of the sliding pill
-    const pillX = useSharedValue(0);
-    const pillWidth = useSharedValue(0);
+    const colors = Colors["light"];
 
     const sortedRoutes = TAB_ORDER.map((name) => {
         const index = state.routes.findIndex((r) => r.name === name);
         return { route: state.routes[index], index };
     }).filter((item) => item.route);
 
-    // When layouts are measured and active index changes → slide the pill
-    useEffect(() => {
-        const activeRouteIndex = sortedRoutes.findIndex(
-            (item) => item.index === state.index,
-        );
+    const centerIndex = sortedRoutes.findIndex(
+        (item) => item.route.name === "home",
+    );
 
-        if (tabLayouts[activeRouteIndex]) {
-            const { x, width } = tabLayouts[activeRouteIndex];
-
-            // 🔥 compensate for tabBar horizontal padding
-            pillX.value = withSpring(x - TAB_PADDING_H, SPRING_CONFIG);
-            pillWidth.value = withSpring(
-                width + TAB_PADDING_H * 2,
-                SPRING_CONFIG,
-            );
-        }
-    }, [state.index, tabLayouts]);
-
-    const pillStyle = useAnimatedStyle(() => ({
-        transform: [{ translateX: pillX.value }],
-        width: pillWidth.value,
-    }));
-
-    const handleTabLayout = (index: number) => (e: LayoutChangeEvent) => {
-        const { x, width } = e.nativeEvent.layout;
-        setTabLayouts((prev) => {
-            const next = [...prev];
-            next[index] = { x, width };
-            return next;
-        });
-    };
-
-    const handlePress = (route: any) => {
+    const handlePress = (route: any, routeIndex: number) => {
         if (Platform.OS === "ios") {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         }
@@ -114,6 +242,9 @@ export function CustomTabBar({ state, navigation }: BottomTabBarProps) {
         navigation.emit({ type: "tabLongPress", target: route.key });
     };
 
+    // Center spacer = button size + small extra breathing room
+    const centerSpacerWidth = R.centerButtonSize + R.centerSpacerExtra;
+
     return (
         <View
             style={[
@@ -121,36 +252,168 @@ export function CustomTabBar({ state, navigation }: BottomTabBarProps) {
                 { paddingBottom: insets.bottom > 0 ? insets.bottom - 10 : 8 },
             ]}
         >
-            {/* Outer glow ring */}
-            <View style={styles.glowRing} />
+            <View style={styles.tabBarWrapper}>
+                {/* Center raised button */}
+                <View style={styles.centerButtonContainer}>
+                    <TouchableOpacity
+                        activeOpacity={0.8}
+                        onPress={() => {
+                            if (centerIndex !== -1) {
+                                handlePress(
+                                    sortedRoutes[centerIndex].route,
+                                    sortedRoutes[centerIndex].index,
+                                );
+                            }
+                        }}
+                        onLongPress={() => {
+                            if (centerIndex !== -1) {
+                                handleLongPress(
+                                    sortedRoutes[centerIndex].route,
+                                );
+                            }
+                        }}
+                    >
+                        <View
+                            style={[
+                                styles.centerButtonOuter,
+                                {
+                                    width: R.centerButtonSize,
+                                    height: R.centerButtonSize,
+                                    borderRadius: R.centerButtonSize / 2,
+                                },
+                            ]}
+                        >
+                            <View style={styles.centerButtonBlur}>
+                                <LinearGradient
+                                    colors={[
+                                        Palette.brand[600],
+                                        Palette.brand[500],
+                                    ]}
+                                    start={{ x: 0.3, y: 0 }}
+                                    end={{ x: 0.7, y: 1 }}
+                                    style={[
+                                        styles.centerButtonGradient,
+                                        {
+                                            borderRadius:
+                                                R.centerButtonSize / 2,
+                                        },
+                                    ]}
+                                >
+                                    <HomeIcon
+                                        size={R.iconSize}
+                                        color="#FFFFFF"
+                                    />
+                                </LinearGradient>
+                            </View>
+                        </View>
+                    </TouchableOpacity>
+                    <AnimatedCenterDot
+                        isActive={
+                            state.index === sortedRoutes[centerIndex]?.index
+                        }
+                    />
+                </View>
 
-            {/* Glass pill container */}
-            <View style={styles.glassPill} ref={containerRef}>
-                {/* Top-edge shimmer */}
-                <View style={styles.topHighlight} />
-
-                {/* Sliding active background — rendered BEHIND icons */}
-                <Animated.View style={[styles.slidingPill, pillStyle]} />
-
-                {/* Tab items */}
-                <View style={styles.tabBar}>
-                    {sortedRoutes.map((item, i) => {
-                        const isFocused = state.index === item.index;
-                        const color = isFocused ? "#FFFFFF" : "#616060";
-
-                        return (
-                            <TouchableOpacity
-                                key={item.route.key}
-                                activeOpacity={0.8}
-                                onPress={() => handlePress(item.route)}
-                                onLongPress={() => handleLongPress(item.route)}
-                                onLayout={handleTabLayout(i)}
-                                style={styles.tabItem}
+                {/* Tab bar pill */}
+                <View style={styles.blurContainer}>
+                    <View
+                        style={[
+                            styles.tabBar,
+                            {
+                                backgroundColor: colors.tabBarBackground,
+                                borderColor: colors.tabBarBorder,
+                            },
+                        ]}
+                    >
+                        {/*
+                         * Use flex layout instead of space-between so each side
+                         * gets exactly 50% minus half the spacer — prevents overflow
+                         * on narrow Android screens.
+                         */}
+                        <View
+                            style={[
+                                styles.tabsContainer,
+                                { paddingHorizontal: R.sidePadding },
+                            ]}
+                        >
+                            {/* Left tabs — flex:1 so they take equal share */}
+                            <View
+                                style={[
+                                    styles.sideGroup,
+                                    { gap: R.sideGroupGap },
+                                ]}
                             >
-                                {getTabIcon(item.route.name, color)}
-                            </TouchableOpacity>
-                        );
-                    })}
+                                {sortedRoutes
+                                    .filter((_, i) => i < centerIndex)
+                                    .map((item) => {
+                                        const isFocused =
+                                            state.index === item.index;
+                                        return (
+                                            <AnimatedTabItem
+                                                key={item.route.key}
+                                                isFocused={isFocused}
+                                                routeName={item.route.name}
+                                                selectedColor={
+                                                    colors.tabIconSelected
+                                                }
+                                                defaultColor={
+                                                    colors.tabIconDefault
+                                                }
+                                                onPress={() =>
+                                                    handlePress(
+                                                        item.route,
+                                                        item.index,
+                                                    )
+                                                }
+                                                onLongPress={() =>
+                                                    handleLongPress(item.route)
+                                                }
+                                            />
+                                        );
+                                    })}
+                            </View>
+
+                            {/* Center spacer — fixed width matching raised button */}
+                            <View style={{ width: centerSpacerWidth }} />
+
+                            {/* Right tabs */}
+                            <View
+                                style={[
+                                    styles.sideGroup,
+                                    { gap: R.sideGroupGap },
+                                ]}
+                            >
+                                {sortedRoutes
+                                    .filter((_, i) => i > centerIndex)
+                                    .map((item) => {
+                                        const isFocused =
+                                            state.index === item.index;
+                                        return (
+                                            <AnimatedTabItem
+                                                key={item.route.key}
+                                                isFocused={isFocused}
+                                                routeName={item.route.name}
+                                                selectedColor={
+                                                    colors.tabIconSelected
+                                                }
+                                                defaultColor={
+                                                    colors.tabIconDefault
+                                                }
+                                                onPress={() =>
+                                                    handlePress(
+                                                        item.route,
+                                                        item.index,
+                                                    )
+                                                }
+                                                onLongPress={() =>
+                                                    handleLongPress(item.route)
+                                                }
+                                            />
+                                        );
+                                    })}
+                            </View>
+                        </View>
+                    </View>
                 </View>
             </View>
         </View>
@@ -164,83 +427,105 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         alignItems: "center",
-        marginHorizontal: 24,
+        marginHorizontal: 10,
     },
-
-    glowRing: {
-        position: "absolute",
-        bottom: 0,
-        left: 0,
-        right: 0,
-        height: TAB_BAR_HEIGHT,
-        borderRadius: BORDER_RADIUS + 2,
-        backgroundColor: "transparent",
-        shadowColor: "#24ADE3",
-        shadowOffset: { width: 0, height: 0 },
-        shadowOpacity: 0.18,
-        shadowRadius: 16,
-    },
-
-    glassPill: {
+    tabBarWrapper: {
         width: "100%",
-        height: TAB_BAR_HEIGHT,
-        borderRadius: BORDER_RADIUS,
-        backgroundColor: "rgba(255, 255, 255, 0.72)",
-        borderWidth: 1,
-        borderColor: "#BBE6F6",
-        overflow: "hidden",
-        shadowColor: "#7DC8E8",
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.22,
-        shadowRadius: 20,
-        elevation: 8,
-        // position context for the absolute sliding pill
+        maxWidth: 411,
+        alignItems: "center",
         position: "relative",
     },
-
-    topHighlight: {
-        position: "absolute",
-        top: 0,
-        left: 16,
-        right: 16,
-        height: 1,
-        borderRadius: 1,
-        backgroundColor: "rgba(255, 255, 255, 0.95)",
-        zIndex: 2,
+    blurContainer: {
+        borderRadius: 62,
+        overflow: "hidden",
+        width: "100%",
     },
-
-    // The sliding blue pill — absolutely positioned, fills full height
-    slidingPill: {
-        position: "absolute",
-        top: 0,
-        left: 0,
-        height: TAB_BAR_HEIGHT,
-        borderRadius: BORDER_RADIUS,
-        backgroundColor: "#50BDE9",
-        zIndex: 1,
-        // Soft glow on the active pill
-        shadowColor: "#24ADE3",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.35,
-        shadowRadius: 8,
-    },
-
     tabBar: {
-        position: "absolute",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
+        height: TAB_BAR_HEIGHT,
+        borderRadius: 62,
+        borderWidth: 1,
         flexDirection: "row",
         alignItems: "center",
-        paddingHorizontal: TAB_PADDING_H,
-        zIndex: 3, // above the sliding pill so icons are always visible
+        justifyContent: "center",
     },
-
+    tabsContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        // justifyContent removed — children now lay out via flex naturally
+        width: "100%",
+        // paddingHorizontal set inline (responsive)
+    },
+    sideGroup: {
+        flex: 1, // ← each side takes equal available space
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-around", // spread tabs evenly within their half
+        // gap set inline (responsive)
+    },
     tabItem: {
-        flex: 1,
         alignItems: "center",
         justifyContent: "center",
-        height: TAB_BAR_HEIGHT,
+        gap: 2,
+        // minWidth set inline (responsive)
+    },
+    tabLabel: {
+        fontWeight: "500",
+        fontFamily: Platform.OS === "ios" ? "System" : "sans-serif-medium",
+        // fontSize set inline (responsive)
+    },
+    centerButtonContainer: {
+        position: "absolute",
+        top: -CENTER_BUTTON_OFFSET,
+        zIndex: 10,
+        alignItems: "center",
+    },
+    centerButtonOuter: {
+        borderWidth: 1,
+        borderColor: "#ECE9E7",
+        overflow: "hidden",
+        // width, height, borderRadius set inline (responsive)
+    },
+    centerButtonBlur: {
+        width: "100%",
+        height: "100%",
+    },
+    centerButtonGradient: {
+        width: "100%",
+        height: "100%",
+        alignItems: "center",
+        justifyContent: "center",
+        // borderRadius set inline (responsive)
+    },
+    activeDot: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        backgroundColor: Palette.brand[500],
+        marginTop: 6,
+    },
+    tabActiveDot: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        backgroundColor: Palette.brand[500],
+        marginTop: 2,
+    },
+    badge: {
+        position: "absolute",
+        top: -5,
+        right: -8,
+        backgroundColor: "#E53935",
+        borderRadius: 9,
+        minWidth: 18,
+        height: 18,
+        alignItems: "center",
+        justifyContent: "center",
+        paddingHorizontal: 4,
+    },
+    badgeText: {
+        color: "#fff",
+        fontSize: 10,
+        fontWeight: "700",
+        textAlign: "center",
     },
 });

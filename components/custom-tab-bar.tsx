@@ -12,6 +12,7 @@ import {
     StyleSheet,
     TouchableOpacity,
     View,
+    useWindowDimensions,
 } from "react-native";
 
 import Animated, {
@@ -114,6 +115,7 @@ function AnimatedTabItem({
     onPress,
     onLongPress,
     badge,
+    scaleFont,
 }: {
     isFocused: boolean;
     routeName: string;
@@ -122,6 +124,7 @@ function AnimatedTabItem({
     onPress: () => void;
     onLongPress: () => void;
     badge?: number;
+    scaleFont: (size: number) => number;
 }) {
     const progress = useSharedValue(isFocused ? 1 : 0);
     const dotScale = useSharedValue(isFocused ? 1 : 0);
@@ -153,8 +156,7 @@ function AnimatedTabItem({
             activeOpacity={0.7}
             onPress={onPress}
             onLongPress={onLongPress}
-            style={[styles.tabItem, { minWidth: R.tabItemMinWidth }]}
-        >
+            style={[styles.tabItem, { minWidth: R.tabItemMinWidth }]}>
             <View>
                 {getTabIcon(routeName, color)}
                 {!!badge && badge > 0 && (
@@ -162,14 +164,12 @@ function AnimatedTabItem({
                         style={[
                             styles.badge,
                             { width: R.badgeSize, height: R.badgeSize },
-                        ]}
-                    >
+                        ]}>
                         <ThemedText
                             style={[
                                 styles.badgeText,
-                                { fontSize: R.fontSize - 2 },
-                            ]}
-                        >
+                                { fontSize: scaleFont(R.fontSize - 2) },
+                            ]}>
                             {badge > 99 ? "99+" : badge}
                         </ThemedText>
                     </View>
@@ -179,10 +179,9 @@ function AnimatedTabItem({
                 style={[
                     styles.tabLabel,
                     animatedLabelStyle,
-                    { fontSize: R.fontSize },
+                    { fontSize: scaleFont(R.fontSize) },
                 ]}
-                numberOfLines={1}
-            >
+                numberOfLines={1}>
                 {getTabLabel(routeName)}
             </Animated.Text>
             <Animated.View style={[styles.tabActiveDot, animatedDotStyle]} />
@@ -214,6 +213,8 @@ export function CustomTabBar({
 }: BottomTabBarProps) {
     const insets = useSafeAreaInsets();
     const colors = Colors["light"];
+    const { width } = useWindowDimensions();
+    const scaleFont = (size: number) => Math.round((width / 375) * size);
 
     const sortedRoutes = TAB_ORDER.map((name) => {
         const index = state.routes.findIndex((r) => r.name === name);
@@ -250,8 +251,7 @@ export function CustomTabBar({
             style={[
                 styles.container,
                 { paddingBottom: insets.bottom > 0 ? insets.bottom - 10 : 8 },
-            ]}
-        >
+            ]}>
             <View style={styles.tabBarWrapper}>
                 {/* Center raised button */}
                 <View style={styles.centerButtonContainer}>
@@ -271,8 +271,7 @@ export function CustomTabBar({
                                     sortedRoutes[centerIndex].route,
                                 );
                             }
-                        }}
-                    >
+                        }}>
                         <View
                             style={[
                                 styles.centerButtonOuter,
@@ -281,8 +280,7 @@ export function CustomTabBar({
                                     height: R.centerButtonSize,
                                     borderRadius: R.centerButtonSize / 2,
                                 },
-                            ]}
-                        >
+                            ]}>
                             <View style={styles.centerButtonBlur}>
                                 <LinearGradient
                                     colors={[
@@ -297,8 +295,7 @@ export function CustomTabBar({
                                             borderRadius:
                                                 R.centerButtonSize / 2,
                                         },
-                                    ]}
-                                >
+                                    ]}>
                                     <HomeIcon
                                         size={R.iconSize}
                                         color="#FFFFFF"
@@ -323,8 +320,7 @@ export function CustomTabBar({
                                 backgroundColor: colors.tabBarBackground,
                                 borderColor: colors.tabBarBorder,
                             },
-                        ]}
-                    >
+                        ]}>
                         {/*
                          * Use flex layout instead of space-between so each side
                          * gets exactly 50% minus half the spacer — prevents overflow
@@ -334,15 +330,13 @@ export function CustomTabBar({
                             style={[
                                 styles.tabsContainer,
                                 { paddingHorizontal: R.sidePadding },
-                            ]}
-                        >
+                            ]}>
                             {/* Left tabs — flex:1 so they take equal share */}
                             <View
                                 style={[
                                     styles.sideGroup,
                                     { gap: R.sideGroupGap },
-                                ]}
-                            >
+                                ]}>
                                 {sortedRoutes
                                     .filter((_, i) => i < centerIndex)
                                     .map((item) => {
@@ -368,6 +362,7 @@ export function CustomTabBar({
                                                 onLongPress={() =>
                                                     handleLongPress(item.route)
                                                 }
+                                                scaleFont={scaleFont}
                                             />
                                         );
                                     })}
@@ -381,8 +376,7 @@ export function CustomTabBar({
                                 style={[
                                     styles.sideGroup,
                                     { gap: R.sideGroupGap },
-                                ]}
-                            >
+                                ]}>
                                 {sortedRoutes
                                     .filter((_, i) => i > centerIndex)
                                     .map((item) => {
@@ -408,6 +402,7 @@ export function CustomTabBar({
                                                 onLongPress={() =>
                                                     handleLongPress(item.route)
                                                 }
+                                                scaleFont={scaleFont}
                                             />
                                         );
                                     })}

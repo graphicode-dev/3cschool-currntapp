@@ -40,11 +40,14 @@ const SessionsListItem = ({ session }: Props) => {
             <View style={styles.content}>
                 {/* Title + session number badge */}
                 <View style={styles.header}>
-                    <ThemedText style={styles.title} numberOfLines={2}>
+                    <ThemedText
+                        style={styles.title}
+                        fontSize={14}
+                        numberOfLines={2}>
                         {title}
                     </ThemedText>
                     <View style={styles.typeBadge}>
-                        <ThemedText style={styles.typeText}>
+                        <ThemedText style={styles.typeText} fontSize={10}>
                             #{session.session_number}
                         </ThemedText>
                     </View>
@@ -57,13 +60,13 @@ const SessionsListItem = ({ session }: Props) => {
                             size={16}
                             color={Palette.brand[500]}
                         />
-                        <ThemedText style={styles.infoText}>
+                        <ThemedText style={styles.infoText} fontSize={13}>
                             {fmtDate(session.start_date)}
                         </ThemedText>
                     </View>
                     <View style={styles.infoItem}>
                         <Icons.ClockIcon size={16} color={Palette.brand[500]} />
-                        <ThemedText style={styles.infoText}>
+                        <ThemedText style={styles.infoText} fontSize={13}>
                             {fmtTime(session.start_time)}
                         </ThemedText>
                     </View>
@@ -75,8 +78,8 @@ const SessionsListItem = ({ session }: Props) => {
                         <Icons.InstructorIcon size={16} color="black" />
                         <ThemedText
                             style={styles.instructorName}
-                            numberOfLines={1}
-                        >
+                            fontSize={13}
+                            numberOfLines={1}>
                             {session.instructor?.full_name ?? "Instructor"}
                         </ThemedText>
                     </View>
@@ -88,9 +91,10 @@ const SessionsListItem = ({ session }: Props) => {
                                 Linking.openURL(session.recording_url!).catch(
                                     () => {},
                                 )
-                            }
-                        >
-                            <ThemedText style={styles.recordingText}>
+                            }>
+                            <ThemedText
+                                style={styles.recordingText}
+                                fontSize={10}>
                                 Recording
                             </ThemedText>
                             <Icons.ArrowIcon size={16} color="white" />
@@ -129,7 +133,6 @@ const styles = StyleSheet.create({
     },
     title: {
         flex: 1,
-        fontSize: 14,
         fontWeight: "600",
         color: Palette.slate900,
         fontFamily: "Poppins-SemiBold",
@@ -144,7 +147,6 @@ const styles = StyleSheet.create({
         paddingVertical: 2,
     },
     typeText: {
-        fontSize: 10,
         fontWeight: "500",
         color: "#98a5e8",
         fontFamily: "Poppins-Medium",
@@ -152,7 +154,6 @@ const styles = StyleSheet.create({
     dateTimeContainer: { flexDirection: "row", gap: 12, alignItems: "center" },
     infoItem: { flexDirection: "row", gap: 4, alignItems: "center" },
     infoText: {
-        fontSize: 13,
         fontWeight: "500",
         color: Palette.brand[500],
         fontFamily: "Poppins-Medium",
@@ -170,7 +171,6 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     instructorName: {
-        fontSize: 13,
         fontWeight: "500",
         color: Palette.slate900,
         fontFamily: "Poppins-Medium",
@@ -189,7 +189,6 @@ const styles = StyleSheet.create({
         gap: 4,
     },
     recordingText: {
-        fontSize: 10,
         color: "#e9f7fc",
         fontFamily: "Poppins-Medium",
         textTransform: "capitalize",

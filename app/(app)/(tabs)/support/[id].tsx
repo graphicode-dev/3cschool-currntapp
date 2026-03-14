@@ -15,11 +15,15 @@ import {
     StyleSheet,
     TouchableOpacity,
     View,
+    useWindowDimensions,
 } from "react-native";
 
 export default function TicketChatScreen() {
     const { id } = useLocalSearchParams<{ id: string }>();
     const flatListRef = useRef<FlatList>(null);
+    const { width } = useWindowDimensions();
+    const scaleFont = (size: number) => Math.round((width / 375) * size);
+    const responsivePaddingBottom = Math.round((width / 375) * 100);
 
     const {
         selectTicket,
@@ -90,10 +94,16 @@ export default function TicketChatScreen() {
         return (
             <ScreenWrapper>
                 <View style={styles.center}>
-                    <ThemedText style={styles.errorText}>
+                    <ThemedText
+                        style={[styles.errorText]}
+                        fontSize={scaleFont(16)}>
                         Something went wrong
                     </ThemedText>
-                    <ThemedText style={styles.errorSubText}>{error}</ThemedText>
+                    <ThemedText
+                        style={[styles.errorSubText]}
+                        fontSize={scaleFont(14)}>
+                        {error}
+                    </ThemedText>
                 </View>
             </ScreenWrapper>
         );
@@ -104,10 +114,14 @@ export default function TicketChatScreen() {
         return (
             <ScreenWrapper>
                 <View style={styles.center}>
-                    <ThemedText style={styles.errorText}>
+                    <ThemedText
+                        style={[styles.errorText]}
+                        fontSize={scaleFont(16)}>
                         Error loading ticket
                     </ThemedText>
-                    <ThemedText style={styles.errorSubText}>
+                    <ThemedText
+                        style={[styles.errorSubText]}
+                        fontSize={scaleFont(14)}>
                         {ticketError}
                     </ThemedText>
                 </View>
@@ -145,13 +159,14 @@ export default function TicketChatScreen() {
                 <TouchableOpacity
                     style={styles.closeButton}
                     onPress={handleCloseTicket}
-                    disabled={closeTicket.isPending}
-                >
+                    disabled={closeTicket.isPending}>
                     {closeTicket.isPending ? (
                         <ActivityIndicator size="small" color="#fff" />
                     ) : (
                         <View style={styles.closeButtonWrapper}>
-                            <ThemedText style={styles.closeButtonText}>
+                            <ThemedText
+                                style={[styles.closeButtonText]}
+                                fontSize={scaleFont(10)}>
                                 Close Ticket
                             </ThemedText>
                         </View>
@@ -180,12 +195,18 @@ export default function TicketChatScreen() {
 
             {isTicketClosed ? (
                 <View style={styles.closedBanner}>
-                    <ThemedText style={styles.closedText}>
+                    <ThemedText
+                        style={[styles.closedText]}
+                        fontSize={scaleFont(14)}>
                         ✅ This ticket has been closed
                     </ThemedText>
                 </View>
             ) : (
-                <View style={styles.inputWrap}>
+                <View
+                    style={[
+                        styles.inputWrap,
+                        { paddingBottom: responsivePaddingBottom },
+                    ]}>
                     <ChatInput
                         onSend={handleSendMessage}
                         isSending={isSending}
@@ -203,13 +224,11 @@ const styles = StyleSheet.create({
         justifyContent: "center",
     },
     errorText: {
-        fontSize: 16,
         color: "#ff4444",
         fontWeight: "600",
         marginBottom: 8,
     },
     errorSubText: {
-        fontSize: 14,
         color: "#666",
         textAlign: "center",
         paddingHorizontal: 32,
@@ -237,7 +256,6 @@ const styles = StyleSheet.create({
     closeButtonText: {
         color: "white",
         fontWeight: "600",
-        fontSize: 10,
     },
     closedBanner: {
         backgroundColor: "#f0f9ff",
@@ -249,7 +267,6 @@ const styles = StyleSheet.create({
         borderTopColor: "#e6f7ff",
     },
     closedText: {
-        fontSize: 14,
         color: "#52c41a",
         fontWeight: "500",
     },

@@ -5,8 +5,12 @@ import { ThemedText } from "../themed-text";
 function InfoRow({ label, value }: { label: string; value: string }) {
     return (
         <View style={styles.infoRow}>
-            <ThemedText style={styles.infoLabel}>{label}</ThemedText>
-            <ThemedText style={styles.infoValue}>{value}</ThemedText>
+            <ThemedText style={styles.infoLabel} fontSize={13}>
+                {label}
+            </ThemedText>
+            <ThemedText style={styles.infoValue} fontSize={13}>
+                {value}
+            </ThemedText>
         </View>
     );
 }
@@ -22,13 +26,11 @@ const styles = StyleSheet.create({
     },
     infoLabel: {
         fontFamily: "Poppins_500Medium",
-        fontSize: 13,
         color: Palette.slate500,
         textTransform: "capitalize",
     },
     infoValue: {
         fontFamily: "Poppins_500Medium",
-        fontSize: 13,
         color: Palette.brand[500],
         textTransform: "capitalize",
     },

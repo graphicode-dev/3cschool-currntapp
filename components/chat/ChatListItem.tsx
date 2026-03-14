@@ -24,17 +24,19 @@ export const ChatListItem = ({
             onLongPress={() => onLongPress?.(chat.id.toString())}
             delayLongPress={500}
             style={[styles.item, isSelected && styles.itemSelected]}
-            activeOpacity={0.7}
-        >
+            activeOpacity={0.7}>
             {/* Avatar */}
             <Avatar image={chat.thumbnail} name={chat.name} size={50} />
 
             {/* ThemedText */}
             <View style={styles.info}>
-                <ThemedText style={styles.name} numberOfLines={1}>
+                <ThemedText style={styles.name} numberOfLines={1} fontSize={14}>
                     {chat.name}
                 </ThemedText>
-                <ThemedText style={styles.lastMessage} numberOfLines={1}>
+                <ThemedText
+                    style={styles.lastMessage}
+                    numberOfLines={1}
+                    fontSize={12}>
                     {chat.lastMessage?.has_attachment ? (
                         <>
                             {chat.lastMessage?.sender?.full_name}: 📎{" "}
@@ -51,14 +53,16 @@ export const ChatListItem = ({
 
             {/* Time + Unread */}
             <View style={styles.rightCol}>
-                <ThemedText style={styles.time}>
+                <ThemedText style={styles.time} fontSize={10}>
                     {chat.lastMessage?.created_at
                         ? formatMessageTime(chat.lastMessage.created_at, false)
                         : ""}
                 </ThemedText>
                 {chat.unreadCount > 0 && (
                     <View style={styles.unreadBadge}>
-                        <ThemedText style={styles.unreadBadgeText}>
+                        <ThemedText
+                            style={styles.unreadBadgeText}
+                            fontSize={10}>
                             {chat.unreadCount > 99 ? "99+" : chat.unreadCount}
                         </ThemedText>
                     </View>
@@ -104,16 +108,10 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
     },
-    unreadDotText: {
-        fontSize: 9,
-        color: "#FFFFFF",
-        fontWeight: "700",
-    },
     info: {
         flex: 1,
     },
     name: {
-        fontSize: 14,
         fontWeight: "600",
         color: "#475569",
         marginBottom: 3,
@@ -125,7 +123,6 @@ const styles = StyleSheet.create({
         height: "100%",
     },
     time: {
-        fontSize: 10,
         color: "#94A3B8",
     },
     unreadBadge: {
@@ -138,12 +135,10 @@ const styles = StyleSheet.create({
         paddingHorizontal: 5,
     },
     unreadBadgeText: {
-        fontSize: 10,
         color: "#FFFFFF",
         fontWeight: "700",
     },
     lastMessage: {
-        fontSize: 12,
         color: "#64748B",
     },
 });

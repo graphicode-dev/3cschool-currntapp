@@ -63,35 +63,35 @@ export default function LoginScreen() {
     return (
         <LinearGradient
             colors={["#E3F2FD", "#BBDEFB", "#90CAF9"]}
-            style={[styles.container, { paddingTop: insets.top }]}
-        >
+            style={[styles.container, { paddingTop: insets.top }]}>
             <KeyboardAvoidingView
                 style={{ flex: 1 }}
-                behavior={Platform.OS === "ios" ? "padding" : "height"}
-            >
+                behavior={Platform.OS === "ios" ? "padding" : "height"}>
                 <ScrollView
                     contentContainerStyle={styles.scrollContent}
                     showsVerticalScrollIndicator={false}
-                    keyboardShouldPersistTaps="handled"
-                >
+                    keyboardShouldPersistTaps="handled">
                     {/* Header Section */}
                     <View style={styles.headerSection}>
                         <ThemedText
                             type="title"
                             lang="en"
                             style={styles.welcomeText}
-                        >
-                            Welcome! Let&apos;s Start
+                            fontSize={35}>
+                            Welcome!
                         </ThemedText>
                         <ThemedText
                             type="title"
                             lang="en"
                             style={styles.codingText}
-                        >
-                            Coding Together!{" "}
-                            <ThemedText style={styles.sparkle}>✨</ThemedText>
+                            fontSize={20}
+                            numberOfLines={1}>
+                            Let&apos;s Start Coding Together ✨
                         </ThemedText>
-                        <ThemedText style={styles.subtitle}>
+                        <ThemedText
+                            style={styles.subtitle}
+                            numberOfLines={1}
+                            fontSize={14}>
                             enter your email and password to log in
                         </ThemedText>
                     </View>
@@ -102,7 +102,7 @@ export default function LoginScreen() {
                             type="defaultSemiBold"
                             lang="en"
                             style={styles.label}
-                        >
+                            fontSize={16}>
                             Email
                         </ThemedText>
                         <View style={styles.inputContainer}>
@@ -139,7 +139,7 @@ export default function LoginScreen() {
                             />
                         </View>
                         {errors.email && (
-                            <ThemedText style={styles.errorText}>
+                            <ThemedText style={styles.errorText} fontSize={14}>
                                 {errors.email.message}
                             </ThemedText>
                         )}
@@ -148,7 +148,7 @@ export default function LoginScreen() {
                             type="defaultSemiBold"
                             lang="en"
                             style={styles.label}
-                        >
+                            fontSize={16}>
                             Password
                         </ThemedText>
                         <View style={styles.inputContainer}>
@@ -172,8 +172,7 @@ export default function LoginScreen() {
                                             onPress={() =>
                                                 setShowPassword(!showPassword)
                                             }
-                                            style={styles.inputIcon}
-                                        >
+                                            style={styles.inputIcon}>
                                             <FontAwesome
                                                 name={
                                                     showPassword
@@ -189,7 +188,7 @@ export default function LoginScreen() {
                             />
                         </View>
                         {errors.password && (
-                            <ThemedText style={styles.errorText}>
+                            <ThemedText style={styles.errorText} fontSize={14}>
                                 {errors.password.message}
                             </ThemedText>
                         )}
@@ -197,13 +196,12 @@ export default function LoginScreen() {
                         <TouchableOpacity
                             style={styles.loginButton}
                             onPress={handleSubmit(onSubmit)}
-                            disabled={isPending}
-                        >
+                            disabled={isPending}>
                             <ThemedText
                                 type="defaultSemiBold"
                                 lang="en"
                                 style={styles.loginButtonText}
-                            >
+                                fontSize={18}>
                                 {isPending ? "Logging in..." : "Log In"}
                             </ThemedText>
                         </TouchableOpacity>
@@ -213,7 +211,7 @@ export default function LoginScreen() {
                     <View style={styles.bottomSection}>
                         <View style={styles.logoContainer}>
                             <Image source={Images.logo} style={styles.logo} />
-                            <ThemedText style={styles.bottomText}>
+                            <ThemedText style={styles.bottomText} fontSize={12}>
                                 Made Especially For Kids To Learn Coding Safely.
                             </ThemedText>
                         </View>
@@ -239,26 +237,18 @@ const styles = StyleSheet.create({
         marginBottom: 60,
     },
     welcomeText: {
-        fontSize: 32,
         fontWeight: "700",
         color: "#1A1A2E",
         textAlign: "center",
         lineHeight: 40,
-        marginBottom: 8,
     },
     codingText: {
-        fontSize: 32,
         fontWeight: "700",
         color: "#1A1A2E",
         textAlign: "center",
         lineHeight: 40,
-        marginBottom: 16,
-    },
-    sparkle: {
-        fontSize: 32,
     },
     subtitle: {
-        fontSize: 16,
         color: "#666",
         textAlign: "center",
         lineHeight: 24,
@@ -267,7 +257,6 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     label: {
-        fontSize: 16,
         fontWeight: "600",
         color: "#333",
         marginBottom: 8,
@@ -297,7 +286,6 @@ const styles = StyleSheet.create({
     },
     errorText: {
         color: "#FF6B6B",
-        fontSize: 14,
         marginTop: -16,
         marginBottom: 8,
     },
@@ -315,7 +303,6 @@ const styles = StyleSheet.create({
     },
     loginButtonText: {
         color: "#FFF",
-        fontSize: 18,
         fontWeight: "600",
     },
     bottomSection: {
@@ -334,7 +321,6 @@ const styles = StyleSheet.create({
         marginRight: 0,
     },
     bottomText: {
-        fontSize: 12,
         color: "#666",
         flex: 1,
         lineHeight: 16,

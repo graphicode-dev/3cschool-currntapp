@@ -109,9 +109,13 @@ export function DonutChart({
 
             {/* Center countdown text */}
             <View style={styles.center}>
-                <ThemedText style={styles.top}>{top}</ThemedText>
+                <ThemedText style={styles.top} fontSize={12}>
+                    {top}
+                </ThemedText>
                 {!!bottom && (
-                    <ThemedText style={styles.bottom}>{bottom}</ThemedText>
+                    <ThemedText style={styles.bottom} fontSize={8}>
+                        {bottom}
+                    </ThemedText>
                 )}
             </View>
         </View>
@@ -131,14 +135,12 @@ const styles = StyleSheet.create({
         justifyContent: "center",
     },
     top: {
-        fontSize: 12,
         fontFamily: "Poppins-SemiBold",
         color: "#24ADE3",
         lineHeight: 15,
         textAlign: "center",
     },
     bottom: {
-        fontSize: 8,
         fontFamily: "Poppins-Regular",
         color: "#A4A3A3",
         lineHeight: 11,

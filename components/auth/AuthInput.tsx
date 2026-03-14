@@ -32,8 +32,7 @@ export default function AuthInput({
     return (
         <View style={styles.container}>
             <View
-                style={[styles.inputRow, error ? styles.inputRowError : null]}
-            >
+                style={[styles.inputRow, error ? styles.inputRowError : null]}>
                 {icon && <View style={styles.iconContainer}>{icon}</View>}
                 <TextInput
                     style={[styles.input, style]}
@@ -45,8 +44,7 @@ export default function AuthInput({
                     <TouchableOpacity
                         onPress={() => setShowPassword(!showPassword)}
                         activeOpacity={0.7}
-                        style={styles.eyeButton}
-                    >
+                        style={styles.eyeButton}>
                         {showPassword ? (
                             <Icons.EyeIcon size={20} color={Palette.slate600} />
                         ) : (
@@ -59,10 +57,14 @@ export default function AuthInput({
                 )}
             </View>
             <View style={styles.labelContainer}>
-                <ThemedText style={styles.label}>{label}</ThemedText>
+                <ThemedText style={styles.label} fontSize={14}>
+                    {label}
+                </ThemedText>
             </View>
             {error ? (
-                <ThemedText style={styles.errorText}>{error}</ThemedText>
+                <ThemedText style={styles.errorText} fontSize={12}>
+                    {error}
+                </ThemedText>
             ) : null}
         </View>
     );
@@ -102,7 +104,6 @@ const styles = StyleSheet.create({
         padding: 4,
     },
     errorText: {
-        fontSize: 12,
         color: "#E53935",
         marginTop: 4,
         marginLeft: 4,
@@ -115,7 +116,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: 6,
     },
     label: {
-        fontSize: 14,
         fontWeight: "600",
         color: Palette.brand[500],
         lineHeight: 21,

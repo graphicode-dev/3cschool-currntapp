@@ -23,7 +23,7 @@ const HomeHeader = ({ user }: { user: User }) => {
                 />
 
                 {/* Greeting ThemedText */}
-                <ThemedText style={styles.greetingText}>
+                <ThemedText style={styles.greetingText} fontSize={16}>
                     hi, {user?.full_name}! 👋
                 </ThemedText>
             </View>
@@ -31,12 +31,11 @@ const HomeHeader = ({ user }: { user: User }) => {
             {/* Right Side - Notification Icon */}
             <TouchableOpacity
                 style={styles.notificationContainer}
-                onPress={() => router.push("/(app)/notifications")}
-            >
+                onPress={() => router.push("/(app)/notifications")}>
                 <Icons.BellIcon color="black" size={25} />
                 {unreadCount > 0 && (
                     <View style={styles.notificationBadge}>
-                        <ThemedText style={styles.badgeText}>
+                        <ThemedText style={styles.badgeText} fontSize={10}>
                             {unreadCount > 99 ? "99+" : unreadCount}
                         </ThemedText>
                     </View>
@@ -62,7 +61,6 @@ const styles = StyleSheet.create({
         gap: 10,
     },
     greetingText: {
-        fontSize: 16,
         fontWeight: "600",
         color: Palette.slate900, // #393838 equivalent
         textTransform: "capitalize",
@@ -90,7 +88,6 @@ const styles = StyleSheet.create({
         justifyContent: "center",
     },
     badgeText: {
-        fontSize: 10,
         color: "white",
         fontWeight: "600",
         textAlign: "center",

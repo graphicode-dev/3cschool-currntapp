@@ -83,8 +83,7 @@ function Bubble({
                 transform: [{ scale: aScale }],
                 alignItems: "center",
                 justifyContent: "center",
-            }}
-        >
+            }}>
             <View
                 style={{
                     borderWidth: 1,
@@ -95,18 +94,16 @@ function Bubble({
                     alignItems: "center",
                     justifyContent: "center",
                     backgroundColor: bgColor,
-                }}
-            >
+                }}>
                 <ThemedText
                     style={{
                         color: labelColor,
-                        fontSize: sc(fontSize),
                         fontFamily: "Poppins-Medium",
                         textAlign: "center",
                         lineHeight: sc(fontSize) * 1.35,
                         textTransform: "capitalize",
                     }}
-                >
+                    fontSize={sc(fontSize)}>
                     {label}
                 </ThemedText>
             </View>
@@ -206,7 +203,9 @@ export default function SplashScreen() {
             <Animated.View style={[styles.skipBtn, { opacity: skipOpacity }]}>
                 <TouchableOpacity onPress={navigateDependingOnAuth}>
                     <View style={styles.skipBtnContent}>
-                        <ThemedText style={styles.skipText}>skip</ThemedText>
+                        <ThemedText style={styles.skipText} fontSize={sc(15)}>
+                            skip
+                        </ThemedText>
                         <Icons.ArrowIcon color={Palette.brand[500]} size={20} />
                     </View>
                 </TouchableOpacity>
@@ -220,9 +219,8 @@ export default function SplashScreen() {
                         opacity: titleOpacity,
                         transform: [{ translateY: titleTranslate }],
                     },
-                ]}
-            >
-                <ThemedText style={styles.title}>
+                ]}>
+                <ThemedText style={styles.title} fontSize={sc(36)}>
                     Code, Practice, And Level Up—{"\n"}Anytime.
                 </ThemedText>
             </Animated.View>
@@ -406,7 +404,6 @@ const styles = StyleSheet.create({
     },
     skipText: {
         color: "#24ADE3",
-        fontSize: sc(15),
         fontFamily: "Poppins-Regular",
         textTransform: "capitalize",
     },
@@ -421,7 +418,6 @@ const styles = StyleSheet.create({
         width: sx(301),
     },
     title: {
-        fontSize: sc(36),
         fontFamily: "Poppins-SemiBold",
         color: "#393838",
         lineHeight: sc(44),

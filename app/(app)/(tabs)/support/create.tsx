@@ -9,6 +9,7 @@ import { router } from "expo-router";
 import { Controller, useForm } from "react-hook-form";
 import {
     ActivityIndicator,
+    ScrollView,
     StyleSheet,
     TextInput,
     TouchableOpacity,
@@ -64,10 +65,14 @@ export default function SupportCreateScreen() {
         <ScreenWrapper>
             <CustomHeader title="Send Help" />
 
-            <View style={styles.scrollContent}>
+            <ScrollView
+                contentContainerStyle={styles.scrollContent}
+                showsVerticalScrollIndicator={false}
+                scrollEventThrottle={16}
+                overScrollMode="never">
                 {/* Headline */}
                 <View style={styles.headRow}>
-                    <ThemedText style={styles.headTitle}>
+                    <ThemedText style={styles.headTitle} fontSize={26}>
                         We&apos;re Here to Help!
                     </ThemedText>
                     <Icons.RobotIcon size={28} color={Palette.brand[500]} />
@@ -75,7 +80,9 @@ export default function SupportCreateScreen() {
 
                 {/* Title */}
                 <View style={styles.field}>
-                    <ThemedText style={styles.label}>Title</ThemedText>
+                    <ThemedText style={styles.label} fontSize={14}>
+                        Title
+                    </ThemedText>
                     <Controller
                         control={control}
                         name="title"
@@ -85,8 +92,7 @@ export default function SupportCreateScreen() {
                                 style={[
                                     styles.inputBox,
                                     !!errors.title && styles.inputError,
-                                ]}
-                            >
+                                ]}>
                                 <TextInput
                                     style={styles.input}
                                     placeholder="Brief description of your issue"
@@ -98,7 +104,7 @@ export default function SupportCreateScreen() {
                         )}
                     />
                     {errors.title && (
-                        <ThemedText style={styles.errorText}>
+                        <ThemedText style={styles.errorText} fontSize={12}>
                             {errors.title.message}
                         </ThemedText>
                     )}
@@ -106,7 +112,9 @@ export default function SupportCreateScreen() {
 
                 {/* Message / Description */}
                 <View style={styles.field}>
-                    <ThemedText style={styles.label}>Message</ThemedText>
+                    <ThemedText style={styles.label} fontSize={14}>
+                        Message
+                    </ThemedText>
                     <Controller
                         control={control}
                         name="message"
@@ -117,8 +125,7 @@ export default function SupportCreateScreen() {
                                     styles.inputBox,
                                     styles.textAreaBox,
                                     !!errors.message && styles.inputError,
-                                ]}
-                            >
+                                ]}>
                                 <TextInput
                                     style={[styles.input, styles.textArea]}
                                     placeholder="Please describe your issue in detail"
@@ -133,7 +140,7 @@ export default function SupportCreateScreen() {
                         )}
                     />
                     {errors.message && (
-                        <ThemedText style={styles.errorText}>
+                        <ThemedText style={styles.errorText} fontSize={12}>
                             {errors.message.message}
                         </ThemedText>
                     )}
@@ -141,7 +148,9 @@ export default function SupportCreateScreen() {
 
                 {/* Priority */}
                 <View style={styles.field}>
-                    <ThemedText style={styles.label}>Priority</ThemedText>
+                    <ThemedText style={styles.label} fontSize={14}>
+                        Priority
+                    </ThemedText>
                     <Controller
                         control={control}
                         name="priority"
@@ -159,16 +168,14 @@ export default function SupportCreateScreen() {
                                                     borderColor: p.color,
                                                 },
                                             ]}
-                                            onPress={() => onChange(p.value)}
-                                        >
+                                            onPress={() => onChange(p.value)}>
                                             <View
                                                 style={[
                                                     styles.radio,
                                                     selected && {
                                                         borderColor: p.color,
                                                     },
-                                                ]}
-                                            >
+                                                ]}>
                                                 {selected && (
                                                     <View
                                                         style={[
@@ -188,7 +195,7 @@ export default function SupportCreateScreen() {
                                                         color: p.color,
                                                     },
                                                 ]}
-                                            >
+                                                fontSize={13}>
                                                 {p.label}
                                             </ThemedText>
                                         </TouchableOpacity>
@@ -206,24 +213,25 @@ export default function SupportCreateScreen() {
                         isPending && styles.submitBtnDisabled,
                     ]}
                     onPress={handleSubmit(onSubmit)}
-                    disabled={isPending}
-                >
+                    disabled={isPending}>
                     {isPending ? (
                         <ActivityIndicator color="white" />
                     ) : (
-                        <ThemedText style={styles.submitText}>Send</ThemedText>
+                        <ThemedText style={styles.submitText} fontSize={16}>
+                            Send
+                        </ThemedText>
                     )}
                 </TouchableOpacity>
-            </View>
+            </ScrollView>
         </ScreenWrapper>
     );
 }
 
 const styles = StyleSheet.create({
     scrollContent: {
-        flex: 1,
         paddingHorizontal: 24,
         paddingTop: 16,
+        paddingBottom: 150,
         gap: 20,
     },
     headRow: {
@@ -233,14 +241,12 @@ const styles = StyleSheet.create({
         marginBottom: 4,
     },
     headTitle: {
-        fontSize: 26,
         fontFamily: "Poppins-SemiBold",
         color: Palette.slate900,
     },
 
     field: { gap: 6 },
     label: {
-        fontSize: 14,
         fontFamily: "Poppins-SemiBold",
         color: Palette.slate900,
         textTransform: "capitalize",
@@ -263,7 +269,6 @@ const styles = StyleSheet.create({
     },
     textArea: { height: "100%", textAlignVertical: "top" },
     errorText: {
-        fontSize: 12,
         color: "#e53e3e",
         fontFamily: "Poppins-Regular",
     },
@@ -293,7 +298,6 @@ const styles = StyleSheet.create({
     },
     radioDot: { width: 7, height: 7, borderRadius: 4 },
     priorityLabel: {
-        fontSize: 13,
         fontFamily: "Poppins-Medium",
         color: Palette.slate500,
         textTransform: "capitalize",
@@ -310,7 +314,6 @@ const styles = StyleSheet.create({
     },
     submitBtnDisabled: { opacity: 0.5 },
     submitText: {
-        fontSize: 16,
         fontFamily: "Poppins-SemiBold",
         color: "#fff",
         textTransform: "capitalize",

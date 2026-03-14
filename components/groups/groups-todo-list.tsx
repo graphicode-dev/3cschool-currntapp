@@ -54,8 +54,7 @@ const AnimatedItem: React.FC<{
 
     return (
         <Animated.View
-            style={[styles.itemWrap, { opacity, transform: [{ translateX }] }]}
-        >
+            style={[styles.itemWrap, { opacity, transform: [{ translateX }] }]}>
             <GroupsTasksListItem
                 task={task}
                 onToggle={onToggle}
@@ -72,9 +71,13 @@ const GroupsTasksList: React.FC<Props> = ({ tasks, onToggle, onDelete }) => {
     if (tasks.length === 0) {
         return (
             <View style={styles.empty}>
-                <ThemedText style={styles.emptyEmoji}>✅</ThemedText>
-                <ThemedText style={styles.emptyTitle}>All clear!</ThemedText>
-                <ThemedText style={styles.emptySubtitle}>
+                <ThemedText style={styles.emptyEmoji} fontSize={44}>
+                    ✅
+                </ThemedText>
+                <ThemedText style={styles.emptyTitle} fontSize={18}>
+                    All clear!
+                </ThemedText>
+                <ThemedText style={styles.emptySubtitle} fontSize={14}>
                     Add a task above to get started.
                 </ThemedText>
             </View>
@@ -110,12 +113,10 @@ const styles = StyleSheet.create({
     },
     emptyEmoji: {
         padding: 10,
-        fontSize: 44,
     },
     emptyTitle: {
-        fontSize: 18,
         fontWeight: "700",
         color: "#2d3a4a",
     },
-    emptySubtitle: { fontSize: 14, color: "#a0b4bf", fontStyle: "italic" },
+    emptySubtitle: { color: "#a0b4bf", fontStyle: "italic" },
 });

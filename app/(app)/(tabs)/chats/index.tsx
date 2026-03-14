@@ -34,14 +34,13 @@ const ChatListScreen = () => {
             <PullToRefreshScrollView
                 refetches={[() => refetch()]}
                 style={styles.scrollView}
-                contentContainerStyle={styles.scrollContent}
-            >
+                contentContainerStyle={styles.scrollContent}>
                 <View style={styles.listHeader}>
                     <View>
-                        <ThemedText style={styles.listTitle}>
+                        <ThemedText style={styles.listTitle} fontSize={24}>
                             Conversations
                         </ThemedText>
-                        <ThemedText style={styles.listSubtitle}>
+                        <ThemedText style={styles.listSubtitle} fontSize={12}>
                             {groups.length} Chats
                         </ThemedText>
                     </View>
@@ -71,10 +70,14 @@ const ChatListScreen = () => {
                             <Loading />
                         ) : (
                             <View style={styles.empty}>
-                                <ThemedText style={styles.emptyIcon}>
+                                <ThemedText
+                                    style={styles.emptyIcon}
+                                    fontSize={36}>
                                     💬
                                 </ThemedText>
-                                <ThemedText style={styles.emptyTitle}>
+                                <ThemedText
+                                    style={styles.emptyTitle}
+                                    fontSize={16}>
                                     No Conversations Yet
                                 </ThemedText>
                             </View>
@@ -115,12 +118,10 @@ const styles = StyleSheet.create({
         borderBottomColor: Palette.slate100,
     },
     listTitle: {
-        fontSize: 24,
         fontWeight: "700",
         color: Palette.slate700,
     },
     listSubtitle: {
-        fontSize: 12,
         color: Palette.slate400,
         marginTop: 2,
     },
@@ -133,15 +134,9 @@ const styles = StyleSheet.create({
         alignItems: "center",
         gap: 8,
     },
-    emptyIcon: { fontSize: 36, marginBottom: 4 },
+    emptyIcon: { marginBottom: 4 },
     emptyTitle: {
-        fontSize: 16,
         fontWeight: "700",
         color: Palette.slate600,
-    },
-    emptyText: {
-        fontSize: 13,
-        color: Palette.slate400,
-        textAlign: "center",
     },
 });

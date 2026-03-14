@@ -4,7 +4,13 @@ import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { useCallback, useState } from "react";
-import { StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
+import {
+    StyleSheet,
+    TextInput,
+    TouchableOpacity,
+    View,
+    useWindowDimensions,
+} from "react-native";
 
 interface Props {
     onSend: (text: string, imageUri?: string) => void;
@@ -14,6 +20,8 @@ interface Props {
 const ChatInput = ({ onSend, isSending }: Props) => {
     const [text, setText] = useState("");
     const [imageUri, setImageUri] = useState<string | null>(null);
+    const { width } = useWindowDimensions();
+    const scaleFont = (size: number) => Math.round((width / 375) * size);
 
     const canSend = (text.trim().length > 0 || imageUri !== null) && !isSending;
 
@@ -52,8 +60,7 @@ const ChatInput = ({ onSend, isSending }: Props) => {
                     <View style={styles.previewActions}>
                         <TouchableOpacity
                             style={styles.previewBtn}
-                            onPress={pickImage}
-                        >
+                            onPress={pickImage}>
                             <Ionicons
                                 name="refresh-outline"
                                 size={15}
@@ -62,8 +69,7 @@ const ChatInput = ({ onSend, isSending }: Props) => {
                         </TouchableOpacity>
                         <TouchableOpacity
                             style={styles.previewBtn}
-                            onPress={() => setImageUri(null)}
-                        >
+                            onPress={() => setImageUri(null)}>
                             <Icons.XIcon size={13} color="#e53e3e" />
                         </TouchableOpacity>
                     </View>
@@ -76,8 +82,7 @@ const ChatInput = ({ onSend, isSending }: Props) => {
                 <TouchableOpacity
                     style={styles.imageBtn}
                     onPress={pickImage}
-                    activeOpacity={0.7}
-                >
+                    activeOpacity={0.7}>
                     <Ionicons
                         name="image-outline"
                         size={22}
@@ -90,15 +95,14 @@ const ChatInput = ({ onSend, isSending }: Props) => {
                     onChangeText={setText}
                     placeholder="type a message...."
                     placeholderTextColor={Palette.slate300}
-                    style={styles.input}
+                    style={[styles.input, { fontSize: scaleFont(12) }]}
                     multiline={false}
                 />
 
                 <TouchableOpacity
                     style={[styles.sendBtn, !canSend && styles.sendBtnDisabled]}
                     onPress={handleSend}
-                    disabled={!canSend}
-                >
+                    disabled={!canSend}>
                     <Icons.SentIcon size={22} color="white" />
                 </TouchableOpacity>
             </View>

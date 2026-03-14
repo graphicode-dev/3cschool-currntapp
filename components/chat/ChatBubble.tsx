@@ -56,8 +56,7 @@ const ChatBubble = ({
         <>
             <Pressable
                 delayLongPress={500}
-                style={[styles.row, isMe && styles.rowReverse]}
-            >
+                style={[styles.row, isMe && styles.rowReverse]}>
                 {!isMe && showAvatar && (
                     <Avatar
                         name={message.senderName || (isInstructor ? "I" : "U")}
@@ -82,11 +81,10 @@ const ChatBubble = ({
                             images.length > 0 &&
                                 !message.text &&
                                 styles.bubbleImageOnly,
-                        ]}
-                    >
+                        ]}>
                         {/* Sender name for group chats */}
                         {shouldShowSenderName && (
-                            <ThemedText style={styles.senderName}>
+                            <ThemedText style={styles.senderName} fontSize={11}>
                                 {message.senderName || "Unknown"}
                             </ThemedText>
                         )}
@@ -95,8 +93,7 @@ const ChatBubble = ({
                         {images.length === 1 && (
                             <TouchableOpacity
                                 onPress={() => openImagePreview(0)}
-                                activeOpacity={0.85}
-                            >
+                                activeOpacity={0.85}>
                                 <Image
                                     source={{ uri: images[0] }}
                                     style={styles.singleImage}
@@ -114,8 +111,7 @@ const ChatBubble = ({
                                             key={uri + i}
                                             onPress={() => openImagePreview(i)}
                                             activeOpacity={0.85}
-                                            style={styles.gridItem}
-                                        >
+                                            style={styles.gridItem}>
                                             <Image
                                                 source={{ uri }}
                                                 style={styles.gridImage}
@@ -123,11 +119,10 @@ const ChatBubble = ({
                                             />
                                             {isLast && (
                                                 <View
-                                                    style={styles.moreOverlay}
-                                                >
+                                                    style={styles.moreOverlay}>
                                                     <ThemedText
                                                         style={styles.moreText}
-                                                    >
+                                                        fontSize={18}>
                                                         +{images.length - 3}
                                                     </ThemedText>
                                                 </View>
@@ -146,7 +141,7 @@ const ChatBubble = ({
                                     isMe ? styles.textAdmin : styles.textUser,
                                     images.length > 0 && styles.textWithImage,
                                 ]}
-                            >
+                                fontSize={14}>
                                 {message.text}
                             </ThemedText>
                         )}
@@ -157,7 +152,7 @@ const ChatBubble = ({
                                 styles.time,
                                 isMe ? styles.timeAdmin : styles.timeUser,
                             ]}
-                        >
+                            fontSize={10}>
                             {timestamp}
                         </ThemedText>
                     </View>
@@ -169,21 +164,20 @@ const ChatBubble = ({
                 visible={imagePreviewVisible}
                 transparent={true}
                 animationType="fade"
-                onRequestClose={closeImagePreview}
-            >
+                onRequestClose={closeImagePreview}>
                 <View style={styles.modalOverlay}>
                     <TouchableOpacity
                         style={styles.modalBackground}
                         activeOpacity={1}
-                        onPress={closeImagePreview}
-                    >
+                        onPress={closeImagePreview}>
                         <View style={styles.modalContent}>
                             <TouchableOpacity
                                 style={styles.closeButton}
                                 onPress={closeImagePreview}
-                                activeOpacity={0.8}
-                            >
-                                <ThemedText style={styles.closeButtonText}>
+                                activeOpacity={0.8}>
+                                <ThemedText
+                                    style={styles.closeButtonText}
+                                    fontSize={18}>
                                     ✕
                                 </ThemedText>
                             </TouchableOpacity>
@@ -203,7 +197,7 @@ const ChatBubble = ({
                                         <View style={styles.imageCounter}>
                                             <ThemedText
                                                 style={styles.imageCounterText}
-                                            >
+                                                fontSize={12}>
                                                 {currentImageIndex + 1} /{" "}
                                                 {images.length}
                                             </ThemedText>
@@ -225,13 +219,12 @@ const ChatBubble = ({
                                                                 1,
                                                         )
                                                     }
-                                                    activeOpacity={0.8}
-                                                >
+                                                    activeOpacity={0.8}>
                                                     <ThemedText
                                                         style={
                                                             styles.navButtonText
                                                         }
-                                                    >
+                                                        fontSize={24}>
                                                         ‹
                                                     </ThemedText>
                                                 </TouchableOpacity>
@@ -250,13 +243,12 @@ const ChatBubble = ({
                                                                 1,
                                                         )
                                                     }
-                                                    activeOpacity={0.8}
-                                                >
+                                                    activeOpacity={0.8}>
                                                     <ThemedText
                                                         style={
                                                             styles.navButtonText
                                                         }
-                                                    >
+                                                        fontSize={24}>
                                                         ›
                                                     </ThemedText>
                                                 </TouchableOpacity>
@@ -309,7 +301,6 @@ const styles = StyleSheet.create({
         borderColor: `${Palette.brand[500]}20`,
     },
     senderName: {
-        fontSize: 11,
         fontWeight: "600",
         color: Palette.slate600,
         marginBottom: 4,
@@ -350,14 +341,13 @@ const styles = StyleSheet.create({
     },
     moreText: {
         color: Palette.white,
-        fontSize: 18,
         fontWeight: "700",
     },
-    text: { fontSize: 14, lineHeight: 20 },
+    text: { lineHeight: 20 },
     textWithImage: { marginTop: 6 },
     textAdmin: { color: Palette.white },
     textUser: { color: Palette.slate700 },
-    time: { fontSize: 10, marginTop: 6 },
+    time: { marginTop: 6 },
     timeAdmin: { color: "rgba(255,255,255,0.6)", textAlign: "right" },
     timeUser: { color: Palette.slate400 },
     // Modal styles for image preview
@@ -394,7 +384,6 @@ const styles = StyleSheet.create({
     },
     closeButtonText: {
         color: Palette.white,
-        fontSize: 18,
         fontWeight: "600",
     },
     imageContainer: {
@@ -419,7 +408,6 @@ const styles = StyleSheet.create({
     },
     imageCounterText: {
         color: Palette.white,
-        fontSize: 12,
         fontWeight: "600",
     },
     navButton: {
@@ -440,7 +428,6 @@ const styles = StyleSheet.create({
     },
     navButtonText: {
         color: Palette.white,
-        fontSize: 24,
         fontWeight: "600",
     },
 });

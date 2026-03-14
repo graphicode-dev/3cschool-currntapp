@@ -29,8 +29,7 @@ function ProfileScreen() {
             <PullToRefreshScrollView
                 refetches={[]}
                 style={styles.scrollView}
-                contentContainerStyle={styles.scrollContent}
-            >
+                contentContainerStyle={styles.scrollContent}>
                 {/* Edit button */}
                 {/* <TouchableOpacity
                     style={styles.editButton}
@@ -48,10 +47,10 @@ function ProfileScreen() {
                         badge={user?.role_name}
                     />
 
-                    <ThemedText style={styles.profileName}>
+                    <ThemedText style={styles.profileName} fontSize={16}>
                         {user?.full_name}
                     </ThemedText>
-                    <ThemedText style={styles.profileEmail}>
+                    <ThemedText style={styles.profileEmail} fontSize={14}>
                         {user?.email}
                     </ThemedText>
                 </View>
@@ -74,27 +73,25 @@ function ProfileScreen() {
                         />
                     </View> */}
                     <View style={styles.languageRow}>
-                        <ThemedText style={styles.languageLabel}>
+                        <ThemedText style={styles.languageLabel} fontSize={14}>
                             Language
                         </ThemedText>
                         <TouchableOpacity
                             onPress={toggleLanguage}
                             activeOpacity={0.8}
-                            style={styles.languageToggle}
-                        >
+                            style={styles.languageToggle}>
                             <View
                                 style={[
                                     styles.languageOption,
                                     language === "en" && styles.languageActive,
-                                ]}
-                            >
+                                ]}>
                                 <ThemedText
                                     style={[
                                         styles.languageOptionText,
                                         language === "en" &&
                                             styles.languageActiveText,
                                     ]}
-                                >
+                                    fontSize={13}>
                                     EN
                                 </ThemedText>
                             </View>
@@ -102,30 +99,30 @@ function ProfileScreen() {
                                 style={[
                                     styles.languageOption,
                                     language === "ar" && styles.languageActive,
-                                ]}
-                            >
+                                ]}>
                                 <ThemedText
                                     style={[
                                         styles.languageOptionText,
                                         language === "ar" &&
                                             styles.languageActiveText,
                                     ]}
-                                >
+                                    fontSize={13}>
                                     AR
                                 </ThemedText>
                             </View>
                         </TouchableOpacity>
                     </View>
                     <InfoRow label="Phone" value={user?.mobile!} />
-                    <InfoRow label="Address" value={user?.address!} />
+                    <InfoRow label="Address" value={user?.address! || "-"} />
                 </View>
 
                 {/* Logout */}
                 <TouchableOpacity
                     style={styles.logoutRow}
-                    onPress={() => logout()}
-                >
-                    <ThemedText style={styles.logoutText}>Log Out</ThemedText>
+                    onPress={() => logout()}>
+                    <ThemedText style={styles.logoutText} fontSize={14}>
+                        Log Out
+                    </ThemedText>
                     <Icons.LogoutIcon size={20} color="#EF4444" />
                 </TouchableOpacity>
             </PullToRefreshScrollView>
@@ -144,7 +141,7 @@ const styles = StyleSheet.create({
     },
     scrollContent: {
         paddingTop: 10,
-        paddingBottom: 100,
+        paddingBottom: 150,
         gap: 30,
     },
 
@@ -172,14 +169,12 @@ const styles = StyleSheet.create({
 
     profileName: {
         fontFamily: "Poppins_600SemiBold",
-        fontSize: 16,
         color: Palette.slate500,
         textTransform: "capitalize",
         textAlign: "center",
     },
     profileEmail: {
         fontFamily: "Poppins_400Regular",
-        fontSize: 14,
         color: Palette.slate300,
         textAlign: "center",
     },
@@ -193,7 +188,6 @@ const styles = StyleSheet.create({
     },
     languageLabel: {
         fontFamily: "Poppins-SemiBold",
-        fontSize: 14,
         color: Palette.slate500,
         textTransform: "capitalize",
     },
@@ -216,7 +210,6 @@ const styles = StyleSheet.create({
     },
     languageOptionText: {
         fontFamily: "Poppins-Medium",
-        fontSize: 13,
         color: Palette.slate500,
     },
     languageActiveText: {
@@ -237,18 +230,6 @@ const styles = StyleSheet.create({
         alignItems: "center",
         paddingVertical: 14,
     },
-    infoLabel: {
-        fontFamily: "Poppins_500Medium",
-        fontSize: 13,
-        color: Palette.slate500,
-        textTransform: "capitalize",
-    },
-    infoValue: {
-        fontFamily: "Poppins_500Medium",
-        fontSize: 13,
-        color: Palette.brand[500],
-        textTransform: "capitalize",
-    },
     divider: {
         height: 1,
         backgroundColor: Palette.brand[100],
@@ -263,7 +244,6 @@ const styles = StyleSheet.create({
     },
     logoutText: {
         fontFamily: "Poppins_600SemiBold",
-        fontSize: 14,
         color: "#EF4444",
         textTransform: "capitalize",
     },

@@ -10,7 +10,9 @@ interface ErrorProps {
 export const Error: React.FC<ErrorProps> = ({ message, style }) => {
     return (
         <View style={[styles.container, style]}>
-            <ThemedText style={styles.errorText}>{message}</ThemedText>
+            <ThemedText style={styles.errorText} fontSize={14}>
+                {message}
+            </ThemedText>
         </View>
     );
 };
@@ -26,7 +28,6 @@ const styles = StyleSheet.create({
     },
     errorText: {
         color: "#d32f2f",
-        fontSize: 14,
         fontWeight: "500",
         textAlign: "center",
     },

@@ -169,7 +169,9 @@ export default function NotificationsScreen() {
         return (
             <View style={styles.loadingFooter}>
                 <ActivityIndicator size="small" color={Palette.brand[500]} />
-                <ThemedText style={styles.loadingText}>
+                <ThemedText
+                    style={styles.loadingText}
+                    fontSize={Typography.sizes.base}>
                     Loading more...
                 </ThemedText>
             </View>
@@ -184,7 +186,9 @@ export default function NotificationsScreen() {
                         size="large"
                         color={Palette.brand[500]}
                     />
-                    <ThemedText style={styles.loadingText}>
+                    <ThemedText
+                        style={styles.loadingText}
+                        fontSize={Typography.sizes.base}>
                         {t("notifications.loading")}
                     </ThemedText>
                 </View>
@@ -197,17 +201,22 @@ export default function NotificationsScreen() {
             <ScreenWrapper>
                 <CustomHeader title="notifications" />
                 <View style={styles.errorContainer}>
-                    <ThemedText style={styles.errorText}>
+                    <ThemedText
+                        style={styles.errorText}
+                        fontSize={Typography.sizes.base}>
                         Error loading notifications
                     </ThemedText>
-                    <ThemedText style={styles.errorDetail}>
+                    <ThemedText
+                        style={styles.errorDetail}
+                        fontSize={Typography.sizes.sm}>
                         {error?.message || "Unknown error occurred"}
                     </ThemedText>
                     <TouchableOpacity
                         style={styles.retryButton}
-                        onPress={() => refetch()}
-                    >
-                        <ThemedText style={styles.retryButtonText}>
+                        onPress={() => refetch()}>
+                        <ThemedText
+                            style={styles.retryButtonText}
+                            fontSize={Typography.sizes.base}>
                             Retry
                         </ThemedText>
                     </TouchableOpacity>
@@ -224,11 +233,15 @@ export default function NotificationsScreen() {
             {/* All Notifications Section */}
             <View style={styles.allNotificationsSection}>
                 <View style={styles.sectionHeader}>
-                    <ThemedText style={styles.sectionTitle}>
+                    <ThemedText
+                        style={styles.sectionTitle}
+                        fontSize={Typography.sizes.xl}>
                         all notifications
                     </ThemedText>
                     <View style={styles.notificationBadge}>
-                        <ThemedText style={styles.badgeText}>
+                        <ThemedText
+                            style={styles.badgeText}
+                            fontSize={Typography.sizes.sm}>
                             {totalCount}
                         </ThemedText>
                     </View>
@@ -237,10 +250,14 @@ export default function NotificationsScreen() {
                 {/* Notification list */}
                 {notifications.length === 0 && !isLoading ? (
                     <View style={styles.emptyContainer}>
-                        <ThemedText style={styles.emptyText}>
+                        <ThemedText
+                            style={styles.emptyText}
+                            fontSize={Typography.sizes.xl}>
                             No notifications yet
                         </ThemedText>
-                        <ThemedText style={styles.emptySubText}>
+                        <ThemedText
+                            style={styles.emptySubText}
+                            fontSize={Typography.sizes.md}>
                             You&apos;ll see your notifications here
                         </ThemedText>
                     </View>
@@ -283,12 +300,6 @@ const styles = StyleSheet.create({
         gap: 10,
         marginBottom: Spacing.sm,
     },
-    headerTitle: {
-        fontSize: Typography.sizes.xl,
-        fontWeight: Typography.weights.semiBold,
-        color: "#393838",
-        textTransform: "capitalize",
-    },
     divider: {
         height: 1,
         backgroundColor: "#E9F7FC",
@@ -306,7 +317,6 @@ const styles = StyleSheet.create({
         marginBottom: Spacing.lg,
     },
     sectionTitle: {
-        fontSize: Typography.sizes.xl,
         fontWeight: Typography.weights.semiBold,
         color: "#393838",
         textTransform: "capitalize",
@@ -320,7 +330,6 @@ const styles = StyleSheet.create({
         justifyContent: "center",
     },
     badgeText: {
-        fontSize: Typography.sizes.sm,
         fontWeight: Typography.weights.semiBold,
         color: Palette.brand[500],
     },
@@ -364,7 +373,6 @@ const styles = StyleSheet.create({
         gap: Spacing.md,
     },
     loadingText: {
-        fontSize: Typography.sizes.base,
         color: Palette.brand[300],
     },
     errorContainer: {
@@ -375,13 +383,11 @@ const styles = StyleSheet.create({
         paddingHorizontal: Spacing.xl,
     },
     errorText: {
-        fontSize: Typography.sizes.base,
         color: Palette.brand[300],
         textAlign: "center",
         marginBottom: Spacing.sm,
     },
     errorDetail: {
-        fontSize: Typography.sizes.sm,
         color: Palette.brand[200],
         textAlign: "center",
         marginBottom: Spacing.lg,
@@ -393,7 +399,6 @@ const styles = StyleSheet.create({
         borderRadius: Radii.md,
     },
     retryButtonText: {
-        fontSize: Typography.sizes.base,
         color: Palette.white,
         fontWeight: Typography.weights.medium,
     },
@@ -404,20 +409,13 @@ const styles = StyleSheet.create({
         paddingVertical: Spacing["3xl"],
     },
     emptyText: {
-        fontSize: Typography.sizes.xl,
         color: Palette.brand[300],
         textAlign: "center",
         marginBottom: Spacing.sm,
     },
     emptySubText: {
-        fontSize: Typography.sizes.md,
         color: Palette.brand[200],
         textAlign: "center",
-    },
-    emptySubloadingText: {
-        fontSize: Typography.sizes.md,
-        color: Palette.slate600,
-        marginTop: Spacing.sm,
     },
     loadingFooter: {
         paddingVertical: Spacing.lg,

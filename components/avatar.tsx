@@ -20,8 +20,7 @@ const Avatar = ({ image, name, size, badge, icon }: AvatarProps) => {
                     width: size,
                     height: size,
                 },
-            ]}
-        >
+            ]}>
             <View style={styles.avatarInner}>
                 {image ? (
                     <Image
@@ -31,15 +30,13 @@ const Avatar = ({ image, name, size, badge, icon }: AvatarProps) => {
                     />
                 ) : icon ? (
                     <View
-                        style={[styles.avatarImage, styles.avatarPlaceholder]}
-                    >
+                        style={[styles.avatarImage, styles.avatarPlaceholder]}>
                         {icon}
                     </View>
                 ) : (
                     <View
-                        style={[styles.avatarImage, styles.avatarPlaceholder]}
-                    >
-                        <ThemedText style={styles.avatarInitial}>
+                        style={[styles.avatarImage, styles.avatarPlaceholder]}>
+                        <ThemedText style={styles.avatarInitial} fontSize={20}>
                             {name?.charAt(0)?.toUpperCase() || "?"}
                         </ThemedText>
                     </View>
@@ -47,7 +44,7 @@ const Avatar = ({ image, name, size, badge, icon }: AvatarProps) => {
             </View>
             {badge && (
                 <View style={styles.badgeContainer}>
-                    <ThemedText style={styles.studentBadgeText}>
+                    <ThemedText style={styles.studentBadgeText} fontSize={10}>
                         {badge}
                     </ThemedText>
                 </View>
@@ -83,7 +80,6 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     avatarInitial: {
-        fontSize: 20,
         fontWeight: "bold",
         color: Palette.brand[500],
     },
@@ -99,7 +95,6 @@ const styles = StyleSheet.create({
     },
     studentBadgeText: {
         fontFamily: "Poppins_400Regular",
-        fontSize: 10,
         color: Palette.brand[50],
         textTransform: "capitalize",
     },

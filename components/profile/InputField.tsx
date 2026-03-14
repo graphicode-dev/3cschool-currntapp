@@ -22,13 +22,14 @@ function InputField({
 }: InputFieldProps) {
     return (
         <View style={styles.inputWrapper}>
-            <ThemedText style={styles.inputLabel}>{label}</ThemedText>
+            <ThemedText style={styles.inputLabel} fontSize={14}>
+                {label}
+            </ThemedText>
             <View
                 style={[
                     styles.inputContainer,
                     !!error && styles.inputContainerError,
-                ]}
-            >
+                ]}>
                 <TextInput
                     style={styles.textInput}
                     value={value}
@@ -41,7 +42,9 @@ function InputField({
                 )}
             </View>
             {!!error && (
-                <ThemedText style={styles.errorText}>{error}</ThemedText>
+                <ThemedText style={styles.errorText} fontSize={12}>
+                    {error}
+                </ThemedText>
             )}
         </View>
     );
@@ -55,7 +58,6 @@ const styles = StyleSheet.create({
     },
     inputLabel: {
         fontFamily: "Poppins-SemiBold",
-        fontSize: 14,
         color: Palette.slate500,
         textTransform: "capitalize",
     },
@@ -89,7 +91,6 @@ const styles = StyleSheet.create({
     },
     errorText: {
         fontFamily: "Poppins-Regular",
-        fontSize: 12,
         color: "#e53e3e",
         marginTop: 2,
     },

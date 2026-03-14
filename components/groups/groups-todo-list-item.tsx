@@ -90,8 +90,7 @@ const GroupsTasksListItem: React.FC<Props> = ({
                 styles.card,
                 isDone && styles.cardDone,
                 { opacity: mountOpacity, transform: [{ translateY: mountY }] },
-            ]}
-        >
+            ]}>
             {/* Checkbox */}
             <TouchableOpacity onPress={handleToggle} activeOpacity={0.8}>
                 <Animated.View
@@ -99,10 +98,11 @@ const GroupsTasksListItem: React.FC<Props> = ({
                         styles.checkbox,
                         isDone && styles.checkboxDone,
                         { transform: [{ scale: checkScale }] },
-                    ]}
-                >
+                    ]}>
                     {isDone && (
-                        <ThemedText style={styles.checkmark}>✓</ThemedText>
+                        <ThemedText style={styles.checkmark} fontSize={16}>
+                            ✓
+                        </ThemedText>
                     )}
                 </Animated.View>
             </TouchableOpacity>
@@ -111,15 +111,17 @@ const GroupsTasksListItem: React.FC<Props> = ({
             <TouchableOpacity
                 style={styles.textContainer}
                 onPress={handleToggle}
-                activeOpacity={0.7}
-            >
+                activeOpacity={0.7}>
                 <ThemedText
                     style={[styles.title, isDone && styles.titleDone]}
                     numberOfLines={2}
-                >
+                    fontSize={14}>
                     {task.title}
                 </ThemedText>
-                <ThemedText style={styles.subtitle} numberOfLines={1}>
+                <ThemedText
+                    style={styles.subtitle}
+                    numberOfLines={1}
+                    fontSize={12}>
                     {task.subtitle}
                 </ThemedText>
             </TouchableOpacity>
@@ -129,14 +131,13 @@ const GroupsTasksListItem: React.FC<Props> = ({
                 style={[
                     styles.badge,
                     isDone ? styles.badgeDone : styles.badgeTodo,
-                ]}
-            >
+                ]}>
                 <ThemedText
                     style={[
                         styles.badgeText,
                         isDone ? styles.badgeTextDone : styles.badgeTextTodo,
                     ]}
-                >
+                    fontSize={12}>
                     {isDone ? "Done" : "To Do"}
                 </ThemedText>
             </Animated.View>
@@ -147,9 +148,8 @@ const GroupsTasksListItem: React.FC<Props> = ({
                     style={styles.deleteBtn}
                     onPress={handleDeletePress}
                     activeOpacity={0.8}
-                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                >
-                    <ThemedText style={styles.deleteBtnIcon}>🗑</ThemedText>
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                    <ThemedText fontSize={15}>🗑</ThemedText>
                 </TouchableOpacity>
             </Animated.View>
         </Animated.View>
@@ -191,17 +191,16 @@ const styles = StyleSheet.create({
         borderColor: "#4DC8E0",
         backgroundColor: "#e8f9fc",
     },
-    checkmark: { color: "#4DC8E0", fontSize: 16, fontWeight: "700" },
+    checkmark: { color: "#4DC8E0", fontWeight: "700" },
     textContainer: { flex: 1, marginRight: 8 },
     title: {
-        fontSize: 14,
         fontWeight: "600",
         color: "#2d3a4a",
         marginBottom: 3,
         lineHeight: 19,
     },
     titleDone: { color: "#a0b4bf", textDecorationLine: "line-through" },
-    subtitle: { fontSize: 12, color: "#a0b4bf" },
+    subtitle: { color: "#a0b4bf" },
     badge: {
         paddingHorizontal: 12,
         paddingVertical: 5,
@@ -212,7 +211,7 @@ const styles = StyleSheet.create({
     },
     badgeTodo: { backgroundColor: "#ede8f8" },
     badgeDone: { backgroundColor: "#e2f7ed" },
-    badgeText: { fontSize: 12, fontWeight: "600" },
+    badgeText: { fontWeight: "600" },
     badgeTextTodo: { color: "#9b85d9" },
     badgeTextDone: { color: "#4cba7e" },
     deleteBtn: {
@@ -223,5 +222,4 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
     },
-    deleteBtnIcon: { fontSize: 15 },
 });

@@ -12,7 +12,7 @@ const GroupsList = ({ data }: GroupsListProps) => {
     if (!data.length) {
         return (
             <View style={styles.empty}>
-                <ThemedText style={styles.emptyText}>
+                <ThemedText style={styles.emptyText} fontSize={14}>
                     No groups found
                 </ThemedText>
             </View>
@@ -42,7 +42,6 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     emptyText: {
-        fontSize: 14,
         fontFamily: "Poppins-Regular",
         color: "#7A7A7A",
     },

@@ -1,6 +1,5 @@
 import { Icons } from "@/constants/icons";
 import { Palette } from "@/constants/theme";
-import { router } from "expo-router";
 import { useState } from "react";
 import { Animated, StyleSheet, TouchableOpacity, View } from "react-native";
 import { ThemedText } from "../themed-text";
@@ -23,32 +22,27 @@ const GroupsFloatingMessageButton = ({ groupId }: Props) => {
             tension: 100,
             friction: 8,
         }).start();
-        setTimeout(() => {
-            Animated.spring(instructorAnim, {
-                toValue: show ? 1 : 0,
-                useNativeDriver: true,
-                tension: 100,
-                friction: 8,
-            }).start();
-        }, show ? 80 : 0);
+        setTimeout(
+            () => {
+                Animated.spring(instructorAnim, {
+                    toValue: show ? 1 : 0,
+                    useNativeDriver: true,
+                    tension: 100,
+                    friction: 8,
+                }).start();
+            },
+            show ? 80 : 0,
+        );
     };
 
     const dismiss = () => toggle(false);
 
     const onPressInstructor = () => {
         dismiss();
-        router.push({
-            pathname: "/(app)/(tabs)/groups/chat/instructor",
-            params: { groupId },
-        });
     };
 
     const onPressGroup = () => {
         dismiss();
-        router.push({
-            pathname: "/(app)/(tabs)/groups/chat/group",
-            params: { groupId },
-        });
     };
 
     const animStyle = (anim: Animated.Value) => ({
@@ -73,34 +67,41 @@ const GroupsFloatingMessageButton = ({ groupId }: Props) => {
         <>
             <TouchableOpacity
                 style={styles.container}
-                onPress={() => toggle(!pressed)}
-            >
+                onPress={() => toggle(!pressed)}>
                 <Icons.SingleChatIcon color="white" size={40} />
             </TouchableOpacity>
 
             {pressed && (
                 <View style={styles.popUpContainer}>
-                    <Animated.View style={[styles.popUpItem, animStyle(groupAnim)]}>
+                    <Animated.View
+                        style={[styles.popUpItem, animStyle(groupAnim)]}>
                         <TouchableOpacity
                             style={styles.popUpItemContent}
-                            onPress={onPressGroup}
-                        >
-                            <Icons.ChatIcon color={Palette.brand[500]} size={16} />
-                            <ThemedText style={styles.popUpItemText}>
+                            onPress={onPressGroup}>
+                            <Icons.ChatIcon
+                                color={Palette.brand[500]}
+                                size={16}
+                            />
+                            <ThemedText
+                                style={styles.popUpItemText}
+                                fontSize={14}>
                                 Chat Group
                             </ThemedText>
                         </TouchableOpacity>
                     </Animated.View>
 
                     <Animated.View
-                        style={[styles.popUpItem, animStyle(instructorAnim)]}
-                    >
+                        style={[styles.popUpItem, animStyle(instructorAnim)]}>
                         <TouchableOpacity
                             style={styles.popUpItemContent}
-                            onPress={onPressInstructor}
-                        >
-                            <Icons.QuizIcon color={Palette.brand[500]} size={16} />
-                            <ThemedText style={styles.popUpItemText}>
+                            onPress={onPressInstructor}>
+                            <Icons.QuizIcon
+                                color={Palette.brand[500]}
+                                size={16}
+                            />
+                            <ThemedText
+                                style={styles.popUpItemText}
+                                fontSize={14}>
                                 Ask Instructor
                             </ThemedText>
                         </TouchableOpacity>
@@ -147,6 +148,5 @@ const styles = StyleSheet.create({
     },
     popUpItemText: {
         color: Palette.brand[500],
-        fontSize: 14,
     },
 });

@@ -87,25 +87,29 @@ export function SessionCard({ session }: Props) {
             <ImageBackground
                 source={Images.groupCardBg}
                 style={styles.bg}
-                resizeMode="cover"
-            >
+                resizeMode="cover">
                 <View style={styles.info}>
                     <View style={styles.textGroup}>
-                        <ThemedText style={styles.title} numberOfLines={1}>
+                        <ThemedText
+                            style={styles.title}
+                            fontSize={16}
+                            numberOfLines={1}>
                             {title}
                         </ThemedText>
-                        <ThemedText style={styles.desc}>{desc}</ThemedText>
+                        <ThemedText style={styles.desc} fontSize={13}>
+                            {desc}
+                        </ThemedText>
                     </View>
                     <View style={styles.metaRow}>
                         <View style={styles.metaItem}>
                             <Icons.CalenderIcon color="white" size={16} />
-                            <ThemedText style={styles.metaText}>
+                            <ThemedText style={styles.metaText} fontSize={13}>
                                 {fmtDate(session.start_date)}
                             </ThemedText>
                         </View>
                         <View style={styles.metaItem}>
                             <Icons.ClockIcon color="white" size={16} />
-                            <ThemedText style={styles.metaText}>
+                            <ThemedText style={styles.metaText} fontSize={13}>
                                 {fmtTime(session.start_time)}
                             </ThemedText>
                         </View>
@@ -119,11 +123,10 @@ export function SessionCard({ session }: Props) {
                             backgroundColor: badge.bg,
                             borderColor: badge.border,
                         },
-                    ]}
-                >
+                    ]}>
                     <ThemedText
                         style={[styles.badgeText, { color: badge.text }]}
-                    >
+                        fontSize={10}>
                         {status}
                     </ThemedText>
                 </View>
@@ -150,20 +153,17 @@ const styles = StyleSheet.create({
     info: { flex: 1, gap: 6 },
     textGroup: { gap: 2 },
     title: {
-        fontSize: 16,
         fontFamily: "Poppins-SemiBold",
         color: "#E9F7FC",
         textTransform: "capitalize",
     },
     desc: {
-        fontSize: 13,
         fontFamily: "Poppins-Regular",
         color: "#EBEBEB",
     },
     metaRow: { flexDirection: "row", alignItems: "center", gap: 12 },
     metaItem: { flexDirection: "row", alignItems: "center", gap: 4 },
     metaText: {
-        fontSize: 13,
         fontFamily: "Poppins-Medium",
         color: "#E9F7FC",
     },
@@ -175,7 +175,6 @@ const styles = StyleSheet.create({
         alignSelf: "flex-start",
     },
     badgeText: {
-        fontSize: 10,
         fontFamily: "Poppins-Medium",
         textTransform: "capitalize",
     },

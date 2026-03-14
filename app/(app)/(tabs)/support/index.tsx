@@ -97,16 +97,15 @@ const TicketCard = ({ ticket }: { ticket: MappedTicket }) => {
                     pathname: "/(app)/(tabs)/support/[id]",
                     params: { id: String(ticket.id) },
                 })
-            }
-        >
+            }>
             <View style={styles.ticketHeader}>
-                <ThemedText style={styles.ticketTitle}>
+                <ThemedText style={styles.ticketTitle} fontSize={14}>
                     {ticket.title}
                 </ThemedText>
                 <View style={styles.headerRight}>
                     {ticket.unreadCount > 0 && (
                         <View style={styles.unreadBadge}>
-                            <ThemedText style={styles.unreadText}>
+                            <ThemedText style={styles.unreadText} fontSize={10}>
                                 {ticket.unreadCount}
                             </ThemedText>
                         </View>
@@ -115,11 +114,10 @@ const TicketCard = ({ ticket }: { ticket: MappedTicket }) => {
                         style={[
                             styles.statusBadge,
                             { backgroundColor: "#e9f7fc" },
-                        ]}
-                    >
+                        ]}>
                         <ThemedText
                             style={[styles.statusText, { color: sc.text }]}
-                        >
+                            fontSize={10}>
                             {ticket.status.replace("_", " ")}
                         </ThemedText>
                     </View>
@@ -129,7 +127,10 @@ const TicketCard = ({ ticket }: { ticket: MappedTicket }) => {
                 {ticket.description}
             </ThemedText> */}
             {ticket.lastMessage && (
-                <ThemedText style={styles.ticketDescription} numberOfLines={1}>
+                <ThemedText
+                    style={styles.ticketDescription}
+                    numberOfLines={1}
+                    fontSize={12}>
                     {ticket.lastMessage.attachment
                         ? "📎 " + (ticket.lastMessage.message || "Attachment")
                         : ticket.lastMessage.message || "No message"}
@@ -139,7 +140,7 @@ const TicketCard = ({ ticket }: { ticket: MappedTicket }) => {
                 <View style={styles.ticketLeftInfo}>
                     <View style={styles.dateContainer}>
                         <Icons.ClockIcon size={18} color={Palette.brand[500]} />
-                        <ThemedText style={styles.dateText}>
+                        <ThemedText style={styles.dateText} fontSize={11}>
                             {formatDate(ticket.created_at)}
                         </ThemedText>
                     </View>
@@ -150,12 +151,14 @@ const TicketCard = ({ ticket }: { ticket: MappedTicket }) => {
                                 color: pc.text,
                             },
                         ]}
-                    >
+                        fontSize={10}>
                         #{ticket.priority}
                     </ThemedText>
                 </View>
                 <View style={styles.viewButton}>
-                    <ThemedText style={styles.viewText}>View</ThemedText>
+                    <ThemedText style={styles.viewText} fontSize={10}>
+                        View
+                    </ThemedText>
                     <Icons.ArrowIcon
                         size={16}
                         color={Palette.slate500}
@@ -183,8 +186,7 @@ export default function SupportScreen() {
                 <PullToRefreshScrollView
                     refetches={[refetch]}
                     style={styles.scrollView}
-                    contentContainerStyle={styles.scrollContent}
-                >
+                    contentContainerStyle={styles.scrollContent}>
                     {/* Hero Section */}
                     <View style={styles.heroSection}>
                         <View style={styles.heroBackground}>
@@ -197,8 +199,7 @@ export default function SupportScreen() {
                                     justifyContent: "center",
                                     alignItems: "center",
                                     gap: 16,
-                                }}
-                            >
+                                }}>
                                 {/* Content */}
                                 <View style={styles.heroIconContainer}>
                                     <Icons.QuestionIcon
@@ -207,10 +208,14 @@ export default function SupportScreen() {
                                     />
                                 </View>
                                 <View style={styles.heroTextContainer}>
-                                    <ThemedText style={styles.heroTitle}>
+                                    <ThemedText
+                                        style={styles.heroTitle}
+                                        fontSize={16}>
                                         How can we help you?
                                     </ThemedText>
-                                    <ThemedText style={styles.heroSubtitle}>
+                                    <ThemedText
+                                        style={styles.heroSubtitle}
+                                        fontSize={13}>
                                         Our support team here for you!
                                     </ThemedText>
                                 </View>
@@ -220,7 +225,7 @@ export default function SupportScreen() {
 
                     {/* My Tickets Section */}
                     <View style={styles.ticketsSection}>
-                        <ThemedText style={styles.sectionTitle}>
+                        <ThemedText style={styles.sectionTitle} fontSize={16}>
                             My Tickets
                         </ThemedText>
                         <View style={styles.ticketsList}>
@@ -236,10 +241,10 @@ export default function SupportScreen() {
                                     size={48}
                                     color={Palette.slate300}
                                 />
-                                <ThemedText style={styles.emptyText}>
+                                <ThemedText style={styles.emptyText} fontSize={18}>
                                     No tickets yet
                                 </ThemedText>
-                                <ThemedText style={styles.emptySubText}>
+                                <ThemedText style={styles.emptySubText} fontSize={13}>
                                     Tap the + button to open a support ticket
                                 </ThemedText>
                             </View>
@@ -319,13 +324,11 @@ const styles = StyleSheet.create({
         width: 218,
     },
     heroTitle: {
-        fontSize: 16,
         fontFamily: "Poppins_600SemiBold",
         color: "#ebebeb",
         textTransform: "capitalize",
     },
     heroSubtitle: {
-        fontSize: 13,
         fontFamily: "Poppins_400Regular",
         color: "#bbe6f6",
         textTransform: "capitalize",
@@ -335,7 +338,6 @@ const styles = StyleSheet.create({
         paddingBottom: 100,
     },
     sectionTitle: {
-        fontSize: 16,
         fontFamily: "Poppins_600SemiBold",
         color: "#393838",
         textTransform: "capitalize",
@@ -358,7 +360,6 @@ const styles = StyleSheet.create({
         marginBottom: 13,
     },
     ticketTitle: {
-        fontSize: 14,
         fontFamily: "Poppins_600SemiBold",
         color: "#393838",
         textTransform: "capitalize",
@@ -372,23 +373,15 @@ const styles = StyleSheet.create({
         paddingVertical: 2,
     },
     statusText: {
-        fontSize: 10,
         fontFamily: "Poppins_500Medium",
         color: "#6cc8ec",
         textTransform: "capitalize",
     },
     ticketDescription: {
-        fontSize: 12,
         fontFamily: "Poppins_400Regular",
         color: "#7a7a7a",
         marginBottom: 8,
         textTransform: "capitalize",
-    },
-    lastMsg: {
-        fontSize: 11,
-        fontFamily: "Poppins_400Regular",
-        color: Palette.slate400,
-        marginBottom: 10,
     },
     ticketFooter: {
         flexDirection: "row",
@@ -406,13 +399,11 @@ const styles = StyleSheet.create({
         gap: 4,
     },
     dateText: {
-        fontSize: 11,
         fontFamily: "Poppins_500Medium",
         color: Palette.brand[500],
         textTransform: "capitalize",
     },
     priorityText: {
-        fontSize: 10,
         fontFamily: "Poppins_600SemiBold",
         textTransform: "capitalize",
     },
@@ -422,7 +413,6 @@ const styles = StyleSheet.create({
         gap: 4,
     },
     viewText: {
-        fontSize: 10,
         fontFamily: "Poppins_600SemiBold",
         color: "#393838",
         textTransform: "capitalize",
@@ -447,12 +437,10 @@ const styles = StyleSheet.create({
         gap: 12,
     },
     emptyText: {
-        fontSize: 18,
         fontFamily: "Poppins-SemiBold",
         color: Palette.slate400,
     },
     emptySubText: {
-        fontSize: 13,
         fontFamily: "Poppins-Regular",
         color: Palette.slate300,
         textAlign: "center",
@@ -472,7 +460,6 @@ const styles = StyleSheet.create({
         justifyContent: "center",
     },
     unreadText: {
-        fontSize: 10,
         fontFamily: "Poppins_600SemiBold",
         color: "white",
         textAlign: "center",

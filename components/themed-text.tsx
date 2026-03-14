@@ -1,4 +1,9 @@
-import { StyleSheet, Text, type TextProps } from "react-native";
+import {
+    StyleSheet,
+    Text,
+    type TextProps,
+    useWindowDimensions,
+} from "react-native";
 
 import { Fonts } from "@/constants/theme";
 import { useTranslation } from "react-i18next";
@@ -7,6 +12,7 @@ export type ThemedTextProps = TextProps & {
     lightColor?: string;
     darkColor?: string;
     type?: "default" | "title" | "defaultSemiBold" | "subtitle" | "link";
+    fontSize?: number;
 };
 
 export function ThemedText({
@@ -14,10 +20,18 @@ export function ThemedText({
     lightColor,
     darkColor,
     type = "default",
+    fontSize,
     ...rest
 }: ThemedTextProps) {
     const { i18n } = useTranslation();
+    const { width } = useWindowDimensions();
     const lang = i18n.language === "ar" ? "ar" : "en";
+
+    // Scale fontSize responsively based on screen width
+    const responsiveFontSize =
+        fontSize !== undefined
+            ? Math.round((width / 375) * fontSize)
+            : undefined;
 
     // Get font based on language and type
     const getFontFamily = () => {
@@ -47,6 +61,9 @@ export function ThemedText({
                 type === "defaultSemiBold" ? styles.defaultSemiBold : undefined,
                 type === "subtitle" ? styles.subtitle : undefined,
                 type === "link" ? styles.link : undefined,
+                responsiveFontSize !== undefined && {
+                    fontSize: responsiveFontSize,
+                },
                 style,
             ]}
             {...rest}

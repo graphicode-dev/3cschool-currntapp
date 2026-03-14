@@ -154,10 +154,12 @@ export function ProgressCard({
     return (
         <View style={styles.card}>
             <View style={styles.left}>
-                <ThemedText style={styles.label}>{label}</ThemedText>
+                <ThemedText style={styles.label} fontSize={13}>
+                    {label}
+                </ThemedText>
 
                 {highlight && (
-                    <ThemedText style={styles.highlight}>
+                    <ThemedText style={styles.highlight} fontSize={13}>
                         {highlight}
                     </ThemedText>
                 )}
@@ -193,25 +195,17 @@ const styles = StyleSheet.create({
         gap: 2,
     },
     label: {
-        fontSize: 13,
         fontFamily: "Poppins-Regular",
         color: "#A4A3A3",
         textTransform: "lowercase",
     },
     highlight: {
-        fontSize: 13,
         fontFamily: "Poppins-Medium",
         color: "#24ADE3",
         textTransform: "lowercase",
     },
     countdownContainer: {
         gap: 2,
-    },
-    countdownLabel: {
-        fontSize: 10,
-        fontFamily: "Poppins-Medium",
-        color: "#A4A3A3",
-        textTransform: "lowercase",
     },
     timeContainer: {
         flexDirection: "row",
@@ -220,24 +214,5 @@ const styles = StyleSheet.create({
     },
     timeUnit: {
         alignItems: "center",
-    },
-    timeValue: {
-        fontSize: 16,
-        fontFamily: "Poppins-Bold",
-        color: "#24ADE3",
-        lineHeight: 16,
-    },
-    timeLabel: {
-        fontSize: 8,
-        fontFamily: "Poppins-Regular",
-        color: "#A4A3A3",
-        textTransform: "uppercase",
-        lineHeight: 8,
-    },
-    timeSeparator: {
-        fontSize: 14,
-        fontFamily: "Poppins-Bold",
-        color: "#24ADE3",
-        marginHorizontal: 2,
     },
 });

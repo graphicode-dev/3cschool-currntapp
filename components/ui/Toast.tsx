@@ -7,12 +7,7 @@ import React, {
     useRef,
     useState,
 } from "react";
-import {
-    Platform,
-    StyleSheet,
-    TouchableOpacity,
-    View,
-} from "react-native";
+import { Platform, StyleSheet, TouchableOpacity, View } from "react-native";
 import Animated, {
     SlideInUp,
     SlideOutUp,
@@ -161,25 +156,29 @@ function ToastItemComponent({
                     backgroundColor: bgColorMap[item.type],
                     borderLeftColor: borderColorMap[item.type],
                 },
-            ]}
-        >
+            ]}>
             <TouchableOpacity
                 activeOpacity={0.9}
                 onPress={() => {
                     onDismiss(item.id);
                     item.onDismiss?.();
                 }}
-                style={styles.toastContent}
-            >
+                style={styles.toastContent}>
                 <View style={styles.iconContainer}>
                     <Icon size={24} />
                 </View>
                 <View style={styles.textContainer}>
-                    <ThemedText style={styles.title} numberOfLines={1}>
+                    <ThemedText
+                        style={styles.title}
+                        fontSize={15}
+                        numberOfLines={1}>
                         {item.title}
                     </ThemedText>
                     {item.message ? (
-                        <ThemedText style={styles.message} numberOfLines={2}>
+                        <ThemedText
+                            style={styles.message}
+                            fontSize={13}
+                            numberOfLines={2}>
                             {item.message}
                         </ThemedText>
                     ) : null}
@@ -270,8 +269,7 @@ export const ToastProvider = React.forwardRef<
             {children}
             <View
                 style={[styles.container, { top: insets.top + 8 }]}
-                pointerEvents="box-none"
-            >
+                pointerEvents="box-none">
                 {toasts.map((item) => (
                     <ToastItemComponent
                         key={item.id}
@@ -330,13 +328,11 @@ const styles = StyleSheet.create({
         gap: 2,
     },
     title: {
-        fontSize: 15,
         fontWeight: "600",
         color: Palette.black,
         letterSpacing: -0.2,
     },
     message: {
-        fontSize: 13,
         color: Palette.brand[300],
         lineHeight: 18,
     },

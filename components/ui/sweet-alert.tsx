@@ -98,8 +98,7 @@ const SweetAlert: React.FC<SweetAlertProps> = ({
             transparent
             visible={visible}
             animationType="none"
-            onRequestClose={onCancel}
-        >
+            onRequestClose={onCancel}>
             <View style={styles.overlay}>
                 <Animated.View
                     style={[
@@ -108,34 +107,35 @@ const SweetAlert: React.FC<SweetAlertProps> = ({
                             opacity: fadeAnim,
                             transform: [{ scale: scaleAnim }],
                         },
-                    ]}
-                >
+                    ]}>
                     {/* Icon */}
                     <View
                         style={[
                             styles.iconContainer,
                             { backgroundColor: colors.iconBg },
-                        ]}
-                    >
-                        <ThemedText style={styles.icon}>
-                            {colors.icon}
-                        </ThemedText>
+                        ]}>
+                        <ThemedText fontSize={24}>{colors.icon}</ThemedText>
                     </View>
 
                     {/* Title */}
-                    <ThemedText style={styles.title}>{title}</ThemedText>
+                    <ThemedText style={styles.title} fontSize={18}>
+                        {title}
+                    </ThemedText>
 
                     {/* Message */}
-                    <ThemedText style={styles.message}>{message}</ThemedText>
+                    <ThemedText style={styles.message} fontSize={14}>
+                        {message}
+                    </ThemedText>
 
                     {/* Buttons */}
                     <View style={styles.buttonContainer}>
                         <TouchableOpacity
                             style={[styles.button, styles.cancelButton]}
                             onPress={onCancel}
-                            activeOpacity={0.8}
-                        >
-                            <ThemedText style={styles.cancelButtonText}>
+                            activeOpacity={0.8}>
+                            <ThemedText
+                                style={styles.cancelButtonText}
+                                fontSize={14}>
                                 {cancelText}
                             </ThemedText>
                         </TouchableOpacity>
@@ -147,14 +147,13 @@ const SweetAlert: React.FC<SweetAlertProps> = ({
                                 { backgroundColor: colors.confirmBg },
                             ]}
                             onPress={onConfirm}
-                            activeOpacity={0.8}
-                        >
+                            activeOpacity={0.8}>
                             <ThemedText
                                 style={[
                                     styles.confirmButtonText,
                                     { color: colors.confirmText },
                                 ]}
-                            >
+                                fontSize={14}>
                                 {confirmText}
                             </ThemedText>
                         </TouchableOpacity>
@@ -193,18 +192,13 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         marginBottom: 16,
     },
-    icon: {
-        fontSize: 24,
-    },
     title: {
-        fontSize: 18,
         fontWeight: "700",
         color: "#1f2937",
         textAlign: "center",
         marginBottom: 8,
     },
     message: {
-        fontSize: 14,
         color: "#6b7280",
         textAlign: "center",
         lineHeight: 20,
@@ -236,12 +230,10 @@ const styles = StyleSheet.create({
         elevation: 2,
     },
     cancelButtonText: {
-        fontSize: 14,
         fontWeight: "600",
         color: "#374151",
     },
     confirmButtonText: {
-        fontSize: 14,
         fontWeight: "600",
     },
 });

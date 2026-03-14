@@ -51,8 +51,7 @@ const GroupsMyTasks: React.FC = () => {
     return (
         <KeyboardAvoidingView
             style={styles.flex}
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
-        >
+            behavior={Platform.OS === "ios" ? "padding" : "height"}>
             <View style={styles.container}>
                 {/* Add input */}
                 <View style={styles.inputRow}>
@@ -66,17 +65,17 @@ const GroupsMyTasks: React.FC = () => {
                         returnKeyType="done"
                     />
                     <Animated.View
-                        style={{ transform: [{ scale: addBtnScale }] }}
-                    >
+                        style={{ transform: [{ scale: addBtnScale }] }}>
                         <TouchableOpacity
                             style={[
                                 styles.addButton,
                                 !inputValue.trim() && styles.addButtonDisabled,
                             ]}
                             onPress={handleAddTask}
-                            activeOpacity={0.85}
-                        >
-                            <ThemedText style={styles.addButtonIcon}>
+                            activeOpacity={0.85}>
+                            <ThemedText
+                                style={styles.addButtonIcon}
+                                fontSize={22}>
                                 ＋
                             </ThemedText>
                         </TouchableOpacity>
@@ -95,12 +94,13 @@ const GroupsMyTasks: React.FC = () => {
                                 prev === "todo" ? "all" : "todo",
                             )
                         }
-                        activeOpacity={0.8}
-                    >
-                        <ThemedText style={styles.statNumber}>
+                        activeOpacity={0.8}>
+                        <ThemedText style={styles.statNumber} fontSize={14}>
                             {todoCount}
                         </ThemedText>
-                        <ThemedText style={styles.statLabel}> To Do</ThemedText>
+                        <ThemedText style={styles.statLabel} fontSize={13}>
+                            To Do
+                        </ThemedText>
                     </TouchableOpacity>
 
                     <TouchableOpacity
@@ -114,16 +114,15 @@ const GroupsMyTasks: React.FC = () => {
                                 prev === "done" ? "all" : "done",
                             )
                         }
-                        activeOpacity={0.8}
-                    >
+                        activeOpacity={0.8}>
                         <ThemedText
                             style={[styles.statNumber, styles.statNumberDone]}
-                        >
+                            fontSize={14}>
                             {doneCount}
                         </ThemedText>
                         <ThemedText
                             style={[styles.statLabel, styles.statLabelDone]}
-                        >
+                            fontSize={13}>
                             {" "}
                             Done
                         </ThemedText>
@@ -181,7 +180,6 @@ const styles = StyleSheet.create({
     addButtonDisabled: { backgroundColor: "#a8dce8", shadowOpacity: 0.08 },
     addButtonIcon: {
         color: "#ffffff",
-        fontSize: 22,
         fontWeight: "300",
         lineHeight: 26,
     },
@@ -208,8 +206,8 @@ const styles = StyleSheet.create({
         backgroundColor: "#d4f0e2",
     },
 
-    statNumber: { fontSize: 14, fontWeight: "700", color: "#9b85d9" },
+    statNumber: { fontWeight: "700", color: "#9b85d9" },
     statNumberDone: { color: "#4cba7e" },
-    statLabel: { fontSize: 13, color: "#9b85d9", fontWeight: "500" },
+    statLabel: { color: "#9b85d9", fontWeight: "500" },
     statLabelDone: { color: "#4cba7e" },
 });

@@ -1,7 +1,12 @@
 import { Icons } from "@/constants/icons";
 import { Palette } from "@/constants/theme";
 import { router } from "expo-router";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
+import {
+    StyleSheet,
+    TouchableOpacity,
+    View,
+    useWindowDimensions,
+} from "react-native";
 import { ThemedText } from "../themed-text";
 
 type Props = {
@@ -17,21 +22,28 @@ const HomeInfoSection = ({
     shareIdeasText,
     chatText,
 }: Props) => {
+    const { width } = useWindowDimensions();
+    const scaleFont = (size: number) => Math.round((width / 375) * size);
+
     return (
         <View style={styles.container}>
             {/* LEFT — BIG CARD */}
             <View style={styles.motivationalCard}>
                 <View style={styles.motivationalContent}>
-                    <ThemedText style={styles.motivationalText}>
+                    <ThemedText
+                        style={[styles.motivationalText]}
+                        fontSize={scaleFont(25)}>
                         {motivational}
                     </ThemedText>
 
                     <TouchableOpacity
                         activeOpacity={0.8}
                         style={styles.continueButton}
-                        onPress={() => router.push("/(app)/(tabs)/groups")}
-                    >
-                        <ThemedText style={styles.continueButtonText}>
+                        onPress={() => router.push("/(app)/(tabs)/groups")}>
+                        <ThemedText
+                            style={[styles.continueButtonText]}
+                            fontSize={scaleFont(10)}
+                            numberOfLines={1}>
                             {continueButtonText}
                         </ThemedText>
 
@@ -46,7 +58,9 @@ const HomeInfoSection = ({
                 <View style={styles.smallCard}>
                     <Icons.ShareIcon />
 
-                    <ThemedText style={styles.smallCardText}>
+                    <ThemedText
+                        style={[styles.smallCardText]}
+                        fontSize={scaleFont(14)}>
                         {shareIdeasText}
                     </ThemedText>
                 </View>
@@ -55,7 +69,9 @@ const HomeInfoSection = ({
                 <View style={[styles.smallCard, styles.chatCard]}>
                     <Icons.ChatLoveIcon />
 
-                    <ThemedText style={styles.smallCardText}>
+                    <ThemedText
+                        style={[styles.smallCardText]}
+                        fontSize={scaleFont(14)}>
                         {chatText}
                     </ThemedText>
                 </View>
@@ -93,7 +109,6 @@ const styles = StyleSheet.create({
     },
 
     motivationalText: {
-        fontSize: 25,
         fontWeight: "700",
         color: Palette.slate900,
         fontFamily: "Poppins-SemiBold",
@@ -108,7 +123,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         gap: 8,
         paddingHorizontal: 16,
-        height: 40,
+        paddingVertical: 5,
         borderRadius: 999,
         backgroundColor: "#FFFFFF",
         borderWidth: 1,
@@ -116,7 +131,6 @@ const styles = StyleSheet.create({
     },
 
     continueButtonText: {
-        fontSize: 13,
         fontWeight: "600",
         color: Palette.brand[500],
         fontFamily: "Poppins-Medium",
@@ -147,7 +161,6 @@ const styles = StyleSheet.create({
 
     smallCardText: {
         flex: 1,
-        fontSize: 14,
         fontWeight: "600",
         color: Palette.slate900,
         fontFamily: "Poppins-SemiBold",

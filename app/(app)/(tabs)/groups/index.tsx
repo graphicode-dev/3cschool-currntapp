@@ -169,15 +169,13 @@ export default function GroupsScreen() {
             <PullToRefreshScrollView
                 refetches={[refetchGroups, refetchSessions]}
                 style={styles.scroll}
-                contentContainerStyle={styles.content}
-            >
+                contentContainerStyle={styles.content}>
                 {/* ── 1. Session banner ───────────────────────────────────── */}
                 <View style={styles.bannerSection}>
                     <RenderSection
                         isLoading={sessionsLoading}
                         error=""
-                        data={bannerSession}
-                    >
+                        data={bannerSession}>
                         {bannerSession ? (
                             <SessionCard session={bannerSession} />
                         ) : null}
@@ -199,7 +197,7 @@ export default function GroupsScreen() {
 
                 {/* ── 2. My Groups ────────────────────────────────────────── */}
                 <View style={styles.section}>
-                    <ThemedText style={styles.sectionTitle}>
+                    <ThemedText style={styles.sectionTitle} fontSize={20}>
                         My Groups
                     </ThemedText>
 
@@ -212,15 +210,14 @@ export default function GroupsScreen() {
                     <RenderSection
                         isLoading={groupsLoading}
                         error={groupsError?.message ?? ""}
-                        data={groups}
-                    >
+                        data={groups}>
                         <GroupsList data={groups} />
                     </RenderSection>
                 </View>
 
                 {/* ── 3. My To-Do ─────────────────────────────────────────── */}
                 <View style={styles.section}>
-                    <ThemedText style={styles.sectionTitle}>
+                    <ThemedText style={styles.sectionTitle} fontSize={20}>
                         My To-Do
                     </ThemedText>
                     <GroupsMyTasks />
@@ -249,7 +246,6 @@ const styles = StyleSheet.create({
     section: { gap: 14 },
 
     sectionTitle: {
-        fontSize: 20,
         fontFamily: "Poppins-SemiBold",
         color: "#393838",
         textTransform: "capitalize",

@@ -9,7 +9,13 @@ import { Palette } from "@/constants/theme";
 import { useGroupChats } from "@/hooks/useGroupChats";
 import { useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useRef } from "react";
-import { ActivityIndicator, FlatList, StyleSheet, View } from "react-native";
+import {
+    ActivityIndicator,
+    FlatList,
+    StyleSheet,
+    View,
+    useWindowDimensions,
+} from "react-native";
 
 export default function ChatConversationScreen() {
     const params = useLocalSearchParams<{
@@ -20,6 +26,8 @@ export default function ChatConversationScreen() {
 
     const resolvedGroupId = params.groupId ?? params.id ?? "";
     const flatListRef = useRef<FlatList>(null);
+    const { width } = useWindowDimensions();
+    const responsivePaddingBottom = Math.round((width / 375) * 100);
 
     const {
         selectGroup,
@@ -126,7 +134,11 @@ export default function ChatConversationScreen() {
                 onScrollToIndexFailed={() => {}}
             />
 
-            <View style={styles.inputWrap}>
+            <View
+                style={[
+                    styles.inputWrap,
+                    { paddingBottom: responsivePaddingBottom },
+                ]}>
                 <ChatInput onSend={handleSendMessage} isSending={isSending} />
             </View>
         </ScreenWrapper>

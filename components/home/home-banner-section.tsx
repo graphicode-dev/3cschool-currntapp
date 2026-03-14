@@ -11,7 +11,6 @@ import {
     FlatList,
     Image,
     StyleSheet,
-    Text,
     TouchableOpacity,
     View,
     ViewToken,
@@ -22,6 +21,7 @@ import Animated, {
     withSpring,
 } from "react-native-reanimated";
 import { RenderSection } from "../RenderSection";
+import { ThemedText } from "../themed-text";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
@@ -173,16 +173,27 @@ const InlineVideoCard = ({
                 <TouchableOpacity
                     style={styles.videoPlayOverlay}
                     activeOpacity={0.8}
-                    onPress={handlePlay}
-                >
+                    onPress={handlePlay}>
                     {hasFinished ? (
                         <View style={styles.videoFinishedBadge}>
-                            <Text style={styles.videoFinishedIcon}>✓</Text>
-                            <Text style={styles.videoFinishedText}>Watched</Text>
+                            <ThemedText
+                                style={styles.videoFinishedIcon}
+                                fontSize={18}>
+                                ✓
+                            </ThemedText>
+                            <ThemedText
+                                style={styles.videoFinishedText}
+                                fontSize={14}>
+                                Watched
+                            </ThemedText>
                         </View>
                     ) : (
                         <View style={styles.videoPlayButton}>
-                            <Text style={styles.videoPlayIcon}>▶</Text>
+                            <ThemedText
+                                style={styles.videoPlayIcon}
+                                fontSize={22}>
+                                ▶
+                            </ThemedText>
                         </View>
                     )}
                 </TouchableOpacity>
@@ -193,28 +204,34 @@ const InlineVideoCard = ({
                     colors={[Palette.brand[400], Palette.brand[500]]}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 1 }}
-                    style={styles.badge}
-                >
-                    <Text style={styles.badgeText}>🎬 VIDEO</Text>
+                    style={styles.badge}>
+                    <ThemedText style={styles.badgeText} fontSize={11}>
+                        🎬 VIDEO
+                    </ThemedText>
                 </LinearGradient>
             </View>
 
             <View style={styles.contentArea} pointerEvents="none">
-                <Text style={styles.titleText} numberOfLines={2}>
+                <ThemedText
+                    style={styles.titleText}
+                    numberOfLines={2}
+                    fontSize={18}>
                     {banner.title}
-                </Text>
-                <Text style={styles.descriptionText} numberOfLines={1}>
+                </ThemedText>
+                <ThemedText
+                    style={styles.descriptionText}
+                    numberOfLines={1}
+                    fontSize={12}>
                     {banner.description}
-                </Text>
+                </ThemedText>
                 <LinearGradient
                     colors={[Palette.brand[400], Palette.brand[500]]}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 0 }}
-                    style={styles.ctaButton}
-                >
-                    <Text style={styles.ctaText}>
+                    style={styles.ctaButton}>
+                    <ThemedText style={styles.ctaText} fontSize={13}>
                         {hasFinished ? "✓ Watched" : "▶ Play"}
-                    </Text>
+                    </ThemedText>
                 </LinearGradient>
             </View>
         </View>
@@ -259,23 +276,33 @@ const ImageBannerCard = ({ banner }: { banner: Banner }) => {
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 1 }}
                     style={styles.badge}>
-                    <Text style={styles.badgeText}>🖼 IMAGE</Text>
+                    <ThemedText style={styles.badgeText} fontSize={11}>
+                        🖼 IMAGE
+                    </ThemedText>
                 </LinearGradient>
             </View>
 
             <View style={styles.contentArea}>
-                <Text style={styles.titleText} numberOfLines={2}>
+                <ThemedText
+                    style={styles.titleText}
+                    numberOfLines={2}
+                    fontSize={18}>
                     {banner.title}
-                </Text>
-                <Text style={styles.descriptionText} numberOfLines={1}>
+                </ThemedText>
+                <ThemedText
+                    style={styles.descriptionText}
+                    numberOfLines={1}
+                    fontSize={12}>
                     {banner.description}
-                </Text>
+                </ThemedText>
                 <LinearGradient
                     colors={[Palette.brand[400], Palette.brand[500]]}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 0 }}
                     style={styles.ctaButton}>
-                    <Text style={styles.ctaText}>→ Explore</Text>
+                    <ThemedText style={styles.ctaText} fontSize={13}>
+                        → Explore
+                    </ThemedText>
                 </LinearGradient>
             </View>
         </TouchableOpacity>
@@ -288,7 +315,10 @@ const HomeBannerSection = () => {
 
     useEffect(() => {
         if (banners.length > 0) {
-            console.log("📺 Banners API response:", JSON.stringify(banners, null, 2));
+            console.log(
+                "📺 Banners API response:",
+                JSON.stringify(banners, null, 2),
+            );
         }
     }, [banners]);
     const [activeIndex, setActiveIndex] = useState(0);
@@ -493,7 +523,6 @@ const styles = StyleSheet.create({
     },
     videoPlayIcon: {
         color: "#fff",
-        fontSize: 22,
         fontWeight: "900",
         marginLeft: 3,
     },
@@ -510,12 +539,10 @@ const styles = StyleSheet.create({
     },
     videoFinishedIcon: {
         color: "#22c55e",
-        fontSize: 18,
         fontWeight: "900",
     },
     videoFinishedText: {
         color: "#fff",
-        fontSize: 14,
         fontWeight: "700",
         letterSpacing: 0.3,
     },
@@ -548,7 +575,6 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
     },
     badgeText: {
-        fontSize: 11,
         fontWeight: "800",
         color: "white",
         letterSpacing: 0.8,
@@ -563,7 +589,6 @@ const styles = StyleSheet.create({
         gap: 5,
     },
     titleText: {
-        fontSize: 18,
         fontWeight: "900",
         color: "#FFFFFF",
         letterSpacing: 0.2,
@@ -573,7 +598,6 @@ const styles = StyleSheet.create({
         lineHeight: 24,
     },
     descriptionText: {
-        fontSize: 12,
         color: "rgba(255,255,255,0.85)",
         lineHeight: 17,
         textShadowColor: "rgba(0,0,0,0.5)",
@@ -593,7 +617,6 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
     },
     ctaText: {
-        fontSize: 13,
         fontWeight: "800",
         color: "white",
         letterSpacing: 0.4,

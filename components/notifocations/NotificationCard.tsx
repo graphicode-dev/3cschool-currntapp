@@ -41,11 +41,9 @@ export function NotificationCard({
                     swipeableRef.current?.close();
                     onDelete(item.id);
                 }}
-                style={styles.swipeContainer}
-            >
+                style={styles.swipeContainer}>
                 <Animated.View
-                    style={[styles.deleteButton, { transform: [{ scale }] }]}
-                >
+                    style={[styles.deleteButton, { transform: [{ scale }] }]}>
                     <Icons.TrashIcon size={20} color="#393838" />
                 </Animated.View>
             </TouchableOpacity>
@@ -60,8 +58,7 @@ export function NotificationCard({
             leftThreshold={isRTL ? 40 : undefined}
             rightThreshold={isRTL ? undefined : 40}
             renderLeftActions={isRTL ? renderDeleteAction : undefined}
-            renderRightActions={isRTL ? undefined : renderDeleteAction}
-        >
+            renderRightActions={isRTL ? undefined : renderDeleteAction}>
             <View style={styles.notificationCard}>
                 <TouchableOpacity
                     activeOpacity={0.8}
@@ -69,26 +66,33 @@ export function NotificationCard({
                         if (!item.read_at) onRead(item.id);
                         onNavigate(item);
                     }}
-                    style={styles.cardContent}
-                >
+                    style={styles.cardContent}>
                     <View style={styles.cardHeader}>
                         <View style={styles.cardTitleRow}>
-                            <Icons.BellIcon size={30} color={Palette.brand[500]} />
-                            <ThemedText style={styles.cardTitle}>
+                            <Icons.BellIcon
+                                size={30}
+                                color={Palette.brand[500]}
+                            />
+                            <ThemedText
+                                style={styles.cardTitle}
+                                fontSize={Typography.sizes.lg}>
                                 {item.title}
                             </ThemedText>
                         </View>
                         {!item.read_at && <View style={styles.unreadDot} />}
                     </View>
-                    <ThemedText style={styles.cardBody}>{item.message}</ThemedText>
+                    <ThemedText
+                        style={styles.cardBody}
+                        fontSize={Typography.sizes.base}>
+                        {item.message}
+                    </ThemedText>
                 </TouchableOpacity>
 
                 {!item.read_at && (
                     <TouchableOpacity
                         style={styles.deleteButton}
                         onPress={() => onDelete(item.id)}
-                        activeOpacity={0.8}
-                    >
+                        activeOpacity={0.8}>
                         <Icons.TrashIcon size={20} color="#393838" />
                     </TouchableOpacity>
                 )}
@@ -127,7 +131,6 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     cardTitle: {
-        fontSize: Typography.sizes.lg,
         fontWeight: Typography.weights.semiBold,
         color: Palette.brand[500],
         letterSpacing: -0.154,
@@ -140,7 +143,6 @@ const styles = StyleSheet.create({
         backgroundColor: Palette.brand[500],
     },
     cardBody: {
-        fontSize: Typography.sizes.base,
         fontWeight: Typography.weights.regular,
         color: "#A4A3A3",
         letterSpacing: -0.132,

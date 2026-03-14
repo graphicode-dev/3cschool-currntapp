@@ -23,8 +23,7 @@ const CustomHeader = ({ title, href, divider, avatar }: Props) => {
         <View>
             <TouchableOpacity
                 onPress={() => (href ? router.push(href) : router.back())}
-                style={styles.container}
-            >
+                style={styles.container}>
                 <Icons.ArrowIcon
                     color={Palette.brand[500]}
                     size={24}
@@ -40,7 +39,9 @@ const CustomHeader = ({ title, href, divider, avatar }: Props) => {
                         icon={avatar.icon}
                     />
                 )}
-                <ThemedText style={styles.title}>{title}</ThemedText>
+                <ThemedText style={styles.title} fontSize={18}>
+                    {title}
+                </ThemedText>
             </TouchableOpacity>
             {divider && <View style={styles.headerDivider} />}
         </View>
@@ -55,7 +56,6 @@ const styles = StyleSheet.create({
         gap: 12,
     },
     title: {
-        fontSize: 18,
         fontWeight: "bold",
     },
     headerDivider: {

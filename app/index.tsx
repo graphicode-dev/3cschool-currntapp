@@ -197,7 +197,7 @@ export default function SplashScreen() {
 
     return (
         <View style={styles.container}>
-            <StatusBar style="dark" />
+            <StatusBar style="auto" />
 
             {/* Skip button */}
             <Animated.View style={[styles.skipBtn, { opacity: skipOpacity }]}>

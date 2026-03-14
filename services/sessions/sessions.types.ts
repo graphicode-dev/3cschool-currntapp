@@ -5,7 +5,7 @@ export interface Session {
     start_time: string;
     end_time: string;
     duration: string | null;
-    session_status: string | null;
+    session_status: "upcoming" | "completed" | "current" | null;
     bbb_meeting_id: string | null;
     recording_url: string | null;
     group: {

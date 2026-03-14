@@ -12,6 +12,7 @@ import {
     StyleSheet,
     TouchableOpacity,
     View,
+    useWindowDimensions,
 } from "react-native";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────-
@@ -19,11 +20,11 @@ import {
 const priorityColor = (p: string) => {
     switch (p?.toLowerCase()) {
         case "high":
-            return { bg: "#e9f0fe", text: Palette.brand[500] };
+            return { bg: "#e9f7fc", text: "#24ade3" };
         case "medium":
-            return { bg: "#f3f0fe", text: "#a7b5ff" };
+            return { bg: "#e4e8ff", text: "#98a5e8" };
         case "low":
-            return { bg: "#fff3f0", text: "#ff6748" };
+            return { bg: "#fff3dd", text: "#ff6748" };
         default:
             return { bg: Palette.slate100, text: Palette.slate500 };
     }
@@ -88,8 +89,7 @@ const TicketCard = ({ ticket }: { ticket: MappedTicket }) => {
             style={[
                 styles.ticketCard,
                 {
-                    backgroundColor: Palette.white,
-                    borderColor: Palette.slate200,
+                    backgroundColor: pc.bg,
                 },
             ]}
             onPress={() =>
@@ -113,7 +113,10 @@ const TicketCard = ({ ticket }: { ticket: MappedTicket }) => {
                     <View
                         style={[
                             styles.statusBadge,
-                            { backgroundColor: "#e9f7fc" },
+                            {
+                                backgroundColor: sc.bg,
+                                borderColor: sc.text,
+                            },
                         ]}>
                         <ThemedText
                             style={[styles.statusText, { color: sc.text }]}
@@ -144,16 +147,24 @@ const TicketCard = ({ ticket }: { ticket: MappedTicket }) => {
                             {formatDate(ticket.created_at)}
                         </ThemedText>
                     </View>
-                    <ThemedText
+                    <View
                         style={[
-                            styles.priorityText,
+                            styles.priorityBadge,
                             {
-                                color: pc.text,
+                                backgroundColor: pc.bg,
                             },
-                        ]}
-                        fontSize={10}>
-                        #{ticket.priority}
-                    </ThemedText>
+                        ]}>
+                        <ThemedText
+                            style={[
+                                styles.priorityText,
+                                {
+                                    color: pc.text,
+                                },
+                            ]}
+                            fontSize={10}>
+                            #{ticket.priority}
+                        </ThemedText>
+                    </View>
                 </View>
                 <View style={styles.viewButton}>
                     <ThemedText style={styles.viewText} fontSize={10}>
@@ -161,7 +172,7 @@ const TicketCard = ({ ticket }: { ticket: MappedTicket }) => {
                     </ThemedText>
                     <Icons.ArrowIcon
                         size={16}
-                        color={Palette.slate500}
+                        color={Palette.brand[500]}
                         direction={{ right: true }}
                     />
                 </View>
@@ -174,6 +185,8 @@ const TicketCard = ({ ticket }: { ticket: MappedTicket }) => {
 
 export default function SupportScreen() {
     const { tickets, refetch, isLoading } = useTicketChat();
+    const { width } = useWindowDimensions();
+    const fabSize = Math.round((width / 375) * 60);
 
     const onNewTicketPress = () => {
         router.push("/(app)/(tabs)/support/create");
@@ -241,10 +254,14 @@ export default function SupportScreen() {
                                     size={48}
                                     color={Palette.slate300}
                                 />
-                                <ThemedText style={styles.emptyText} fontSize={18}>
+                                <ThemedText
+                                    style={styles.emptyText}
+                                    fontSize={18}>
                                     No tickets yet
                                 </ThemedText>
-                                <ThemedText style={styles.emptySubText} fontSize={13}>
+                                <ThemedText
+                                    style={styles.emptySubText}
+                                    fontSize={13}>
                                     Tap the + button to open a support ticket
                                 </ThemedText>
                             </View>
@@ -254,8 +271,20 @@ export default function SupportScreen() {
             </ScreenWrapper>
 
             {/* Floating Action Button */}
-            <TouchableOpacity onPress={onNewTicketPress} style={styles.fab}>
-                <Icons.ChatIcon size={36} color="white" />
+            <TouchableOpacity
+                onPress={onNewTicketPress}
+                style={[
+                    styles.fab,
+                    {
+                        width: fabSize,
+                        height: fabSize,
+                        bottom: Math.round((width / 375) * 140),
+                    },
+                ]}>
+                <Icons.TicketChatIcon
+                    size={Math.round(fabSize * 0.5)}
+                    color="white"
+                />
             </TouchableOpacity>
         </>
     );
@@ -348,21 +377,22 @@ const styles = StyleSheet.create({
     ticketCard: {
         borderRadius: 22,
         borderWidth: 0.8,
-        borderColor: "#393838",
-        padding: 16,
+        borderColor: "black",
+        paddingHorizontal: 16,
+        paddingVertical: 12,
         backgroundColor: Palette.white,
-        minHeight: 116,
+        // minHeight: 116,
     },
     ticketHeader: {
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        marginBottom: 13,
     },
     ticketTitle: {
         fontFamily: "Poppins_600SemiBold",
         color: "#393838",
         textTransform: "capitalize",
+        fontWeight: "bold",
     },
     statusBadge: {
         backgroundColor: "#e9f7fc",
@@ -380,7 +410,6 @@ const styles = StyleSheet.create({
     ticketDescription: {
         fontFamily: "Poppins_400Regular",
         color: "#7a7a7a",
-        marginBottom: 8,
         textTransform: "capitalize",
     },
     ticketFooter: {
@@ -407,6 +436,11 @@ const styles = StyleSheet.create({
         fontFamily: "Poppins_600SemiBold",
         textTransform: "capitalize",
     },
+    priorityBadge: {
+        borderRadius: 31,
+        paddingHorizontal: 8,
+        paddingVertical: 2,
+    },
     viewButton: {
         flexDirection: "row",
         alignItems: "center",
@@ -416,13 +450,12 @@ const styles = StyleSheet.create({
         fontFamily: "Poppins_600SemiBold",
         color: "#393838",
         textTransform: "capitalize",
+        fontWeight: "bold",
     },
     fab: {
         position: "absolute",
         bottom: 120,
         right: 20,
-        width: 70,
-        height: 70,
         backgroundColor: Palette.brand[500],
         padding: 10,
         borderRadius: 50,

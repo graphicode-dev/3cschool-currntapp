@@ -3,8 +3,9 @@ import { groupsApi } from "@/services/groups/groups.api";
 import { groupsKeys } from "@/services/groups/groups.keys";
 import { useGroupChat, useGroupsList } from "@/services/groups/groups.queries";
 import { GroupMessage, LastGroupMessage } from "@/services/groups/groups.types";
+import { useFocusEffect } from "@react-navigation/native";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { useDebounce } from "./useDebounce";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -28,6 +29,8 @@ export interface MappedGroup {
     lastMessage?: LastGroupMessage;
     unreadCount: number;
     time: string;
+    courseTitle?: string;
+    capacity?: number;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -109,9 +112,33 @@ export const useGroupChats = () => {
         fetchNextPage,
         hasNextPage,
         isFetchingNextPage,
+        refetch,
     } = useGroupChat(selectedGroupId!, {
         enabled: !!selectedGroupId,
     });
+
+    // ── Polling on screen focus ───────────────────────────────────────────────
+
+    const pollingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+    useFocusEffect(
+        useCallback(() => {
+            if (!selectedGroupId) return;
+
+            // Start polling when screen becomes focused
+            pollingIntervalRef.current = setInterval(() => {
+                refetch();
+            }, 1000 * 10); // Poll every 10 seconds
+
+            // Cleanup on blur
+            return () => {
+                if (pollingIntervalRef.current) {
+                    clearInterval(pollingIntervalRef.current);
+                    pollingIntervalRef.current = null;
+                }
+            };
+        }, [selectedGroupId, refetch]),
+    );
 
     // ── Mutations ─────────────────────────────────────────────────────────────
 
@@ -131,6 +158,8 @@ export const useGroupChats = () => {
             queryClient.invalidateQueries({
                 queryKey: groupsKeys.groupChat(selectedGroupId!),
             });
+            // Immediately refetch messages after sending
+            refetch();
         },
         onError: (error) => {
             console.error("Failed to send group message:", error);
@@ -143,6 +172,8 @@ export const useGroupChats = () => {
         return groups.map((group) => ({
             id: group.id,
             name: group.name,
+            courseTitle: group.course?.title,
+            capacity: group.course?.capacity ?? undefined,
             avatar: group.teacher?.avatar || undefined,
             thumbnail: group.course?.thumbnail
                 ? group.course?.thumbnail

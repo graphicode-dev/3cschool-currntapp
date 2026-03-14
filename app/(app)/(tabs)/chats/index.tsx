@@ -22,6 +22,7 @@ const ChatListScreen = () => {
                 id: String(group.id),
                 groupId: String(group.id),
                 groupName: group.name,
+                groupCapacity: group.capacity,
             },
         });
     };

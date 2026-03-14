@@ -136,7 +136,7 @@ const InlineVideoCard = ({
     }, [player]);
 
     // Show overlay: before user taps play, or after video finishes
-    const showOverlay = !userTappedPlay || hasFinished;
+    const showOverlay = !isPlaying && (!userTappedPlay || hasFinished);
 
     return (
         <View style={styles.slide}>
@@ -199,41 +199,45 @@ const InlineVideoCard = ({
                 </TouchableOpacity>
             )}
 
-            <View style={styles.badgeWrapper} pointerEvents="none">
-                <LinearGradient
-                    colors={[Palette.brand[400], Palette.brand[500]]}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={styles.badge}>
-                    <ThemedText style={styles.badgeText} fontSize={11}>
-                        🎬 VIDEO
-                    </ThemedText>
-                </LinearGradient>
-            </View>
+            {!isPlaying ||hasFinished && (
+                <>
+                    <View style={styles.badgeWrapper} pointerEvents="none">
+                        <LinearGradient
+                            colors={[Palette.brand[400], Palette.brand[500]]}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 1 }}
+                            style={styles.badge}>
+                            <ThemedText style={styles.badgeText} fontSize={11}>
+                                🎬 VIDEO
+                            </ThemedText>
+                        </LinearGradient>
+                    </View>
 
-            <View style={styles.contentArea} pointerEvents="none">
-                <ThemedText
-                    style={styles.titleText}
-                    numberOfLines={2}
-                    fontSize={18}>
-                    {banner.title}
-                </ThemedText>
-                <ThemedText
-                    style={styles.descriptionText}
-                    numberOfLines={1}
-                    fontSize={12}>
-                    {banner.description}
-                </ThemedText>
-                <LinearGradient
-                    colors={[Palette.brand[400], Palette.brand[500]]}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 0 }}
-                    style={styles.ctaButton}>
-                    <ThemedText style={styles.ctaText} fontSize={13}>
-                        {hasFinished ? "✓ Watched" : "▶ Play"}
-                    </ThemedText>
-                </LinearGradient>
-            </View>
+                    <View style={styles.contentArea} pointerEvents="none">
+                        <ThemedText
+                            style={styles.titleText}
+                            numberOfLines={2}
+                            fontSize={18}>
+                            {banner.title}
+                        </ThemedText>
+                        <ThemedText
+                            style={styles.descriptionText}
+                            numberOfLines={1}
+                            fontSize={12}>
+                            {banner.description}
+                        </ThemedText>
+                        <LinearGradient
+                            colors={[Palette.brand[400], Palette.brand[500]]}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 0 }}
+                            style={styles.ctaButton}>
+                            <ThemedText style={styles.ctaText} fontSize={13}>
+                                {hasFinished ? "✓ Watched" : "▶ Play"}
+                            </ThemedText>
+                        </LinearGradient>
+                    </View>
+                </>
+            )}
         </View>
     );
 };

@@ -8,6 +8,7 @@ import { ThemedText } from "./themed-text";
 
 type Props = {
     title: string;
+    subtitle?: string;
     href?: Href;
     divider?: boolean;
     avatar?: {
@@ -18,7 +19,7 @@ type Props = {
     };
 };
 
-const CustomHeader = ({ title, href, divider, avatar }: Props) => {
+const CustomHeader = ({ title, subtitle, href, divider, avatar }: Props) => {
     return (
         <View>
             <TouchableOpacity
@@ -39,9 +40,16 @@ const CustomHeader = ({ title, href, divider, avatar }: Props) => {
                         icon={avatar.icon}
                     />
                 )}
-                <ThemedText style={styles.title} fontSize={18}>
-                    {title}
-                </ThemedText>
+                <View style={styles.titleWrapper}>
+                    <ThemedText style={styles.title} fontSize={18}>
+                        {title}
+                    </ThemedText>
+                    {subtitle && (
+                        <ThemedText style={styles.subtitle} fontSize={12}>
+                            {subtitle}
+                        </ThemedText>
+                    )}
+                </View>
             </TouchableOpacity>
             {divider && <View style={styles.headerDivider} />}
         </View>
@@ -52,11 +60,17 @@ const styles = StyleSheet.create({
     container: {
         paddingVertical: 20,
         flexDirection: "row",
-        alignItems: "center",
+        alignItems: "flex-start",
         gap: 12,
+    },
+    titleWrapper: {
+        flexDirection: "column",
     },
     title: {
         fontWeight: "bold",
+    },
+    subtitle: {
+        color: Palette.slate500,
     },
     headerDivider: {
         height: 1,

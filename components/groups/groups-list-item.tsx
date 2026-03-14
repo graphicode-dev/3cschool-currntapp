@@ -156,10 +156,18 @@ const GroupsListItem = ({ group }: GroupsListItemProps) => {
                     </ThemedText>
                 </View>
                 <View style={styles.instructorRow}>
-                    <Icons.InstructorIcon color="black" size={16} />
-                    <ThemedText style={styles.instructorText} fontSize={10}>
-                        {group.teacher?.full_name ?? "Instructor"}
-                    </ThemedText>
+                    <View style={styles.instructorRow}>
+                        <Icons.InstructorIcon color="black" size={16} />
+                        <ThemedText style={styles.instructorText} fontSize={10}>
+                            {group.teacher?.full_name ?? "Instructor"}
+                        </ThemedText>
+                    </View>
+                    <View style={styles.instructorRow}>
+                        <Icons.UserIcon color="black" size={16} />
+                        <ThemedText style={styles.instructorText} fontSize={10}>
+                            Members: {group?.course?.capacity ?? "-"}
+                        </ThemedText>
+                    </View>
                 </View>
             </View>
 

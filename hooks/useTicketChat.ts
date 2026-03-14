@@ -6,8 +6,9 @@ import {
     TicketLatestMessage,
     TicketMessage,
 } from "@/services/tickets/tickets.types";
+import { useFocusEffect } from "@react-navigation/native";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -120,6 +121,31 @@ export const useTicketChat = () => {
     } = useTicket(selectedTicketId!, {
         enabled: !!selectedTicketId,
     });
+
+    // ── Polling on screen focus ───────────────────────────────────────────────
+
+    const pollingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(
+        null,
+    );
+
+    useFocusEffect(
+        useCallback(() => {
+            if (!selectedTicketId) return;
+
+            // Start polling when screen becomes focused
+            pollingIntervalRef.current = setInterval(() => {
+                refetchTicket();
+            }, 1000 * 10); // Poll every 10 seconds
+
+            // Cleanup on blur
+            return () => {
+                if (pollingIntervalRef.current) {
+                    clearInterval(pollingIntervalRef.current);
+                    pollingIntervalRef.current = null;
+                }
+            };
+        }, [selectedTicketId, refetchTicket]),
+    );
 
     // ── Mutations ─────────────────────────────────────────────────────────────
 

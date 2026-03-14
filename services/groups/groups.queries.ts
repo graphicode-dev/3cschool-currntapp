@@ -74,7 +74,6 @@ export function useGroupChat(
         },
         initialPageParam: 1,
         enabled: !!groupId,
-        refetchInterval: 1000 * 30,
         ...options,
     });
 }

@@ -120,7 +120,7 @@ export default function LoginScreen() {
                                     <>
                                         <TextInput
                                             style={styles.input}
-                                            placeholder="student@email.com"
+                                            placeholder="student@student.com"
                                             placeholderTextColor="#999"
                                             value={value}
                                             onChangeText={onChange}
@@ -267,6 +267,7 @@ const styles = StyleSheet.create({
     },
     input: {
         backgroundColor: "#FFF",
+        color: "black",
         borderRadius: 12,
         paddingHorizontal: 16,
         paddingVertical: 16,

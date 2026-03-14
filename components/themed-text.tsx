@@ -9,16 +9,12 @@ import { Fonts } from "@/constants/theme";
 import { useTranslation } from "react-i18next";
 
 export type ThemedTextProps = TextProps & {
-    lightColor?: string;
-    darkColor?: string;
     type?: "default" | "title" | "defaultSemiBold" | "subtitle" | "link";
     fontSize?: number;
 };
 
 export function ThemedText({
     style,
-    lightColor,
-    darkColor,
     type = "default",
     fontSize,
     ...rest

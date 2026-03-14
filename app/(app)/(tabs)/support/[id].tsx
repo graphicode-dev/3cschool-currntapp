@@ -1,5 +1,6 @@
 import ChatBubble from "@/components/chat/ChatBubble";
 import ChatInput from "@/components/chat/ChatInput";
+import { DateSeparator } from "@/components/chat/DateSeparator";
 import CustomHeader from "@/components/custom-header";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import { ThemedText } from "@/components/themed-text";
@@ -7,11 +8,13 @@ import { Images } from "@/constants/images";
 import { useTicketChat } from "@/hooks/useTicketChat";
 import { useCloseTicket } from "@/services/tickets/tickets.mutations";
 import { useLocalSearchParams } from "expo-router";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import {
     ActivityIndicator,
     Alert,
     FlatList,
+    KeyboardAvoidingView,
+    Platform,
     StyleSheet,
     TouchableOpacity,
     View,
@@ -53,6 +56,13 @@ export default function TicketChatScreen() {
         [sendMessage],
     );
 
+    const handleLoadMore = useCallback(() => {
+        // Support tickets don't typically have pagination for messages
+        // This is a placeholder function
+    }, []);
+
+    const isLoadingMore = false; // Support tickets don't have loading more state
+
     const handleCloseTicket = useCallback(() => {
         Alert.alert(
             "Close Ticket",
@@ -79,6 +89,53 @@ export default function TicketChatScreen() {
         }
     }, [messages.length]);
 
+    // Process messages to add date separators
+    const messagesWithDates = useMemo(() => {
+        if (messages.length === 0) return [];
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+
+        const processed: { type: "message" | "date"; data: any }[] = [];
+        let lastDate: Date | null = null;
+
+        // Process messages in reverse order (since FlatList is inverted)
+        const reversedMessages = [...messages].reverse();
+
+        reversedMessages.forEach((message) => {
+            const messageDate = new Date(message.createdAt);
+            messageDate.setHours(0, 0, 0, 0);
+
+            // Check if we need to add a date separator
+            if (!lastDate || messageDate.getTime() !== lastDate.getTime()) {
+                const isToday = messageDate.getTime() === today.getTime();
+                const isYesterday =
+                    messageDate.getTime() === yesterday.getTime();
+
+                processed.push({
+                    type: "date",
+                    data: {
+                        date: message.createdAt,
+                        isToday,
+                        isYesterday,
+                    },
+                });
+
+                lastDate = messageDate;
+            }
+
+            processed.push({
+                type: "message",
+                data: message,
+            });
+        });
+
+        return processed.reverse();
+    }, [messages]);
+
     if (isLoading || isLoadingTicket) {
         return (
             <ScreenWrapper>
@@ -96,12 +153,14 @@ export default function TicketChatScreen() {
                 <View style={styles.center}>
                     <ThemedText
                         style={[styles.errorText]}
-                        fontSize={scaleFont(16)}>
+                        fontSize={scaleFont(16)}
+                    >
                         Something went wrong
                     </ThemedText>
                     <ThemedText
                         style={[styles.errorSubText]}
-                        fontSize={scaleFont(14)}>
+                        fontSize={scaleFont(14)}
+                    >
                         {error}
                     </ThemedText>
                 </View>
@@ -116,12 +175,14 @@ export default function TicketChatScreen() {
                 <View style={styles.center}>
                     <ThemedText
                         style={[styles.errorText]}
-                        fontSize={scaleFont(16)}>
+                        fontSize={scaleFont(16)}
+                    >
                         Error loading ticket
                     </ThemedText>
                     <ThemedText
                         style={[styles.errorSubText]}
-                        fontSize={scaleFont(14)}>
+                        fontSize={scaleFont(14)}
+                    >
                         {ticketError}
                     </ThemedText>
                 </View>
@@ -159,14 +220,16 @@ export default function TicketChatScreen() {
                 <TouchableOpacity
                     style={styles.closeButton}
                     onPress={handleCloseTicket}
-                    disabled={closeTicket.isPending}>
+                    disabled={closeTicket.isPending}
+                >
                     {closeTicket.isPending ? (
                         <ActivityIndicator size="small" color="#fff" />
                     ) : (
                         <View style={styles.closeButtonWrapper}>
                             <ThemedText
                                 style={[styles.closeButtonText]}
-                                fontSize={scaleFont(10)}>
+                                fontSize={scaleFont(10)}
+                            >
                                 Close Ticket
                             </ThemedText>
                         </View>
@@ -174,45 +237,76 @@ export default function TicketChatScreen() {
                 </TouchableOpacity>
             )}
 
-            <FlatList
-                ref={flatListRef}
-                data={messages}
-                inverted
-                keyExtractor={(item) => item.id}
-                renderItem={({ item }) => (
-                    <ChatBubble
-                        message={item}
-                        chatType="private"
-                        showAvatar
-                        showSenderName={false}
-                    />
-                )}
-                contentContainerStyle={styles.list}
-                showsVerticalScrollIndicator={false}
-                style={styles.chat}
-                onScrollToIndexFailed={() => {}}
-            />
+            <KeyboardAvoidingView
+                behavior={Platform.OS === "ios" ? "padding" : "height"}
+                style={styles.keyboardAvoidingView}
+            >
+                <FlatList
+                    ref={flatListRef}
+                    data={messagesWithDates}
+                    inverted
+                    keyExtractor={(item, index) =>
+                        item.type === "date" ? `date-${index}` : item.data.id
+                    }
+                    renderItem={({ item }) => {
+                        if (item.type === "date") {
+                            return (
+                                <DateSeparator
+                                    date={item.data.date}
+                                    isToday={item.data.isToday}
+                                    isYesterday={item.data.isYesterday}
+                                />
+                            );
+                        }
 
-            {isTicketClosed ? (
-                <View style={styles.closedBanner}>
-                    <ThemedText
-                        style={[styles.closedText]}
-                        fontSize={scaleFont(14)}>
-                        ✅ This ticket has been closed
-                    </ThemedText>
-                </View>
-            ) : (
-                <View
-                    style={[
-                        styles.inputWrap,
-                        { paddingBottom: responsivePaddingBottom },
-                    ]}>
-                    <ChatInput
-                        onSend={handleSendMessage}
-                        isSending={isSending}
-                    />
-                </View>
-            )}
+                        return (
+                            <ChatBubble
+                                message={item.data}
+                                chatType="private"
+                            />
+                        );
+                    }}
+                    contentContainerStyle={styles.list}
+                    showsVerticalScrollIndicator={false}
+                    style={styles.chat}
+                    onEndReached={handleLoadMore}
+                    onEndReachedThreshold={0.3}
+                    ListFooterComponent={
+                        isLoadingMore ? (
+                            <View style={styles.loadingMore}>
+                                <ActivityIndicator
+                                    size="small"
+                                    color="#1890FF"
+                                />
+                            </View>
+                        ) : null
+                    }
+                    onScrollToIndexFailed={() => {}}
+                />
+
+                {isTicketClosed ? (
+                    <View style={styles.closedBanner}>
+                        <ThemedText
+                            style={[styles.closedText]}
+                            fontSize={scaleFont(14)}
+                        >
+                            ✅ This ticket has been closed
+                        </ThemedText>
+                    </View>
+                ) : (
+                    <View
+                        style={[
+                            styles.inputWrap,
+                            { paddingBottom: responsivePaddingBottom },
+                        ]}
+                    >
+                        <ChatInput
+                            onSend={handleSendMessage}
+                            isSending={isSending}
+                        />
+                    </View>
+                )}
+            </KeyboardAvoidingView>
         </ScreenWrapper>
     );
 }
@@ -222,6 +316,9 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: "center",
         justifyContent: "center",
+    },
+    keyboardAvoidingView: {
+        flex: 1,
     },
     errorText: {
         color: "#ff4444",
@@ -270,4 +367,5 @@ const styles = StyleSheet.create({
         color: "#52c41a",
         fontWeight: "500",
     },
+    loadingMore: { paddingVertical: 16, alignItems: "center" },
 });

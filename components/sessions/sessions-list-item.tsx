@@ -30,25 +30,76 @@ function fmtTime(timeStr: string) {
     }
 }
 
+function getStatusBadgeStyle(
+    status: "upcoming" | "completed" | "current" | null,
+) {
+    switch (status) {
+        case "upcoming":
+            return {
+                backgroundColor: "#fef3c7",
+                borderColor: "#f59e0b",
+                textColor: "#f59e0b",
+                label: "Upcoming",
+            };
+        case "current":
+            return {
+                backgroundColor: "#f0f9ff",
+                borderColor: "#3b82f6",
+                textColor: "#3b82f6",
+                label: "Current",
+            };
+        case "completed":
+            return {
+                backgroundColor: "#f0fdf4",
+                borderColor: "#22c55e",
+                textColor: "#22c55e",
+                label: "Completed",
+            };
+        default:
+            return {
+                backgroundColor: "#f3f4f6",
+                borderColor: "#9ca3af",
+                textColor: "#9ca3af",
+                label: "Pending",
+            };
+    }
+}
+
 const SessionsListItem = ({ session }: Props) => {
     const title =
         session.session_info?.title ?? `Session #${session.session_number}`;
     const hasRecording = !!session.recording_url;
+    const statusStyle = getStatusBadgeStyle(session.session_status);
 
     return (
         <View style={styles.container}>
             <View style={styles.content}>
                 {/* Title + session number badge */}
                 <View style={styles.header}>
+                        <ThemedText style={styles.typeText} fontSize={14}>
+                            #{session.session_number}
+                        </ThemedText>
                     <ThemedText
                         style={styles.title}
                         fontSize={14}
                         numberOfLines={2}>
                         {title}
                     </ThemedText>
-                    <View style={styles.typeBadge}>
-                        <ThemedText style={styles.typeText} fontSize={10}>
-                            #{session.session_number}
+                    <View
+                        style={[
+                            styles.typeBadge,
+                            {
+                                backgroundColor: statusStyle.backgroundColor,
+                                borderColor: statusStyle.borderColor,
+                            },
+                        ]}>
+                        <ThemedText
+                            style={[
+                                styles.typeText,
+                                { color: statusStyle.textColor },
+                            ]}
+                            fontSize={10}>
+                            {statusStyle.label}
                         </ThemedText>
                     </View>
                 </View>
@@ -142,7 +193,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#f6f8ff",
         borderWidth: 1,
         borderColor: "#98a5e8",
-        borderRadius: 31,
+        borderRadius: 10,
         paddingHorizontal: 8,
         paddingVertical: 2,
     },

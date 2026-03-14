@@ -34,9 +34,15 @@ export const ChatListItem = ({
                     {chat.name}
                 </ThemedText>
                 <ThemedText
+                    style={styles.courseName}
+                    numberOfLines={1}
+                    fontSize={11}>
+                    {chat.courseTitle}
+                </ThemedText>
+                <ThemedText
                     style={styles.lastMessage}
                     numberOfLines={1}
-                    fontSize={12}>
+                    fontSize={10}>
                     {chat.lastMessage?.has_attachment ? (
                         <>
                             {chat.lastMessage?.sender?.full_name}: 📎{" "}
@@ -75,7 +81,7 @@ export const ChatListItem = ({
 const styles = StyleSheet.create({
     item: {
         flexDirection: "row",
-        alignItems: "center",
+        alignItems: "flex-start",
         paddingHorizontal: 16,
         paddingVertical: 12,
         gap: 12,
@@ -112,9 +118,12 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     name: {
+        fontWeight: "bold",
+        color: "#475569",
+    },
+    courseName: {
         fontWeight: "600",
         color: "#475569",
-        marginBottom: 3,
     },
     rightCol: {
         alignItems: "flex-start",
@@ -139,6 +148,7 @@ const styles = StyleSheet.create({
         fontWeight: "700",
     },
     lastMessage: {
-        color: "#64748B",
+        color: "#94A3B8",
+        fontStyle: "italic",
     },
 });

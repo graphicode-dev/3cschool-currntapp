@@ -1,6 +1,6 @@
 import { Palette, Radii } from "@/constants/theme";
 import { MappedChatMessage } from "@/hooks/useGroupChats";
-import { useProfile } from "@/services/auth";
+import { authStore } from "@/services/auth/auth.store";
 import { formatMessageTime } from "@/utils";
 import { memo, useState } from "react";
 import {
@@ -29,7 +29,7 @@ const ChatBubble = ({
     showAvatar = true,
     showSenderName = false,
 }: Props) => {
-    const { data: user } = useProfile();
+    const { user } = authStore();
     const isMe = message.sender === "me";
     const isInstructor = message.sender === "user";
     const [imagePreviewVisible, setImagePreviewVisible] = useState(false);

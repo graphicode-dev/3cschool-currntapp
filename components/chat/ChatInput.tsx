@@ -5,6 +5,8 @@ import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { useCallback, useState } from "react";
 import {
+    KeyboardAvoidingView,
+    Platform,
     StyleSheet,
     TextInput,
     TouchableOpacity,
@@ -48,65 +50,74 @@ const ChatInput = ({ onSend, isSending }: Props) => {
     }, [canSend, text, imageUri, onSend]);
 
     return (
-        <View style={styles.wrapper}>
-            {/* Image preview strip */}
-            {imageUri && (
-                <View style={styles.previewStrip}>
-                    <Image
-                        source={{ uri: imageUri }}
-                        style={styles.previewThumb}
-                        contentFit="cover"
-                    />
-                    <View style={styles.previewActions}>
-                        <TouchableOpacity
-                            style={styles.previewBtn}
-                            onPress={pickImage}>
-                            <Ionicons
-                                name="refresh-outline"
-                                size={15}
-                                color={Palette.brand[500]}
-                            />
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={styles.previewBtn}
-                            onPress={() => setImageUri(null)}>
-                            <Icons.XIcon size={13} color="#e53e3e" />
-                        </TouchableOpacity>
+        <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}>
+            <View style={styles.wrapper}>
+                {/* Image preview strip */}
+                {imageUri && (
+                    <View style={styles.previewStrip}>
+                        <Image
+                            source={{ uri: imageUri }}
+                            style={styles.previewThumb}
+                            contentFit="cover"
+                        />
+                        <View style={styles.previewActions}>
+                            <TouchableOpacity
+                                style={styles.previewBtn}
+                                onPress={pickImage}>
+                                <Ionicons
+                                    name="refresh-outline"
+                                    size={15}
+                                    color={Palette.brand[500]}
+                                />
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={styles.previewBtn}
+                                onPress={() => setImageUri(null)}>
+                                <Icons.XIcon size={13} color="#e53e3e" />
+                            </TouchableOpacity>
+                        </View>
                     </View>
-                </View>
-            )}
+                )}
 
-            {/* Input row */}
-            <View style={styles.inputRow}>
-                {/* Image picker icon */}
-                <TouchableOpacity
-                    style={styles.imageBtn}
-                    onPress={pickImage}
-                    activeOpacity={0.7}>
-                    <Ionicons
-                        name="image-outline"
-                        size={22}
-                        color={imageUri ? Palette.brand[500] : Palette.slate400}
+                {/* Input row */}
+                <View style={styles.inputRow}>
+                    {/* Image picker icon */}
+                    <TouchableOpacity
+                        style={styles.imageBtn}
+                        onPress={pickImage}
+                        activeOpacity={0.7}>
+                        <Ionicons
+                            name="image-outline"
+                            size={22}
+                            color={
+                                imageUri ? Palette.brand[500] : Palette.slate400
+                            }
+                        />
+                    </TouchableOpacity>
+
+                    <TextInput
+                        value={text}
+                        onChangeText={setText}
+                        placeholder="type a message...."
+                        placeholderTextColor={Palette.slate300}
+                        style={[styles.input, { fontSize: scaleFont(12) }]}
+                        multiline={false}
                     />
-                </TouchableOpacity>
 
-                <TextInput
-                    value={text}
-                    onChangeText={setText}
-                    placeholder="type a message...."
-                    placeholderTextColor={Palette.slate300}
-                    style={[styles.input, { fontSize: scaleFont(12) }]}
-                    multiline={false}
-                />
-
-                <TouchableOpacity
-                    style={[styles.sendBtn, !canSend && styles.sendBtnDisabled]}
-                    onPress={handleSend}
-                    disabled={!canSend}>
-                    <Icons.SentIcon size={22} color="white" />
-                </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[
+                            styles.sendBtn,
+                            !canSend && styles.sendBtnDisabled,
+                        ]}
+                        onPress={handleSend}
+                        disabled={!canSend}>
+                        <Icons.SentIcon size={22} color="white" />
+                    </TouchableOpacity>
+                </View>
             </View>
-        </View>
+        </KeyboardAvoidingView>
     );
 };
 

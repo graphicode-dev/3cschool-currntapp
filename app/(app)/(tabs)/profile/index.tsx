@@ -50,6 +50,11 @@ function ProfileScreen() {
                     <ThemedText style={styles.profileName} fontSize={16}>
                         {user?.full_name}
                     </ThemedText>
+                    {user?.role_name === "user" && (
+                        <ThemedText style={styles.profileName} fontSize={14}>
+                            Student Code: {user?.student_code}
+                        </ThemedText>
+                    )}
                     <ThemedText style={styles.profileEmail} fontSize={14}>
                         {user?.email}
                     </ThemedText>
@@ -112,8 +117,32 @@ function ProfileScreen() {
                             </View>
                         </TouchableOpacity>
                     </View>
+                    {user?.role_name === "user" && (
+                        <InfoRow
+                            label="Age"
+                            value={user?.age?.toString() || "-"}
+                        />
+                    )}
                     <InfoRow label="Phone" value={user?.mobile!} />
-                    <InfoRow label="Address" value={user?.address! || "-"} />
+                    {user?.role_name === "user" && (
+                        <>
+                            <InfoRow
+                                label="Parent Phone"
+                                value={user?.parent_number! || "-"}
+                            />
+                            <InfoRow
+                                label="Session Quota"
+                                value={user?.session_quota?.toString() || "-"}
+                            />
+                            <InfoRow
+                                label="Level"
+                                value={user?.next_course_id?.toString() || "-"}
+                            />
+                        </>
+                    )}
+                    {user?.role_name === "teacher" && (
+                        <InfoRow label="Current Groups: " value={"-"} />
+                    )}
                 </View>
 
                 {/* Logout */}

@@ -16,6 +16,7 @@ import {
     RobotIcon,
     SentIcon,
     SingleChatIcon,
+    TicketChatIcon,
     TrashIcon,
     XIcon,
 } from "./general.icons";
@@ -61,4 +62,5 @@ export const Icons = {
     FilterIcon,
     MagnifyingGlassIcon,
     TrashIcon,
+    TicketChatIcon,
 };

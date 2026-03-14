@@ -33,21 +33,19 @@ export const authApi = {
     },
 
     profile: async (): Promise<User> => {
-        const res = await api.get("/profile");
+        const res = await api.get<{ data: User }>("/profile");
         if (!res.success) {
             throw new Error(res.message);
         }
 
-        const responseData = res.data as any;
-        const user = responseData?.data?.token
-            ? responseData.data
-            : responseData;
+        const responseData = res?.data?.data as User;
 
-        if (!user?.token) {
-            throw new Error("Invalid profile response - no token found");
-        }
+        // console.log(
+        //     "User Responseeee: ",
+        //     JSON.stringify(responseData, null, 2),
+        // );
 
-        return user as User;
+        return responseData;
     },
 
     updateProfile: async (payload: UpdateProfileRequest): Promise<User> => {

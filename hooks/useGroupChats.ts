@@ -44,18 +44,20 @@ const toChatMessage = (msg: GroupMessage, myId: number): MappedChatMessage => ({
     createdAt: msg.created_at?.replace(" ", "T") ?? "",
     avatar: msg.sender?.avatar ?? undefined,
     senderName: msg.sender?.full_name,
-    imageUrl: msg.attachment_url ? msg.attachment_url : undefined,
+    imageUrl:
+        msg.attachment_url && msg.attachment_type === "image"
+            ? msg.attachment_url
+            : undefined,
     fileUrl:
-        msg.attachment_url &&
-        !msg.attachment_url?.match(/\.(jpg|jpeg|png|gif|webp)$/i)
+        msg.attachment_url && msg.attachment_type === "file"
             ? msg.attachment_url
             : undefined,
     fileName:
-        msg.attachment_name ||
-        (msg.attachment_url &&
-        !msg.attachment_url?.match(/\.(jpg|jpeg|png|gif|webp)$/i)
-            ? msg.attachment_url.split("/").pop()?.split("?")[0]
-            : undefined),
+        msg.attachment_name && msg.attachment_name !== "file"
+            ? msg.attachment_name
+            : msg.attachment_url
+              ? msg.attachment_url.split("/").pop()?.split("?")[0]
+              : undefined,
 });
 
 const toTime = (timestamp: string | number) => {

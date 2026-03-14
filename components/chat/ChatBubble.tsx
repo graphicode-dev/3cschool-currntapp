@@ -154,8 +154,8 @@ const ChatBubble = ({
                         style={[
                             styles.bubble,
                             isMe ? styles.bubbleAdmin : styles.bubbleUser,
-                            // If only images, no text — reduce padding
-                            images.length > 0 &&
+                            // If only images or files, no text — reduce padding
+                            (images.length > 0 || files.length > 0) &&
                                 !message.text &&
                                 styles.bubbleImageOnly,
                         ]}
@@ -225,7 +225,7 @@ const ChatBubble = ({
                                 <View style={styles.fileIcon}>
                                     <Ionicons
                                         name={getFileIcon(files[0].name)}
-                                        size={24}
+                                        size={20}
                                         color={Palette.brand[500]}
                                     />
                                 </View>
@@ -645,14 +645,14 @@ const styles = StyleSheet.create({
         backgroundColor: Palette.slate50,
         borderWidth: 1,
         borderColor: Palette.slate200,
-        borderRadius: Radii.md,
-        padding: 12,
+        borderRadius: Radii.sm,
+        padding: 8,
         marginBottom: 4,
-        gap: 12,
+        gap: 8,
     },
     fileIcon: {
-        width: 40,
-        height: 40,
+        width: 32,
+        height: 32,
         borderRadius: Radii.sm,
         backgroundColor: Palette.white,
         justifyContent: "center",
@@ -666,7 +666,7 @@ const styles = StyleSheet.create({
     fileName: {
         fontWeight: "600",
         color: Palette.slate700,
-        marginBottom: 2,
+        marginBottom: 1,
     },
     fileSize: {
         color: Palette.slate400,

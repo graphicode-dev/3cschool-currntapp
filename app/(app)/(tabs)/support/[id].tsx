@@ -50,8 +50,8 @@ export default function TicketChatScreen() {
     }, [id, selectTicket]);
 
     const handleSendMessage = useCallback(
-        async (text: string, imageUri?: string) => {
-            await sendMessage(text, imageUri);
+        async (text: string, attachmentUri?: string, fileName?: string) => {
+            await sendMessage(text, attachmentUri);
         },
         [sendMessage],
     );

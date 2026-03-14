@@ -45,7 +45,7 @@ export const notificationsApi = {
             };
         }>
     > => {
-        console.log("Making API call to /notifications with page:", page);
+        // console.log("Making API call to /notifications with page:", page);
         const response = await api.get<{
             code: number;
             message: string;
@@ -60,7 +60,7 @@ export const notificationsApi = {
             params: { page, limit },
             signal,
         });
-        console.log("API response:", response);
+        // console.log("API response:", response);
 
         // Extract the notifications array from the wrapped response
         if (response.data && response.data.data) {

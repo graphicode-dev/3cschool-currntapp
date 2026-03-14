@@ -48,7 +48,7 @@ function deriveStatus(session: Session): "upcoming" | "ongoing" | "completed" {
         // If session was more than 3 hours ago, it's completed
         return "completed";
     } catch (error) {
-        console.log("Date parsing error:", error);
+        console.error("Date parsing error:", error);
         // Default to upcoming if we can't parse dates (safer than completed)
         return "upcoming";
     }
@@ -87,13 +87,15 @@ export function SessionCard({ session }: Props) {
             <ImageBackground
                 source={Images.groupCardBg}
                 style={styles.bg}
-                resizeMode="cover">
+                resizeMode="cover"
+            >
                 <View style={styles.info}>
                     <View style={styles.textGroup}>
                         <ThemedText
                             style={styles.title}
                             fontSize={16}
-                            numberOfLines={1}>
+                            numberOfLines={1}
+                        >
                             {title}
                         </ThemedText>
                         <ThemedText style={styles.desc} fontSize={13}>
@@ -123,10 +125,12 @@ export function SessionCard({ session }: Props) {
                             backgroundColor: badge.bg,
                             borderColor: badge.border,
                         },
-                    ]}>
+                    ]}
+                >
                     <ThemedText
                         style={[styles.badgeText, { color: badge.text }]}
-                        fontSize={10}>
+                        fontSize={10}
+                    >
                         {status}
                     </ThemedText>
                 </View>

@@ -173,17 +173,20 @@ const InlineVideoCard = ({
                 <TouchableOpacity
                     style={styles.videoPlayOverlay}
                     activeOpacity={0.8}
-                    onPress={handlePlay}>
+                    onPress={handlePlay}
+                >
                     {hasFinished ? (
                         <View style={styles.videoFinishedBadge}>
                             <ThemedText
                                 style={styles.videoFinishedIcon}
-                                fontSize={18}>
+                                fontSize={18}
+                            >
                                 ✓
                             </ThemedText>
                             <ThemedText
                                 style={styles.videoFinishedText}
-                                fontSize={14}>
+                                fontSize={14}
+                            >
                                 Watched
                             </ThemedText>
                         </View>
@@ -191,7 +194,8 @@ const InlineVideoCard = ({
                         <View style={styles.videoPlayButton}>
                             <ThemedText
                                 style={styles.videoPlayIcon}
-                                fontSize={22}>
+                                fontSize={22}
+                            >
                                 ▶
                             </ThemedText>
                         </View>
@@ -199,45 +203,62 @@ const InlineVideoCard = ({
                 </TouchableOpacity>
             )}
 
-            {!isPlaying ||hasFinished && (
-                <>
-                    <View style={styles.badgeWrapper} pointerEvents="none">
-                        <LinearGradient
-                            colors={[Palette.brand[400], Palette.brand[500]]}
-                            start={{ x: 0, y: 0 }}
-                            end={{ x: 1, y: 1 }}
-                            style={styles.badge}>
-                            <ThemedText style={styles.badgeText} fontSize={11}>
-                                🎬 VIDEO
-                            </ThemedText>
-                        </LinearGradient>
-                    </View>
+            {!isPlaying ||
+                (hasFinished && (
+                    <>
+                        <View style={styles.badgeWrapper} pointerEvents="none">
+                            <LinearGradient
+                                colors={[
+                                    Palette.brand[400],
+                                    Palette.brand[500],
+                                ]}
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 1 }}
+                                style={styles.badge}
+                            >
+                                <ThemedText
+                                    style={styles.badgeText}
+                                    fontSize={11}
+                                >
+                                    🎬 VIDEO
+                                </ThemedText>
+                            </LinearGradient>
+                        </View>
 
-                    <View style={styles.contentArea} pointerEvents="none">
-                        <ThemedText
-                            style={styles.titleText}
-                            numberOfLines={2}
-                            fontSize={18}>
-                            {banner.title}
-                        </ThemedText>
-                        <ThemedText
-                            style={styles.descriptionText}
-                            numberOfLines={1}
-                            fontSize={12}>
-                            {banner.description}
-                        </ThemedText>
-                        <LinearGradient
-                            colors={[Palette.brand[400], Palette.brand[500]]}
-                            start={{ x: 0, y: 0 }}
-                            end={{ x: 1, y: 0 }}
-                            style={styles.ctaButton}>
-                            <ThemedText style={styles.ctaText} fontSize={13}>
-                                {hasFinished ? "✓ Watched" : "▶ Play"}
+                        <View style={styles.contentArea} pointerEvents="none">
+                            <ThemedText
+                                style={styles.titleText}
+                                numberOfLines={2}
+                                fontSize={18}
+                            >
+                                {banner.title}
                             </ThemedText>
-                        </LinearGradient>
-                    </View>
-                </>
-            )}
+                            <ThemedText
+                                style={styles.descriptionText}
+                                numberOfLines={1}
+                                fontSize={12}
+                            >
+                                {banner.description}
+                            </ThemedText>
+                            <LinearGradient
+                                colors={[
+                                    Palette.brand[400],
+                                    Palette.brand[500],
+                                ]}
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 0 }}
+                                style={styles.ctaButton}
+                            >
+                                <ThemedText
+                                    style={styles.ctaText}
+                                    fontSize={13}
+                                >
+                                    {hasFinished ? "✓ Watched" : "▶ Play"}
+                                </ThemedText>
+                            </LinearGradient>
+                        </View>
+                    </>
+                ))}
         </View>
     );
 };
@@ -258,7 +279,8 @@ const ImageBannerCard = ({ banner }: { banner: Banner }) => {
         <TouchableOpacity
             style={styles.slide}
             onPress={handlePress}
-            activeOpacity={0.95}>
+            activeOpacity={0.95}
+        >
             <Image
                 source={{ uri: encodeURI(banner.media_url) }}
                 style={styles.cardImage}
@@ -279,7 +301,8 @@ const ImageBannerCard = ({ banner }: { banner: Banner }) => {
                     colors={[Palette.brand[400], Palette.brand[500]]}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 1 }}
-                    style={styles.badge}>
+                    style={styles.badge}
+                >
                     <ThemedText style={styles.badgeText} fontSize={11}>
                         🖼 IMAGE
                     </ThemedText>
@@ -290,20 +313,23 @@ const ImageBannerCard = ({ banner }: { banner: Banner }) => {
                 <ThemedText
                     style={styles.titleText}
                     numberOfLines={2}
-                    fontSize={18}>
+                    fontSize={18}
+                >
                     {banner.title}
                 </ThemedText>
                 <ThemedText
                     style={styles.descriptionText}
                     numberOfLines={1}
-                    fontSize={12}>
+                    fontSize={12}
+                >
                     {banner.description}
                 </ThemedText>
                 <LinearGradient
                     colors={[Palette.brand[400], Palette.brand[500]]}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 0 }}
-                    style={styles.ctaButton}>
+                    style={styles.ctaButton}
+                >
                     <ThemedText style={styles.ctaText} fontSize={13}>
                         → Explore
                     </ThemedText>
@@ -317,14 +343,6 @@ const ImageBannerCard = ({ banner }: { banner: Banner }) => {
 const HomeBannerSection = () => {
     const { data: banners = [], isLoading, error } = useBannersList();
 
-    useEffect(() => {
-        if (banners.length > 0) {
-            console.log(
-                "📺 Banners API response:",
-                JSON.stringify(banners, null, 2),
-            );
-        }
-    }, [banners]);
     const [activeIndex, setActiveIndex] = useState(0);
     const [activeInfiniteIndex, setActiveInfiniteIndex] = useState(0);
     const flatListRef = useRef<FlatList>(null);
@@ -449,7 +467,8 @@ const HomeBannerSection = () => {
         <RenderSection
             isLoading={isLoading}
             error={error?.message || ""}
-            data={banners}>
+            data={banners}
+        >
             <View style={styles.container}>
                 <FlatList
                     ref={flatListRef}

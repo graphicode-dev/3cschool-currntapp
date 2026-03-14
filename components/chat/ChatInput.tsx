@@ -1,6 +1,8 @@
+import { ThemedText } from "@/components/themed-text";
 import { Icons } from "@/constants/icons";
 import { Palette } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
+import * as DocumentPicker from "expo-document-picker";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { useCallback, useState } from "react";
@@ -15,17 +17,24 @@ import {
 } from "react-native";
 
 interface Props {
-    onSend: (text: string, imageUri?: string) => void;
+    onSend: (text: string, attachmentUri?: string, fileName?: string) => void;
     isSending?: boolean;
+}
+
+interface Attachment {
+    uri: string;
+    name: string;
+    type: "image" | "document";
 }
 
 const ChatInput = ({ onSend, isSending }: Props) => {
     const [text, setText] = useState("");
-    const [imageUri, setImageUri] = useState<string | null>(null);
+    const [attachment, setAttachment] = useState<Attachment | null>(null);
     const { width } = useWindowDimensions();
     const scaleFont = (size: number) => Math.round((width / 375) * size);
 
-    const canSend = (text.trim().length > 0 || imageUri !== null) && !isSending;
+    const canSend =
+        (text.trim().length > 0 || attachment !== null) && !isSending;
 
     const pickImage = useCallback(async () => {
         const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -38,34 +47,81 @@ const ChatInput = ({ onSend, isSending }: Props) => {
         });
 
         if (!result.canceled && result.assets[0]?.uri) {
-            setImageUri(result.assets[0].uri);
+            setAttachment({
+                uri: result.assets[0].uri,
+                name: result.assets[0].fileName || "image.jpg",
+                type: "image",
+            });
+        }
+    }, []);
+
+    const pickDocument = useCallback(async () => {
+        try {
+            const result = await DocumentPicker.getDocumentAsync({
+                type: "*/*",
+                copyToCacheDirectory: true,
+                multiple: false,
+            });
+
+            if (!result.canceled && result.assets[0]) {
+                const asset = result.assets[0];
+                setAttachment({
+                    uri: asset.uri,
+                    name: asset.name,
+                    type: "document",
+                });
+            }
+        } catch (error) {
+            console.error("Error picking document:", error);
         }
     }, []);
 
     const handleSend = useCallback(() => {
         if (!canSend) return;
-        onSend(text.trim(), imageUri ?? undefined);
+        onSend(text.trim(), attachment?.uri, attachment?.name);
         setText("");
-        setImageUri(null);
-    }, [canSend, text, imageUri, onSend]);
+        setAttachment(null);
+    }, [canSend, text, attachment, onSend]);
 
     return (
         <KeyboardAvoidingView
             behavior={Platform.OS === "ios" ? "padding" : "height"}
-            keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}>
+            keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
+        >
             <View style={styles.wrapper}>
-                {/* Image preview strip */}
-                {imageUri && (
+                {/* Attachment preview strip */}
+                {attachment && (
                     <View style={styles.previewStrip}>
-                        <Image
-                            source={{ uri: imageUri }}
-                            style={styles.previewThumb}
-                            contentFit="cover"
-                        />
+                        {attachment.type === "image" ? (
+                            <Image
+                                source={{ uri: attachment.uri }}
+                                style={styles.previewThumb}
+                                contentFit="cover"
+                            />
+                        ) : (
+                            <View style={styles.documentPreview}>
+                                <Ionicons
+                                    name="document-text-outline"
+                                    size={24}
+                                    color={Palette.brand[500]}
+                                />
+                                <ThemedText
+                                    style={styles.documentName}
+                                    numberOfLines={1}
+                                >
+                                    {attachment.name}
+                                </ThemedText>
+                            </View>
+                        )}
                         <View style={styles.previewActions}>
                             <TouchableOpacity
                                 style={styles.previewBtn}
-                                onPress={pickImage}>
+                                onPress={
+                                    attachment.type === "image"
+                                        ? pickImage
+                                        : pickDocument
+                                }
+                            >
                                 <Ionicons
                                     name="refresh-outline"
                                     size={15}
@@ -74,7 +130,8 @@ const ChatInput = ({ onSend, isSending }: Props) => {
                             </TouchableOpacity>
                             <TouchableOpacity
                                 style={styles.previewBtn}
-                                onPress={() => setImageUri(null)}>
+                                onPress={() => setAttachment(null)}
+                            >
                                 <Icons.XIcon size={13} color="#e53e3e" />
                             </TouchableOpacity>
                         </View>
@@ -87,12 +144,32 @@ const ChatInput = ({ onSend, isSending }: Props) => {
                     <TouchableOpacity
                         style={styles.imageBtn}
                         onPress={pickImage}
-                        activeOpacity={0.7}>
+                        activeOpacity={0.7}
+                    >
                         <Ionicons
                             name="image-outline"
                             size={22}
                             color={
-                                imageUri ? Palette.brand[500] : Palette.slate400
+                                attachment?.type === "image"
+                                    ? Palette.brand[500]
+                                    : Palette.slate400
+                            }
+                        />
+                    </TouchableOpacity>
+
+                    {/* Document picker icon */}
+                    <TouchableOpacity
+                        style={styles.documentBtn}
+                        onPress={pickDocument}
+                        activeOpacity={0.7}
+                    >
+                        <Ionicons
+                            name="document-text-outline"
+                            size={22}
+                            color={
+                                attachment?.type === "document"
+                                    ? Palette.brand[500]
+                                    : Palette.slate400
                             }
                         />
                     </TouchableOpacity>
@@ -112,7 +189,8 @@ const ChatInput = ({ onSend, isSending }: Props) => {
                             !canSend && styles.sendBtnDisabled,
                         ]}
                         onPress={handleSend}
-                        disabled={!canSend}>
+                        disabled={!canSend}
+                    >
                         <Icons.SentIcon size={22} color="white" />
                     </TouchableOpacity>
                 </View>
@@ -167,6 +245,23 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: Palette.brand[200],
     },
+    documentPreview: {
+        width: 64,
+        height: 64,
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: Palette.brand[200],
+        backgroundColor: Palette.slate50,
+        justifyContent: "center",
+        alignItems: "center",
+        paddingHorizontal: 4,
+    },
+    documentName: {
+        fontSize: 8,
+        color: Palette.slate600,
+        textAlign: "center",
+        marginTop: 2,
+    },
     previewActions: {
         flexDirection: "column",
         gap: 6,
@@ -195,6 +290,11 @@ const styles = StyleSheet.create({
         paddingRight: 58,
     },
     imageBtn: {
+        paddingHorizontal: 8,
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    documentBtn: {
         paddingHorizontal: 8,
         justifyContent: "center",
         alignItems: "center",

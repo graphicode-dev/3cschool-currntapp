@@ -46,13 +46,13 @@ export default function NotificationsScreen() {
     const totalCount = notificationsData?.pages[0]?.pagination?.total ?? 0;
 
     // Debug: Log the notifications data
-    React.useEffect(() => {
-        console.log("Notifications data:", notificationsData);
-        console.log("Flattened notifications:", notifications);
-        console.log("Loading:", isLoading);
-        console.log("Error:", error);
-        console.log("Has next page:", hasNextPage);
-    }, [notificationsData, notifications, isLoading, error, hasNextPage]);
+    // React.useEffect(() => {
+    //     console.log("Notifications data:", notificationsData);
+    //     console.log("Flattened notifications:", notifications);
+    //     console.log("Loading:", isLoading);
+    //     console.log("Error:", error);
+    //     console.log("Has next page:", hasNextPage);
+    // }, [notificationsData, notifications, isLoading, error, hasNextPage]);
 
     // Mark as read mutation
     const { mutateAsync: markAsRead } = useMarkAsRead();
@@ -71,7 +71,7 @@ export default function NotificationsScreen() {
     // Simple UI-only delete for demo purposes
     const handleDelete = useCallback((id: number) => {
         // In a real implementation, this would call a delete API
-        console.log("Delete notification:", id);
+        // console.log("Delete notification:", id);
     }, []);
 
     // Drop-in replacement for handleNavigate in NotificationsScreen
@@ -171,7 +171,8 @@ export default function NotificationsScreen() {
                 <ActivityIndicator size="small" color={Palette.brand[500]} />
                 <ThemedText
                     style={styles.loadingText}
-                    fontSize={Typography.sizes.base}>
+                    fontSize={Typography.sizes.base}
+                >
                     Loading more...
                 </ThemedText>
             </View>
@@ -188,7 +189,8 @@ export default function NotificationsScreen() {
                     />
                     <ThemedText
                         style={styles.loadingText}
-                        fontSize={Typography.sizes.base}>
+                        fontSize={Typography.sizes.base}
+                    >
                         {t("notifications.loading")}
                     </ThemedText>
                 </View>
@@ -203,20 +205,24 @@ export default function NotificationsScreen() {
                 <View style={styles.errorContainer}>
                     <ThemedText
                         style={styles.errorText}
-                        fontSize={Typography.sizes.base}>
+                        fontSize={Typography.sizes.base}
+                    >
                         Error loading notifications
                     </ThemedText>
                     <ThemedText
                         style={styles.errorDetail}
-                        fontSize={Typography.sizes.sm}>
+                        fontSize={Typography.sizes.sm}
+                    >
                         {error?.message || "Unknown error occurred"}
                     </ThemedText>
                     <TouchableOpacity
                         style={styles.retryButton}
-                        onPress={() => refetch()}>
+                        onPress={() => refetch()}
+                    >
                         <ThemedText
                             style={styles.retryButtonText}
-                            fontSize={Typography.sizes.base}>
+                            fontSize={Typography.sizes.base}
+                        >
                             Retry
                         </ThemedText>
                     </TouchableOpacity>
@@ -235,13 +241,15 @@ export default function NotificationsScreen() {
                 <View style={styles.sectionHeader}>
                     <ThemedText
                         style={styles.sectionTitle}
-                        fontSize={Typography.sizes.xl}>
+                        fontSize={Typography.sizes.xl}
+                    >
                         all notifications
                     </ThemedText>
                     <View style={styles.notificationBadge}>
                         <ThemedText
                             style={styles.badgeText}
-                            fontSize={Typography.sizes.sm}>
+                            fontSize={Typography.sizes.sm}
+                        >
                             {totalCount}
                         </ThemedText>
                     </View>
@@ -252,12 +260,14 @@ export default function NotificationsScreen() {
                     <View style={styles.emptyContainer}>
                         <ThemedText
                             style={styles.emptyText}
-                            fontSize={Typography.sizes.xl}>
+                            fontSize={Typography.sizes.xl}
+                        >
                             No notifications yet
                         </ThemedText>
                         <ThemedText
                             style={styles.emptySubText}
-                            fontSize={Typography.sizes.md}>
+                            fontSize={Typography.sizes.md}
+                        >
                             You&apos;ll see your notifications here
                         </ThemedText>
                     </View>

@@ -20,6 +20,8 @@ export interface MappedChatMessage {
     avatar?: string;
     senderName?: string;
     imageUrl?: string;
+    fileUrl?: string;
+    fileName?: string;
     replyTo?: MappedChatMessage;
 }
 
@@ -74,7 +76,21 @@ const toChatMessage = (msg: TicketMessage, myId: number): MappedChatMessage => {
         createdAt,
         avatar: msg.sender?.avatar ?? undefined,
         senderName: msg.sender?.full_name,
-        imageUrl: msg.attachment ?? undefined,
+        imageUrl:
+            msg.attachment &&
+            msg.attachment?.match(/\.(jpg|jpeg|png|gif|webp)$/i)
+                ? msg.attachment
+                : undefined,
+        fileUrl:
+            msg.attachment &&
+            !msg.attachment?.match(/\.(jpg|jpeg|png|gif|webp)$/i)
+                ? msg.attachment
+                : undefined,
+        fileName:
+            msg.attachment &&
+            !msg.attachment?.match(/\.(jpg|jpeg|png|gif|webp)$/i)
+                ? msg.attachment.split("/").pop()?.split("?")[0]
+                : undefined,
     };
 };
 
@@ -150,10 +166,18 @@ export const useTicketChat = () => {
     // ── Mutations ─────────────────────────────────────────────────────────────
 
     const sendMessageMutation = useMutation({
-        mutationFn: ({ text, imageUri }: { text: string; imageUri?: string }) =>
+        mutationFn: ({
+            text,
+            attachmentUri,
+            fileName,
+        }: {
+            text: string;
+            attachmentUri?: string;
+            fileName?: string;
+        }) =>
             ticketsApi.sendMessage(selectedTicketId!, {
                 message: text || undefined,
-                attachmentUri: imageUri,
+                attachmentUri: attachmentUri,
             }),
         onSuccess: () => {
             queryClient.invalidateQueries({
@@ -272,11 +296,15 @@ export const useTicketChat = () => {
     }, []);
 
     const sendMessage = useCallback(
-        async (text: string, imageUri?: string) => {
-            if (!selectedTicketId || (!text.trim() && !imageUri)) return;
+        async (text: string, attachmentUri?: string, fileName?: string) => {
+            if (!selectedTicketId || (!text.trim() && !attachmentUri)) return;
 
             try {
-                await sendMessageMutation.mutateAsync({ text, imageUri });
+                await sendMessageMutation.mutateAsync({
+                    text,
+                    attachmentUri,
+                    fileName,
+                });
                 // Refetch ticket data to get the new message
                 refetchTicket();
             } catch (error) {

@@ -18,6 +18,8 @@ export interface MappedChatMessage {
     avatar?: string;
     senderName?: string;
     imageUrl?: string;
+    fileUrl?: string;
+    fileName?: string;
     replyTo?: MappedChatMessage;
 }
 
@@ -43,6 +45,17 @@ const toChatMessage = (msg: GroupMessage, myId: number): MappedChatMessage => ({
     avatar: msg.sender?.avatar ?? undefined,
     senderName: msg.sender?.full_name,
     imageUrl: msg.attachment_url ? msg.attachment_url : undefined,
+    fileUrl:
+        msg.attachment_url &&
+        !msg.attachment_url?.match(/\.(jpg|jpeg|png|gif|webp)$/i)
+            ? msg.attachment_url
+            : undefined,
+    fileName:
+        msg.attachment_name ||
+        (msg.attachment_url &&
+        !msg.attachment_url?.match(/\.(jpg|jpeg|png|gif|webp)$/i)
+            ? msg.attachment_url.split("/").pop()?.split("?")[0]
+            : undefined),
 });
 
 const toTime = (timestamp: string | number) => {
@@ -74,7 +87,7 @@ const toTime = (timestamp: string | number) => {
 
     // If date is invalid, return a fallback
     if (isNaN(date.getTime())) {
-        console.log("Invalid date, returning empty string");
+        console.error("Invalid date, returning empty string");
         return "";
     }
 
@@ -119,7 +132,9 @@ export const useGroupChats = () => {
 
     // ── Polling on screen focus ───────────────────────────────────────────────
 
-    const pollingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const pollingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(
+        null,
+    );
 
     useFocusEffect(
         useCallback(() => {
@@ -143,14 +158,27 @@ export const useGroupChats = () => {
     // ── Mutations ─────────────────────────────────────────────────────────────
 
     const sendMessageMutation = useMutation({
-        mutationFn: ({ text, imageUri }: { text: string; imageUri?: string }) =>
+        mutationFn: ({
+            text,
+            attachmentUri,
+            fileName,
+        }: {
+            text: string;
+            attachmentUri?: string;
+            fileName?: string;
+        }) =>
             groupsApi.sendGroupChatMessage(selectedGroupId!, {
                 message: text,
-                attachment: imageUri
+                attachment: attachmentUri
                     ? ({
-                          uri: imageUri,
-                          name: "photo.jpg",
-                          type: "image/jpeg",
+                          uri: attachmentUri,
+                          name: fileName || "file",
+                          type:
+                              fileName?.endsWith(".jpg") ||
+                              fileName?.endsWith(".jpeg") ||
+                              fileName?.endsWith(".png")
+                                  ? "image/jpeg"
+                                  : "application/octet-stream",
                       } as any)
                     : undefined,
             }),
@@ -249,11 +277,15 @@ export const useGroupChats = () => {
     }, []);
 
     const sendMessage = useCallback(
-        async (text: string, imageUri?: string) => {
-            if (!selectedGroupId || (!text.trim() && !imageUri)) return;
+        async (text: string, attachmentUri?: string, fileName?: string) => {
+            if (!selectedGroupId || (!text.trim() && !attachmentUri)) return;
 
             try {
-                await sendMessageMutation.mutateAsync({ text, imageUri });
+                await sendMessageMutation.mutateAsync({
+                    text,
+                    attachmentUri,
+                    fileName,
+                });
             } catch (error) {
                 console.error("Failed to send message:", error);
             }

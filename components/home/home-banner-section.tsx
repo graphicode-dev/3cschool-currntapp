@@ -73,21 +73,56 @@ function Dot({ isActive }: { isActive: boolean }) {
 const InlineVideoCard = ({
     banner,
     onPlayingChange,
+    isActive,
 }: {
     banner: Banner;
     onPlayingChange: (isPlaying: boolean) => void;
+    isActive: boolean;
 }) => {
-    const player = useVideoPlayer(banner.media_url, (p) => {
+    const [hasFinished, setHasFinished] = useState(false);
+    const [userTappedPlay, setUserTappedPlay] = useState(false);
+
+    const videoUrl = encodeURI(banner.media_url)
+        .replace(/\(/g, "%28")
+        .replace(/\)/g, "%29");
+
+    const player = useVideoPlayer(videoUrl, (p) => {
         p.loop = false;
     });
 
     const { isPlaying } = useEvent(player, "playingChange", {
-        isPlaying: false, // always start as false — never assume playing on init
+        isPlaying: false,
     });
 
     useEffect(() => {
-        onPlayingChange(isPlaying);
-    }, [isPlaying]);
+        const sub = player.addListener("playToEnd", () => {
+            setHasFinished(true);
+            setUserTappedPlay(false);
+            onPlayingChange(false);
+        });
+        return () => sub.remove();
+    }, [player, onPlayingChange]);
+
+    const handlePlay = useCallback(() => {
+        if (hasFinished) return;
+        onPlayingChange(true);
+        setUserTappedPlay(true);
+        try {
+            player.play();
+        } catch (_) {}
+    }, [player, hasFinished, onPlayingChange]);
+
+    useEffect(() => {
+        if (!isActive) {
+            try {
+                player.pause();
+            } catch (_) {}
+            if (!isPlaying) {
+                setUserTappedPlay(false);
+                onPlayingChange(false);
+            }
+        }
+    }, [isActive, player, isPlaying, onPlayingChange]);
 
     useEffect(() => {
         const sub = AppState.addEventListener("change", (state) => {
@@ -100,15 +135,88 @@ const InlineVideoCard = ({
         return () => sub.remove();
     }, [player]);
 
+    // Show overlay: before user taps play, or after video finishes
+    const showOverlay = !userTappedPlay || hasFinished;
+
     return (
         <View style={styles.slide}>
+            {/* Thumbnail poster — visible until video starts playing */}
+            {banner.thumbnail_url && showOverlay && (
+                <Image
+                    source={{ uri: encodeURI(banner.thumbnail_url) }}
+                    style={styles.cardImage}
+                />
+            )}
+
+            {/* Video layer — sits behind overlays, NOT inside TouchableOpacity */}
             <VideoView
                 style={styles.videoView}
                 player={player}
                 contentFit="cover"
-                allowsFullscreen
                 allowsPictureInPicture
             />
+
+            {/* Gradient overlay */}
+            <LinearGradient
+                colors={[
+                    "rgba(0,0,0,0.0)",
+                    "rgba(0,0,0,0.0)",
+                    "rgba(0,0,0,0.4)",
+                ]}
+                locations={[0, 0.55, 1]}
+                style={styles.gradient}
+                pointerEvents="none"
+            />
+
+            {/* Tap handler — transparent overlay on top */}
+            {showOverlay && (
+                <TouchableOpacity
+                    style={styles.videoPlayOverlay}
+                    activeOpacity={0.8}
+                    onPress={handlePlay}
+                >
+                    {hasFinished ? (
+                        <View style={styles.videoFinishedBadge}>
+                            <Text style={styles.videoFinishedIcon}>✓</Text>
+                            <Text style={styles.videoFinishedText}>Watched</Text>
+                        </View>
+                    ) : (
+                        <View style={styles.videoPlayButton}>
+                            <Text style={styles.videoPlayIcon}>▶</Text>
+                        </View>
+                    )}
+                </TouchableOpacity>
+            )}
+
+            <View style={styles.badgeWrapper} pointerEvents="none">
+                <LinearGradient
+                    colors={[Palette.brand[400], Palette.brand[500]]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.badge}
+                >
+                    <Text style={styles.badgeText}>🎬 VIDEO</Text>
+                </LinearGradient>
+            </View>
+
+            <View style={styles.contentArea} pointerEvents="none">
+                <Text style={styles.titleText} numberOfLines={2}>
+                    {banner.title}
+                </Text>
+                <Text style={styles.descriptionText} numberOfLines={1}>
+                    {banner.description}
+                </Text>
+                <LinearGradient
+                    colors={[Palette.brand[400], Palette.brand[500]]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={styles.ctaButton}
+                >
+                    <Text style={styles.ctaText}>
+                        {hasFinished ? "✓ Watched" : "▶ Play"}
+                    </Text>
+                </LinearGradient>
+            </View>
         </View>
     );
 };
@@ -131,7 +239,7 @@ const ImageBannerCard = ({ banner }: { banner: Banner }) => {
             onPress={handlePress}
             activeOpacity={0.95}>
             <Image
-                source={{ uri: banner.media_url }}
+                source={{ uri: encodeURI(banner.media_url) }}
                 style={styles.cardImage}
             />
             <LinearGradient
@@ -177,7 +285,14 @@ const ImageBannerCard = ({ banner }: { banner: Banner }) => {
 // ─── Main Section ─────────────────────────────────────────────────────────────
 const HomeBannerSection = () => {
     const { data: banners = [], isLoading, error } = useBannersList();
+
+    useEffect(() => {
+        if (banners.length > 0) {
+            console.log("📺 Banners API response:", JSON.stringify(banners, null, 2));
+        }
+    }, [banners]);
     const [activeIndex, setActiveIndex] = useState(0);
+    const [activeInfiniteIndex, setActiveInfiniteIndex] = useState(0);
     const flatListRef = useRef<FlatList>(null);
     const autoSlideTimer = useRef<ReturnType<typeof setInterval> | null>(null);
     const isVideoPlayingRef = useRef(false);
@@ -191,6 +306,13 @@ const HomeBannerSection = () => {
             : sortedBanners;
     const initialIndex = sortedBanners.length;
     initialIndexRef.current = initialIndex;
+
+    useEffect(() => {
+        if (sortedBanners.length <= 0) return;
+        setActiveInfiniteIndex(initialIndex);
+        activeIndexRef.current = 0;
+        setActiveIndex(0);
+    }, [initialIndex, sortedBanners.length]);
 
     const stopAutoSlide = useCallback(() => {
         if (autoSlideTimer.current) {
@@ -233,6 +355,8 @@ const HomeBannerSection = () => {
     const onViewableItemsChanged = useRef(
         ({ viewableItems }: { viewableItems: ViewToken[] }) => {
             if (viewableItems.length > 0 && viewableItems[0].index != null) {
+                setActiveInfiniteIndex(viewableItems[0].index);
+                if (sortedBanners.length <= 0) return;
                 const next = viewableItems[0].index % sortedBanners.length;
                 activeIndexRef.current = next;
                 setActiveIndex(next);
@@ -265,16 +389,17 @@ const HomeBannerSection = () => {
     );
 
     const renderItem = useCallback(
-        ({ item }: { item: Banner }) =>
+        ({ item, index }: { item: Banner; index: number }) =>
             item.type === "video" ? (
                 <InlineVideoCard
                     banner={item}
                     onPlayingChange={handlePlayingChange}
+                    isActive={index === activeInfiniteIndex}
                 />
             ) : (
                 <ImageBannerCard banner={item} />
             ),
-        [handlePlayingChange],
+        [handlePlayingChange, activeInfiniteIndex],
     );
 
     const getItemLayout = useCallback(
@@ -350,6 +475,49 @@ const styles = StyleSheet.create({
         ...StyleSheet.absoluteFillObject,
         width: "100%",
         height: "100%",
+    },
+    videoPlayOverlay: {
+        ...StyleSheet.absoluteFillObject,
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    videoPlayButton: {
+        width: 58,
+        height: 58,
+        borderRadius: 29,
+        backgroundColor: "rgba(0,0,0,0.55)",
+        justifyContent: "center",
+        alignItems: "center",
+        borderWidth: 1,
+        borderColor: "rgba(255,255,255,0.35)",
+    },
+    videoPlayIcon: {
+        color: "#fff",
+        fontSize: 22,
+        fontWeight: "900",
+        marginLeft: 3,
+    },
+    videoFinishedBadge: {
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: "rgba(0,0,0,0.6)",
+        paddingHorizontal: 18,
+        paddingVertical: 10,
+        borderRadius: 24,
+        gap: 8,
+        borderWidth: 1,
+        borderColor: "rgba(255,255,255,0.25)",
+    },
+    videoFinishedIcon: {
+        color: "#22c55e",
+        fontSize: 18,
+        fontWeight: "900",
+    },
+    videoFinishedText: {
+        color: "#fff",
+        fontSize: 14,
+        fontWeight: "700",
+        letterSpacing: 0.3,
     },
     gradient: {
         ...StyleSheet.absoluteFillObject,

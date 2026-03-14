@@ -126,7 +126,7 @@ function ProfileScreen() {
                     onPress={() => logout()}
                 >
                     <ThemedText style={styles.logoutText}>Log Out</ThemedText>
-                    <Icons.LogoutIcon size={20} color={Palette.brand[500]} />
+                    <Icons.LogoutIcon size={20} color="#EF4444" />
                 </TouchableOpacity>
             </PullToRefreshScrollView>
         </ScreenWrapper>
@@ -264,7 +264,7 @@ const styles = StyleSheet.create({
     logoutText: {
         fontFamily: "Poppins_600SemiBold",
         fontSize: 14,
-        color: Palette.brand[500],
+        color: "#EF4444",
         textTransform: "capitalize",
     },
 });

@@ -120,7 +120,7 @@ export default function LoginScreen() {
                                     <>
                                         <TextInput
                                             style={styles.input}
-                                            placeholder="farah3@gmail.com"
+                                            placeholder="student@email.com"
                                             placeholderTextColor="#999"
                                             value={value}
                                             onChangeText={onChange}

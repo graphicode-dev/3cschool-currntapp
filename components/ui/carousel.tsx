@@ -16,7 +16,8 @@ import Animated, {
 } from "react-native-reanimated";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
-const SLIDE_WIDTH = SCREEN_WIDTH - 31; // Account for 2px padding on each side
+const SLIDE_MARGIN = Spacing.lg;
+const SLIDE_WIDTH = SCREEN_WIDTH - SLIDE_MARGIN * 2;
 
 const DOT_INACTIVE_SIZE = 8;
 const DOT_ACTIVE_WIDTH = 28;
@@ -24,7 +25,7 @@ const DOT_HEIGHT = 8;
 const ANIMATION_DURATION = 250;
 
 interface BannerCarouselProps {
-    sources: (any | React.ReactNode)[];
+    sources: any[];
     height?: number;
 }
 
@@ -53,8 +54,11 @@ function Dot({ isActive }: { isActive: boolean }) {
 
     return (
         <Animated.View
-            style={[styles.dot, animatedStyle, !isActive && styles.dotInactive]}
-        >
+            style={[
+                styles.dot,
+                animatedStyle,
+                !isActive && styles.dotInactive,
+            ]}>
             {isActive && (
                 <LinearGradient
                     colors={[Palette.brand[600], Palette.brand[500]]}
@@ -102,7 +106,7 @@ const Carousel = ({
             if (sources.length <= 1) return;
 
             const contentOffsetX = event.nativeEvent.contentOffset.x;
-            const slideWidth = SLIDE_WIDTH + Spacing.sm; // Account for spacing
+            const slideWidth = SLIDE_WIDTH + Spacing.sm;
             const currentIndex = Math.round(contentOffsetX / slideWidth);
 
             // If we're at the beginning or end of the infinite list, jump to the middle
@@ -125,7 +129,7 @@ const Carousel = ({
         if (!autoSlide || sources.length <= 1) return;
 
         const interval = setInterval(() => {
-            const slideWidth = SLIDE_WIDTH + Spacing.sm; // Account for spacing
+            const slideWidth = SLIDE_WIDTH + Spacing.sm;
             flatListRef.current?.scrollToOffset({
                 offset: (activeIndex + initialIndex + 1) * slideWidth,
                 animated: true,
@@ -143,10 +147,12 @@ const Carousel = ({
 
     const renderItem = useCallback(
         ({ item }: { item: any }) => {
+            // If item is a React component, render it directly
             if (React.isValidElement(item)) {
                 return <View style={[styles.slide, { height }]}>{item}</View>;
             }
 
+            // Otherwise, treat it as an image source
             return (
                 <View style={[styles.slide, { height }]}>
                     <Image
@@ -163,7 +169,7 @@ const Carousel = ({
 
     const getItemLayout = useCallback(
         (_: any, index: number) => ({
-            length: SLIDE_WIDTH + Spacing.sm, // Account for spacing
+            length: SLIDE_WIDTH + Spacing.sm,
             offset: (SLIDE_WIDTH + Spacing.sm) * index,
             index,
         }),
@@ -204,15 +210,13 @@ export default Carousel;
 
 const styles = StyleSheet.create({
     listContent: {
+        paddingHorizontal: SLIDE_MARGIN,
         gap: Spacing.sm,
     },
     slide: {
         width: SLIDE_WIDTH,
         borderRadius: Radii.xl,
         overflow: "hidden",
-        backgroundColor: "transparent",
-        justifyContent: "center",
-        alignItems: "center",
     },
     image: {
         width: "100%",

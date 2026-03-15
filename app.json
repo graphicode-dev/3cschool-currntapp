@@ -41,7 +41,7 @@
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "package": "app.c3school.current",
-      "versionCode": 6
+      "versionCode": 7
     },
     "plugins": [
       "expo-router",

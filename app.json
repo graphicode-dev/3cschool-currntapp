@@ -7,7 +7,7 @@
       "web"
     ],
     "name": "3cschool",
-    "slug": "3cschool",
+    "slug": "3c",
     "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/icon/ios-adaptive-light-icon.png",
@@ -41,7 +41,7 @@
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "package": "app.c3school.current",
-      "versionCode": 5
+      "versionCode": 6
     },
     "plugins": [
       "expo-router",

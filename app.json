@@ -12,11 +12,6 @@
     "orientation": "portrait",
     "icon": "./assets/icon/ios-adaptive-light-icon.png",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
-    "notification": {
-      "icon": "./assets/icon/notification.png",
-      "color": "#ffffff"
-    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.c3school.app",
@@ -38,7 +33,6 @@
         "NOTIFICATIONS"
       ],
       "googleServicesFile": "./google-services.json",
-      "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "package": "app.c3school.current",
       "versionCode": 7

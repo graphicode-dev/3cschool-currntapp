@@ -1,12 +1,11 @@
 import { toast } from "@/components/ui/Toast";
 import { useAudioPlayer } from "expo-audio";
-import * as Notifications from "expo-notifications";
 import { usePathname } from "expo-router";
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 
-const useNotificationHandler = (
-    receivedNotification: Notifications.Notification | null,
-) => {
+const useNotificationHandler = (receivedNotification: any | null) => {
+    const { t } = useTranslation();
     const pathname = usePathname();
     const audioSource = require("@/assets/notification.wav");
     const player = useAudioPlayer(audioSource);
@@ -14,12 +13,12 @@ const useNotificationHandler = (
     useEffect(() => {
         if (!receivedNotification) return;
 
-        toast.success("New Notification");
+        toast.success(t("ui.newNotification"));
 
         // Play sound effect
         player.seekTo(0);
         player.play();
-    }, [receivedNotification, pathname, player]);
+    }, [receivedNotification, pathname]);
 };
 
 export default useNotificationHandler;

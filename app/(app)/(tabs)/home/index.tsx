@@ -6,18 +6,20 @@ import { RenderSection } from "@/components/RenderSection";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import { PullToRefreshScrollView } from "@/components/ui/Pulltorefresh";
 import { Spacing } from "@/constants/theme";
+import { useLanguage } from "@/contexts/language-context";
 import { authStore } from "@/services/auth/auth.store";
 import { StyleSheet } from "react-native";
 
-const infoMockData = {
-    motivational: "You're Doing Great! Keep Going!",
-    continueButtonText: "Continue Session",
-    shareIdeasText: "Share ideas and learn as a team.",
-    chatText: "Chat with your classmates.",
-};
-
 const HomeScreen = () => {
     const { user } = authStore();
+    const { t } = useLanguage();
+
+    const infoMockData = {
+        motivational: t("home.infoSection.motivational"),
+        continueButtonText: t("home.infoSection.continueButton"),
+        shareIdeasText: t("home.infoSection.shareIdeas"),
+        chatText: t("home.infoSection.chat"),
+    };
 
     if (!user) return null;
 
@@ -27,7 +29,8 @@ const HomeScreen = () => {
             <PullToRefreshScrollView
                 refetches={[]}
                 style={styles.scrollView}
-                contentContainerStyle={styles.scrollContent}>
+                contentContainerStyle={styles.scrollContent}
+            >
                 {/* Banner Section */}
                 <HomeBannerSection />
                 {/* Info Section */}

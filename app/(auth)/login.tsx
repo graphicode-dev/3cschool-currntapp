@@ -3,7 +3,6 @@ import { useLogin } from "@/services/auth";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { useTranslation } from "react-i18next";
 import {
     Image,
     KeyboardAvoidingView,
@@ -17,6 +16,7 @@ import {
 
 import { toast } from "@/components/ui/Toast";
 import { Images } from "@/constants/images";
+import { useLanguage } from "@/contexts/language-context";
 import { FontAwesome } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -26,7 +26,7 @@ interface LoginFormData {
 }
 
 export default function LoginScreen() {
-    const { t } = useTranslation();
+    const { t } = useLanguage();
     const insets = useSafeAreaInsets();
     const { mutateAsync: login, isPending } = useLogin();
     const [showPassword, setShowPassword] = useState(false);
@@ -63,21 +63,25 @@ export default function LoginScreen() {
     return (
         <LinearGradient
             colors={["#E3F2FD", "#BBDEFB", "#90CAF9"]}
-            style={[styles.container, { paddingTop: insets.top }]}>
+            style={[styles.container, { paddingTop: insets.top }]}
+        >
             <KeyboardAvoidingView
                 style={{ flex: 1 }}
-                behavior={Platform.OS === "ios" ? "padding" : "height"}>
+                behavior={Platform.OS === "ios" ? "padding" : "height"}
+            >
                 <ScrollView
                     contentContainerStyle={styles.scrollContent}
                     showsVerticalScrollIndicator={false}
-                    keyboardShouldPersistTaps="handled">
+                    keyboardShouldPersistTaps="handled"
+                >
                     {/* Header Section */}
                     <View style={styles.headerSection}>
                         <ThemedText
                             type="title"
                             lang="en"
                             style={styles.welcomeText}
-                            fontSize={35}>
+                            fontSize={35}
+                        >
                             Welcome!
                         </ThemedText>
                         <ThemedText
@@ -85,13 +89,15 @@ export default function LoginScreen() {
                             lang="en"
                             style={styles.codingText}
                             fontSize={20}
-                            numberOfLines={1}>
+                            numberOfLines={1}
+                        >
                             Let&apos;s Start Coding Together ✨
                         </ThemedText>
                         <ThemedText
                             style={styles.subtitle}
                             numberOfLines={1}
-                            fontSize={14}>
+                            fontSize={14}
+                        >
                             enter your email and password to log in
                         </ThemedText>
                     </View>
@@ -102,7 +108,8 @@ export default function LoginScreen() {
                             type="defaultSemiBold"
                             lang="en"
                             style={styles.label}
-                            fontSize={16}>
+                            fontSize={16}
+                        >
                             Email
                         </ThemedText>
                         <View style={styles.inputContainer}>
@@ -148,7 +155,8 @@ export default function LoginScreen() {
                             type="defaultSemiBold"
                             lang="en"
                             style={styles.label}
-                            fontSize={16}>
+                            fontSize={16}
+                        >
                             Password
                         </ThemedText>
                         <View style={styles.inputContainer}>
@@ -172,7 +180,8 @@ export default function LoginScreen() {
                                             onPress={() =>
                                                 setShowPassword(!showPassword)
                                             }
-                                            style={styles.inputIcon}>
+                                            style={styles.inputIcon}
+                                        >
                                             <FontAwesome
                                                 name={
                                                     showPassword
@@ -196,12 +205,14 @@ export default function LoginScreen() {
                         <TouchableOpacity
                             style={styles.loginButton}
                             onPress={handleSubmit(onSubmit)}
-                            disabled={isPending}>
+                            disabled={isPending}
+                        >
                             <ThemedText
                                 type="defaultSemiBold"
                                 lang="en"
                                 style={styles.loginButtonText}
-                                fontSize={18}>
+                                fontSize={18}
+                            >
                                 {isPending ? "Logging in..." : "Log In"}
                             </ThemedText>
                         </TouchableOpacity>

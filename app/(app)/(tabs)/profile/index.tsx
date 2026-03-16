@@ -29,7 +29,8 @@ function ProfileScreen() {
             <PullToRefreshScrollView
                 refetches={[]}
                 style={styles.scrollView}
-                contentContainerStyle={styles.scrollContent}>
+                contentContainerStyle={styles.scrollContent}
+            >
                 {/* Edit button */}
                 {/* <TouchableOpacity
                     style={styles.editButton}
@@ -84,19 +85,22 @@ function ProfileScreen() {
                         <TouchableOpacity
                             onPress={toggleLanguage}
                             activeOpacity={0.8}
-                            style={styles.languageToggle}>
+                            style={styles.languageToggle}
+                        >
                             <View
                                 style={[
                                     styles.languageOption,
                                     language === "en" && styles.languageActive,
-                                ]}>
+                                ]}
+                            >
                                 <ThemedText
                                     style={[
                                         styles.languageOptionText,
                                         language === "en" &&
                                             styles.languageActiveText,
                                     ]}
-                                    fontSize={13}>
+                                    fontSize={13}
+                                >
                                     EN
                                 </ThemedText>
                             </View>
@@ -104,14 +108,16 @@ function ProfileScreen() {
                                 style={[
                                     styles.languageOption,
                                     language === "ar" && styles.languageActive,
-                                ]}>
+                                ]}
+                            >
                                 <ThemedText
                                     style={[
                                         styles.languageOptionText,
                                         language === "ar" &&
                                             styles.languageActiveText,
                                     ]}
-                                    fontSize={13}>
+                                    fontSize={13}
+                                >
                                     AR
                                 </ThemedText>
                             </View>
@@ -148,7 +154,8 @@ function ProfileScreen() {
                 {/* Logout */}
                 <TouchableOpacity
                     style={styles.logoutRow}
-                    onPress={() => logout()}>
+                    onPress={() => logout()}
+                >
                     <ThemedText style={styles.logoutText} fontSize={14}>
                         Log Out
                     </ThemedText>
@@ -236,6 +243,8 @@ const styles = StyleSheet.create({
     },
     languageActive: {
         backgroundColor: Palette.brand[500],
+        borderRadius: 20,
+        padding: 3,
     },
     languageOptionText: {
         fontFamily: "Poppins-Medium",

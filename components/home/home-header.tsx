@@ -1,5 +1,6 @@
 import { Icons } from "@/constants/icons";
 import { Palette } from "@/constants/theme";
+import { useLanguage } from "@/contexts/language-context";
 import { User } from "@/services/auth/auth.types";
 import { useUnreadCount } from "@/services/notifications";
 import { router } from "expo-router";
@@ -8,6 +9,7 @@ import Avatar from "../avatar";
 import { ThemedText } from "../themed-text";
 
 const HomeHeader = ({ user }: { user: User }) => {
+    const { t } = useLanguage();
     const { data: unreadData } = useUnreadCount();
     const unreadCount = unreadData?.count ?? 0;
 
@@ -24,14 +26,15 @@ const HomeHeader = ({ user }: { user: User }) => {
 
                 {/* Greeting ThemedText */}
                 <ThemedText style={styles.greetingText} fontSize={16}>
-                    hi, {user?.full_name}! 👋
+                    {t("home.header.greeting")}, {user?.full_name}! 👋
                 </ThemedText>
             </View>
 
             {/* Right Side - Notification Icon */}
             <TouchableOpacity
                 style={styles.notificationContainer}
-                onPress={() => router.push("/(app)/notifications")}>
+                onPress={() => router.push("/(app)/notifications")}
+            >
                 <Icons.BellIcon color="black" size={25} />
                 {unreadCount > 0 && (
                     <View style={styles.notificationBadge}>

@@ -1,1 +1,35 @@
-{}
+{
+    "common": {
+        "greeting": "مرحبا",
+        "watched": "تمت مشاهدته",
+        "play": "تشغيل",
+        "explore": "استكشف",
+        "video": "فيديو",
+        "image": "صورة"
+    },
+    "home": {
+        "banner": {
+            "video": {
+                "badge": "🎬 فيديو",
+                "watched": "✓ تمت مشاهدته",
+                "play": "▶ تشغيل"
+            },
+            "image": {
+                "badge": "🖼 صورة",
+                "explore": "→ استكشف"
+            }
+        },
+        "header": {
+            "greeting": "مرحبا"
+        },
+        "infoSection": {
+            "motivational": "أداء رائع! استمر!",
+            "continueButton": "متابعة الجلسة",
+            "shareIdeas": "شارك الأفكار وتعلم كفريق.",
+            "chat": "تواصل مع زملائك."
+        },
+        "upcomingSessions": {
+            "title": "الجلسات القادمة"
+        }
+    }
+}

@@ -1,8 +1,10 @@
 import { RenderSection } from "@/components/RenderSection";
 import SessionsList from "@/components/sessions/sessions-list";
+import { useLanguage } from "@/contexts/language-context";
 import { useAllSessions } from "@/services/sessions/sessions.queries";
 
 const HomeUpcomingSessions = () => {
+    const { t } = useLanguage();
     const { data, isLoading, error } = useAllSessions();
 
     const upcomingSessions = data?.upcoming ?? [];
@@ -16,7 +18,7 @@ const HomeUpcomingSessions = () => {
         >
             <SessionsList
                 sessions={upcomingSessions}
-                title="Upcoming Sessions"
+                title={t("home.upcomingSessions.title")}
                 count={totalUpcoming}
             />
         </RenderSection>

@@ -13,6 +13,7 @@
  */
 
 import { applyRTL, loadSavedLanguage, saveLanguage } from "@/i18n";
+import { TFunction } from "i18next";
 import React, {
     createContext,
     useCallback,
@@ -31,6 +32,7 @@ interface LanguageContextType {
     isReady: boolean;
     toggleLanguage: () => void;
     setLanguage: (lang: string) => void;
+    t: TFunction<"translation", undefined>;
 }
 
 // ─── Context ──────────────────────────────────────────────────────────────────
@@ -41,12 +43,13 @@ const LanguageContext = createContext<LanguageContextType>({
     isReady: false,
     toggleLanguage: () => {},
     setLanguage: () => {},
+    t: (() => "") as any,
 });
 
 // ─── Provider ─────────────────────────────────────────────────────────────────
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-    const { i18n } = useTranslation();
+    const { t, i18n } = useTranslation();
     const [language, setLang] = useState(i18n.language);
     const [isReady, setIsReady] = useState(false);
 
@@ -97,6 +100,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
                 isReady,
                 toggleLanguage,
                 setLanguage: changeLanguage,
+                t,
             }}
         >
             {children}

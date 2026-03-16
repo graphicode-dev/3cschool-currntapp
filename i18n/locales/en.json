@@ -1,1 +1,35 @@
-{}
+{
+    "common": {
+        "greeting": "hi",
+        "watched": "Watched",
+        "play": "Play",
+        "explore": "Explore",
+        "video": "VIDEO",
+        "image": "IMAGE"
+    },
+    "home": {
+        "banner": {
+            "video": {
+                "badge": "🎬 VIDEO",
+                "watched": "✓ Watched",
+                "play": "▶ Play"
+            },
+            "image": {
+                "badge": "🖼 IMAGE",
+                "explore": "→ Explore"
+            }
+        },
+        "header": {
+            "greeting": "hi"
+        },
+        "infoSection": {
+            "motivational": "You're Doing Great! Keep Going!",
+            "continueButton": "Continue Session",
+            "shareIdeas": "Share ideas and learn as a team.",
+            "chat": "Chat with your classmates."
+        },
+        "upcomingSessions": {
+            "title": "Upcoming Sessions"
+        }
+    }
+}

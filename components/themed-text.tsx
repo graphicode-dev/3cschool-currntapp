@@ -6,7 +6,7 @@ import {
 } from "react-native";
 
 import { Fonts } from "@/constants/theme";
-import { useTranslation } from "react-i18next";
+import { useLanguage } from "@/contexts/language-context";
 
 export type ThemedTextProps = TextProps & {
     type?: "default" | "title" | "defaultSemiBold" | "subtitle" | "link";
@@ -19,9 +19,9 @@ export function ThemedText({
     fontSize,
     ...rest
 }: ThemedTextProps) {
-    const { i18n } = useTranslation();
+    const { language } = useLanguage();
     const { width } = useWindowDimensions();
-    const lang = i18n.language === "ar" ? "ar" : "en";
+    const lang = language === "ar" ? "ar" : "en";
 
     // Scale fontSize responsively based on screen width
     const responsiveFontSize =

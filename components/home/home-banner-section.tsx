@@ -1,4 +1,5 @@
 import { Palette } from "@/constants/theme";
+import { useLanguage } from "@/contexts/language-context";
 import { useBannersList, type Banner } from "@/services/banner";
 import { useEvent } from "expo";
 import { LinearGradient } from "expo-linear-gradient";
@@ -79,6 +80,7 @@ const InlineVideoCard = ({
     onPlayingChange: (isPlaying: boolean) => void;
     isActive: boolean;
 }) => {
+    const { t } = useLanguage();
     const [hasFinished, setHasFinished] = useState(false);
     const [userTappedPlay, setUserTappedPlay] = useState(false);
 
@@ -187,7 +189,7 @@ const InlineVideoCard = ({
                                 style={styles.videoFinishedText}
                                 fontSize={14}
                             >
-                                Watched
+                                {t("common.watched")}
                             </ThemedText>
                         </View>
                     ) : (
@@ -220,7 +222,7 @@ const InlineVideoCard = ({
                                     style={styles.badgeText}
                                     fontSize={11}
                                 >
-                                    🎬 VIDEO
+                                    {t("home.banner.video.badge")}
                                 </ThemedText>
                             </LinearGradient>
                         </View>
@@ -253,7 +255,9 @@ const InlineVideoCard = ({
                                     style={styles.ctaText}
                                     fontSize={13}
                                 >
-                                    {hasFinished ? "✓ Watched" : "▶ Play"}
+                                    {hasFinished
+                                        ? t("home.banner.video.watched")
+                                        : t("home.banner.video.play")}
                                 </ThemedText>
                             </LinearGradient>
                         </View>
@@ -265,6 +269,8 @@ const InlineVideoCard = ({
 
 // ─── Image Banner Card ────────────────────────────────────────────────────────
 const ImageBannerCard = ({ banner }: { banner: Banner }) => {
+    const { t } = useLanguage();
+
     const handlePress = async () => {
         if (banner.link) {
             try {
@@ -304,7 +310,7 @@ const ImageBannerCard = ({ banner }: { banner: Banner }) => {
                     style={styles.badge}
                 >
                     <ThemedText style={styles.badgeText} fontSize={11}>
-                        🖼 IMAGE
+                        {t("home.banner.image.badge")}
                     </ThemedText>
                 </LinearGradient>
             </View>
@@ -331,7 +337,7 @@ const ImageBannerCard = ({ banner }: { banner: Banner }) => {
                     style={styles.ctaButton}
                 >
                     <ThemedText style={styles.ctaText} fontSize={13}>
-                        → Explore
+                        {t("home.banner.image.explore")}
                     </ThemedText>
                 </LinearGradient>
             </View>

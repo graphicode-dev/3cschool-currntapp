@@ -3,6 +3,7 @@ import { NotificationCard } from "@/components/notifocations/NotificationCard";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import { ThemedText } from "@/components/themed-text";
 import { Palette, Radii, Spacing, Typography } from "@/constants/theme";
+import { useLanguage } from "@/contexts/language-context";
 import {
     Notification,
     useMarkAsRead,
@@ -10,7 +11,6 @@ import {
 } from "@/services/notifications";
 import { useRouter } from "expo-router";
 import React, { useCallback } from "react";
-import { useTranslation } from "react-i18next";
 import {
     ActivityIndicator,
     FlatList,
@@ -21,7 +21,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function NotificationsScreen() {
-    const { t } = useTranslation();
+    const { t } = useLanguage();
     const router = useRouter();
     const insets = useSafeAreaInsets();
     const [isRefreshing, setIsRefreshing] = React.useState(false);

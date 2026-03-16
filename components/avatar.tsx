@@ -20,7 +20,8 @@ const Avatar = ({ image, name, size, badge, icon }: AvatarProps) => {
                     width: size,
                     height: size,
                 },
-            ]}>
+            ]}
+        >
             <View style={styles.avatarInner}>
                 {image ? (
                     <Image
@@ -30,12 +31,14 @@ const Avatar = ({ image, name, size, badge, icon }: AvatarProps) => {
                     />
                 ) : icon ? (
                     <View
-                        style={[styles.avatarImage, styles.avatarPlaceholder]}>
+                        style={[styles.avatarImage, styles.avatarPlaceholder]}
+                    >
                         {icon}
                     </View>
                 ) : (
                     <View
-                        style={[styles.avatarImage, styles.avatarPlaceholder]}>
+                        style={[styles.avatarImage, styles.avatarPlaceholder]}
+                    >
                         <ThemedText style={styles.avatarInitial} fontSize={20}>
                             {name?.charAt(0)?.toUpperCase() || "?"}
                         </ThemedText>
@@ -94,7 +97,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: 6,
     },
     studentBadgeText: {
-        fontFamily: "Poppins_400Regular",
         color: Palette.brand[50],
         textTransform: "capitalize",
     },

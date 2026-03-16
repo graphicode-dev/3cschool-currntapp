@@ -119,7 +119,8 @@ function EditProfileView() {
             <PullToRefreshScrollView
                 refetches={[]}
                 style={styles.scrollView}
-                contentContainerStyle={styles.scrollContent}>
+                contentContainerStyle={styles.scrollContent}
+            >
                 <ThemedText type="title" fontSize={25}>
                     Update your info anytime.
                 </ThemedText>
@@ -129,7 +130,8 @@ function EditProfileView() {
                     <TouchableOpacity
                         onPress={handlePickImage}
                         activeOpacity={0.8}
-                        style={styles.avatarWrapper}>
+                        style={styles.avatarWrapper}
+                    >
                         {displayAvatarUri ? (
                             <Image
                                 source={{ uri: displayAvatarUri }}
@@ -223,13 +225,15 @@ function EditProfileView() {
                         ]}
                         activeOpacity={0.85}
                         onPress={handleSubmit(onSubmit)}
-                        disabled={isButtonDisabled}>
+                        disabled={isButtonDisabled}
+                    >
                         {isPending ? (
                             <ActivityIndicator color={Palette.white} />
                         ) : (
                             <ThemedText
                                 style={styles.saveButtonText}
-                                fontSize={16}>
+                                fontSize={16}
+                            >
                                 Save
                             </ThemedText>
                         )}
@@ -305,7 +309,6 @@ const styles = StyleSheet.create({
         opacity: 0.4,
     },
     saveButtonText: {
-        fontFamily: "Poppins-SemiBold",
         color: Palette.white,
         textTransform: "capitalize",
     },

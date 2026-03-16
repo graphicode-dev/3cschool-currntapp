@@ -6,12 +6,14 @@ import { Error } from "@/components/ui/Error";
 import { Loading } from "@/components/ui/Loading";
 import { PullToRefreshScrollView } from "@/components/ui/Pulltorefresh";
 import { Palette, Spacing } from "@/constants/theme";
+import { useLanguage } from "@/contexts/language-context";
 import { useGroupChats } from "@/hooks/useGroupChats";
 import { router } from "expo-router";
 import React from "react";
 import { FlatList, StyleSheet, View } from "react-native";
 
 const ChatListScreen = () => {
+    const { t } = useLanguage();
     const { groups, isLoading, error, searchQuery, setSearchQuery, refetch } =
         useGroupChats();
 
@@ -35,14 +37,15 @@ const ChatListScreen = () => {
             <PullToRefreshScrollView
                 refetches={[() => refetch()]}
                 style={styles.scrollView}
-                contentContainerStyle={styles.scrollContent}>
+                contentContainerStyle={styles.scrollContent}
+            >
                 <View style={styles.listHeader}>
                     <View>
                         <ThemedText style={styles.listTitle} fontSize={24}>
-                            Conversations
+                            {t("chats.index.title")}
                         </ThemedText>
                         <ThemedText style={styles.listSubtitle} fontSize={12}>
-                            {groups.length} Chats
+                            {groups.length} {t("chats.index.chatsCount")}
                         </ThemedText>
                     </View>
                 </View>
@@ -73,13 +76,15 @@ const ChatListScreen = () => {
                             <View style={styles.empty}>
                                 <ThemedText
                                     style={styles.emptyIcon}
-                                    fontSize={36}>
+                                    fontSize={36}
+                                >
                                     💬
                                 </ThemedText>
                                 <ThemedText
                                     style={styles.emptyTitle}
-                                    fontSize={16}>
-                                    No Conversations Yet
+                                    fontSize={16}
+                                >
+                                    {t("chats.index.noConversationsYet")}
                                 </ThemedText>
                             </View>
                         )

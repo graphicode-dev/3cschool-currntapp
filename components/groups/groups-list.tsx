@@ -1,4 +1,5 @@
 import { ThemedText } from "@/components/themed-text";
+import { useLanguage } from "@/contexts/language-context";
 import { Group } from "@/services/groups/groups.types";
 import React from "react";
 import { StyleSheet, View } from "react-native";
@@ -9,11 +10,13 @@ interface GroupsListProps {
 }
 
 const GroupsList = ({ data }: GroupsListProps) => {
+    const { t } = useLanguage();
+
     if (!data.length) {
         return (
             <View style={styles.empty}>
                 <ThemedText style={styles.emptyText} fontSize={14}>
-                    No groups found
+                    {t("groups.list.noGroupsFound")}
                 </ThemedText>
             </View>
         );
@@ -42,7 +45,6 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     emptyText: {
-        fontFamily: "Poppins-Regular",
         color: "#7A7A7A",
     },
     separator: { height: 12 },

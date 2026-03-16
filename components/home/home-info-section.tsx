@@ -32,18 +32,23 @@ const HomeInfoSection = ({
                 <View style={styles.motivationalContent}>
                     <ThemedText
                         style={[styles.motivationalText]}
-                        fontSize={scaleFont(25)}>
+                        fontSize={scaleFont(25)}
+                        fontWeight="bold"
+                    >
                         {motivational}
                     </ThemedText>
 
                     <TouchableOpacity
                         activeOpacity={0.8}
                         style={styles.continueButton}
-                        onPress={() => router.push("/(app)/(tabs)/groups")}>
+                        onPress={() => router.push("/(app)/(tabs)/groups")}
+                    >
                         <ThemedText
                             style={[styles.continueButtonText]}
                             fontSize={scaleFont(10)}
-                            numberOfLines={1}>
+                            fontWeight="medium"
+                            numberOfLines={1}
+                        >
                             {continueButtonText}
                         </ThemedText>
 
@@ -60,7 +65,9 @@ const HomeInfoSection = ({
 
                     <ThemedText
                         style={[styles.smallCardText]}
-                        fontSize={scaleFont(14)}>
+                        fontSize={scaleFont(14)}
+                        fontWeight="medium"
+                    >
                         {shareIdeasText}
                     </ThemedText>
                 </View>
@@ -71,7 +78,9 @@ const HomeInfoSection = ({
 
                     <ThemedText
                         style={[styles.smallCardText]}
-                        fontSize={scaleFont(14)}>
+                        fontSize={scaleFont(14)}
+                        fontWeight="medium"
+                    >
                         {chatText}
                     </ThemedText>
                 </View>
@@ -111,7 +120,6 @@ const styles = StyleSheet.create({
     motivationalText: {
         fontWeight: "700",
         color: Palette.slate900,
-        fontFamily: "Poppins-SemiBold",
         lineHeight: 40,
     },
 
@@ -133,7 +141,6 @@ const styles = StyleSheet.create({
     continueButtonText: {
         fontWeight: "600",
         color: Palette.brand[500],
-        fontFamily: "Poppins-Medium",
     },
 
     /* ================= RIGHT SIDE ================= */
@@ -163,7 +170,6 @@ const styles = StyleSheet.create({
         flex: 1,
         fontWeight: "600",
         color: Palette.slate900,
-        fontFamily: "Poppins-SemiBold",
         lineHeight: 20,
     },
 });

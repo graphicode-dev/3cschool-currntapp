@@ -1,3 +1,4 @@
+import { useLanguage } from "@/contexts/language-context";
 import { useEffect, useMemo, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { ThemedText } from "../themed-text";
@@ -26,6 +27,7 @@ export function ProgressCard({
     total,
     nextSessionDate,
 }: ProgressCardProps) {
+    const { t } = useLanguage();
     const [timeLeft, setTimeLeft] = useState<TimeLeft | null>(null);
     const [countdownMode, setCountdownMode] = useState<
         "upcoming" | "current" | "ended"
@@ -149,7 +151,10 @@ export function ProgressCard({
         return "#00ADEF";
     }, [timeLeft]);
 
-    const countdownLabel = countdownMode === "upcoming" ? "Starts in" : "Ended";
+    const countdownLabel =
+        countdownMode === "upcoming"
+            ? t("groups.progressCard.startsIn")
+            : t("groups.progressCard.ended");
 
     return (
         <View style={styles.card}>
@@ -159,7 +164,11 @@ export function ProgressCard({
                 </ThemedText>
 
                 {highlight && (
-                    <ThemedText style={styles.highlight} fontSize={13}>
+                    <ThemedText
+                        style={styles.highlight}
+                        fontSize={13}
+                        fontWeight="medium"
+                    >
                         {highlight}
                     </ThemedText>
                 )}
@@ -195,12 +204,10 @@ const styles = StyleSheet.create({
         gap: 2,
     },
     label: {
-        fontFamily: "Poppins-Regular",
         color: "#A4A3A3",
         textTransform: "lowercase",
     },
     highlight: {
-        fontFamily: "Poppins-Medium",
         color: "#24ADE3",
         textTransform: "lowercase",
     },

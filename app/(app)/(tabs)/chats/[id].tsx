@@ -7,6 +7,7 @@ import { ThemedText } from "@/components/themed-text";
 import { Icons } from "@/constants/icons";
 import { Images } from "@/constants/images";
 import { Palette } from "@/constants/theme";
+import { useLanguage } from "@/contexts/language-context";
 import { useGroupChats } from "@/hooks/useGroupChats";
 import { useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef } from "react";
@@ -21,6 +22,7 @@ import {
 } from "react-native";
 
 export default function ChatConversationScreen() {
+    const { t } = useLanguage();
     const params = useLocalSearchParams<{
         groupId?: string;
         id?: string;
@@ -143,12 +145,17 @@ export default function ChatConversationScreen() {
     return (
         <ScreenWrapper bgImage={Images.chatBg}>
             <CustomHeader
-                title={params.groupName ?? selectedGroup.name ?? "Group Chat"}
+                title={
+                    params.groupName ??
+                    selectedGroup.name ??
+                    t("chats.conversation.title")
+                }
                 subtitle={
-                    "Members: " +
+                    t("chats.conversation.members") +
+                    ": " +
                     (params.groupCapacity ??
                         String(selectedGroup.capacity) ??
-                        "Capacity not available")
+                        t("chats.conversation.capacityNotAvailable"))
                 }
                 divider
                 avatar={{

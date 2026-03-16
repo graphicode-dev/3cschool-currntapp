@@ -138,6 +138,17 @@ export const Shadows = {
 };
 
 export const Fonts = Platform.select({
+    android: {
+        /** English fonts */
+        poppins: "Poppins-Regular",
+        poppinsMedium: "Poppins-Medium",
+        poppinsSemiBold: "Poppins-SemiBold",
+        poppinsBold: "Poppins-Bold",
+        /** Arabic fonts */
+        tajawal: "Tajawal-Regular",
+        tajawalMedium: "Tajawal-Medium",
+        tajawalBold: "Tajawal-Bold",
+    },
     ios: {
         /** English fonts */
         poppins: "Poppins-Regular",

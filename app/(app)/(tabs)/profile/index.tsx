@@ -18,14 +18,14 @@ import { StyleSheet, TouchableOpacity, View } from "react-native";
 function ProfileScreen() {
     const { mutate: logout } = useLogout();
     const { user } = useAuthStore();
-    const { language, toggleLanguage } = useLanguage();
+    const { language, toggleLanguage, t } = useLanguage();
 
     const isStudent = user?.role_name === "user";
     const isTeacher = user?.role_name === "teacher";
 
     return (
         <ScreenWrapper bgImage={Images.profileBg}>
-            <CustomHeader title="Profile" divider />
+            <CustomHeader title={t("profile.index.title")} divider />
             <PullToRefreshScrollView
                 refetches={[]}
                 style={styles.scrollView}
@@ -54,28 +54,26 @@ function ProfileScreen() {
                     >
                         {user?.email}
                     </ThemedText>
-                    {isStudent && (
-                        <ThemedText
-                            style={styles.studentCode}
-                            fontSize={14}
-                            fontWeight="bold"
-                        >
-                            ID: {user?.id}
-                        </ThemedText>
-                    )}
+                    <ThemedText
+                        style={styles.studentCode}
+                        fontSize={14}
+                        fontWeight="bold"
+                    >
+                        {t("profile.index.id")}: {user?.id}
+                    </ThemedText>
 
                     {isStudent && (
                         <View style={styles.chips}>
                             <ChipItem
-                                label="Age"
+                                label={t("profile.index.age")}
                                 value={user?.age?.toString() || "-"}
                             />
                             <ChipItem
-                                label="Level"
+                                label={t("profile.index.level")}
                                 value={user?.next_course_id?.toString() || "-"}
                             />
                             <ChipItem
-                                label="Code"
+                                label={t("profile.index.code")}
                                 value={user?.student_code || "-"}
                             />
                         </View>
@@ -87,7 +85,7 @@ function ProfileScreen() {
                     {/* English toggle row */}
                     <View style={styles.languageRow}>
                         <ThemedText style={styles.languageLabel} fontSize={13}>
-                            Language
+                            {t("profile.index.language")}
                         </ThemedText>
                         <TouchableOpacity
                             onPress={toggleLanguage}
@@ -131,11 +129,14 @@ function ProfileScreen() {
                         </TouchableOpacity>
                     </View>
 
-                    <InfoRow label="Phone" value={user?.mobile!} />
+                    <InfoRow
+                        label={t("profile.index.phone")}
+                        value={user?.mobile!}
+                    />
                     {isStudent && (
                         <>
                             <InfoRow
-                                label="Parent Phone"
+                                label={t("profile.index.parentPhone")}
                                 value={user?.parent_number! || "-"}
                             />
                             <View style={styles.subscriptionContainer}>
@@ -143,7 +144,7 @@ function ProfileScreen() {
                                     style={styles.subscriptionLabel}
                                     fontSize={13}
                                 >
-                                    Subscription
+                                    {t("profile.index.subscription")}
                                 </ThemedText>
                                 <View style={styles.subscriptionValueContainer}>
                                     <ThemedText
@@ -158,9 +159,15 @@ function ProfileScreen() {
                         </>
                     )}
                     {isTeacher && (
-                        <InfoRow label="Current Groups: " value={"-"} />
+                        <InfoRow
+                            label={t("profile.index.currentGroups")}
+                            value={"-"}
+                        />
                     )}
-                    <InfoRow label="Address" value={user?.address || "-"} />
+                    <InfoRow
+                        label={t("profile.index.address")}
+                        value={user?.address || "-"}
+                    />
                 </View>
 
                 {/* Logout */}
@@ -169,7 +176,7 @@ function ProfileScreen() {
                     onPress={() => logout()}
                 >
                     <ThemedText style={styles.logoutText} fontSize={14}>
-                        Log Out
+                        {t("profile.index.logOut")}
                     </ThemedText>
                     <Icons.LogoutIcon size={20} color="#EF4444" />
                 </TouchableOpacity>
@@ -251,7 +258,6 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
     },
     languageLabel: {
-        fontFamily: "Poppins_500Medium",
         textTransform: "capitalize",
     },
     languageToggle: {
@@ -274,12 +280,10 @@ const styles = StyleSheet.create({
         padding: 3,
     },
     languageOptionText: {
-        fontFamily: "Poppins-Medium",
         color: Palette.slate500,
     },
     languageActiveText: {
         color: Palette.white,
-        fontFamily: "Poppins-SemiBold",
     },
 
     // Info card
@@ -315,7 +319,6 @@ const styles = StyleSheet.create({
         minWidth: 60,
     },
     subscriptionValue: {
-        fontFamily: "Poppins_500Medium",
         color: Palette.brand[500],
         textTransform: "capitalize",
     },
@@ -328,7 +331,6 @@ const styles = StyleSheet.create({
         gap: 12,
     },
     logoutText: {
-        fontFamily: "Poppins_600SemiBold",
         color: "#EF4444",
         textTransform: "capitalize",
     },

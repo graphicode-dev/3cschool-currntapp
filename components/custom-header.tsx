@@ -21,10 +21,11 @@ type Props = {
 
 const CustomHeader = ({ title, subtitle, href, divider, avatar }: Props) => {
     return (
-        <View>
+        <>
             <TouchableOpacity
                 onPress={() => (href ? router.push(href) : router.back())}
-                style={styles.container}>
+                style={styles.container}
+            >
                 <Icons.ArrowIcon
                     color={Palette.brand[500]}
                     size={24}
@@ -41,18 +42,26 @@ const CustomHeader = ({ title, subtitle, href, divider, avatar }: Props) => {
                     />
                 )}
                 <View style={styles.titleWrapper}>
-                    <ThemedText style={styles.title} fontSize={18}>
+                    <ThemedText
+                        style={styles.title}
+                        fontSize={18}
+                        fontWeight="bold"
+                    >
                         {title}
                     </ThemedText>
                     {subtitle && (
-                        <ThemedText style={styles.subtitle} fontSize={12}>
+                        <ThemedText
+                            style={styles.subtitle}
+                            fontSize={12}
+                            fontWeight="regular"
+                        >
                             {subtitle}
                         </ThemedText>
                     )}
                 </View>
             </TouchableOpacity>
             {divider && <View style={styles.headerDivider} />}
-        </View>
+        </>
     );
 };
 export default CustomHeader;

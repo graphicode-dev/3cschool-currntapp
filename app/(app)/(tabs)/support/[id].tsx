@@ -5,6 +5,7 @@ import CustomHeader from "@/components/custom-header";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import { ThemedText } from "@/components/themed-text";
 import { Images } from "@/constants/images";
+import { useLanguage } from "@/contexts/language-context";
 import { useTicketChat } from "@/hooks/useTicketChat";
 import { useCloseTicket } from "@/services/tickets/tickets.mutations";
 import { useLocalSearchParams } from "expo-router";
@@ -23,6 +24,7 @@ import {
 
 export default function TicketChatScreen() {
     const { id } = useLocalSearchParams<{ id: string }>();
+    const { t } = useLanguage();
     const flatListRef = useRef<FlatList>(null);
     const { width } = useWindowDimensions();
     const scaleFont = (size: number) => Math.round((width / 375) * size);
@@ -65,12 +67,12 @@ export default function TicketChatScreen() {
 
     const handleCloseTicket = useCallback(() => {
         Alert.alert(
-            "Close Ticket",
-            "Are you sure you want to close this ticket? You won't be able to send more messages.",
+            t("support.chat.closeTicket"),
+            t("support.chat.closeTicketConfirm"),
             [
-                { text: "Cancel", style: "cancel" },
+                { text: t("support.chat.cancel"), style: "cancel" },
                 {
-                    text: "Close Ticket",
+                    text: t("support.chat.closeTicket"),
                     style: "destructive",
                     onPress: () => {
                         if (id) {
@@ -80,7 +82,7 @@ export default function TicketChatScreen() {
                 },
             ],
         );
-    }, [id, closeTicket]);
+    }, [id, closeTicket, t]);
 
     // Scroll to bottom when new messages arrive
     useEffect(() => {
@@ -155,7 +157,7 @@ export default function TicketChatScreen() {
                         style={[styles.errorText]}
                         fontSize={scaleFont(16)}
                     >
-                        Something went wrong
+                        {t("support.chat.somethingWentWrong")}
                     </ThemedText>
                     <ThemedText
                         style={[styles.errorSubText]}
@@ -177,7 +179,7 @@ export default function TicketChatScreen() {
                         style={[styles.errorText]}
                         fontSize={scaleFont(16)}
                     >
-                        Error loading ticket
+                        {t("support.chat.errorLoadingTicket")}
                     </ThemedText>
                     <ThemedText
                         style={[styles.errorSubText]}
@@ -194,7 +196,7 @@ export default function TicketChatScreen() {
         return (
             <ScreenWrapper>
                 <View style={styles.center}>
-                    <ThemedText>Ticket not found</ThemedText>
+                    <ThemedText>{t("support.chat.ticketNotFound")}</ThemedText>
                 </View>
             </ScreenWrapper>
         );
@@ -230,7 +232,7 @@ export default function TicketChatScreen() {
                                 style={[styles.closeButtonText]}
                                 fontSize={scaleFont(10)}
                             >
-                                Close Ticket
+                                {t("support.chat.closeTicket")}
                             </ThemedText>
                         </View>
                     )}
@@ -290,7 +292,7 @@ export default function TicketChatScreen() {
                             style={[styles.closedText]}
                             fontSize={scaleFont(14)}
                         >
-                            ✅ This ticket has been closed
+                            {t("support.chat.ticketClosed")}
                         </ThemedText>
                     </View>
                 ) : (

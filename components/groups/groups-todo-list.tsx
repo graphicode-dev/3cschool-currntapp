@@ -1,3 +1,4 @@
+import { useLanguage } from "@/contexts/language-context";
 import React, { useCallback, useRef } from "react";
 import { Alert, Animated, StyleSheet, View } from "react-native";
 import { ThemedText } from "../themed-text";
@@ -20,15 +21,17 @@ const AnimatedItem: React.FC<{
     const opacity = useRef(new Animated.Value(1)).current;
     const translateX = useRef(new Animated.Value(0)).current;
 
+    const { t } = useLanguage();
+
     const handleDelete = useCallback(
         (id: string) => {
             Alert.alert(
-                "🗑  Delete Task",
-                `Remove "${task.title}"?\n\nThis action cannot be undone.`,
+                t("common.deleteTask"),
+                t("common.removeTask", { task: task.title }),
                 [
-                    { text: "Cancel", style: "cancel" },
+                    { text: t("common.cancel"), style: "cancel" },
                     {
-                        text: "Yes, Delete",
+                        text: t("common.yesDelete"),
                         style: "destructive",
                         onPress: () => {
                             Animated.parallel([
@@ -54,7 +57,8 @@ const AnimatedItem: React.FC<{
 
     return (
         <Animated.View
-            style={[styles.itemWrap, { opacity, transform: [{ translateX }] }]}>
+            style={[styles.itemWrap, { opacity, transform: [{ translateX }] }]}
+        >
             <GroupsTasksListItem
                 task={task}
                 onToggle={onToggle}
@@ -68,6 +72,8 @@ const AnimatedItem: React.FC<{
 // ─── Main list — uses .map() instead of FlatList to avoid nested VirtualizedList ──
 
 const GroupsTasksList: React.FC<Props> = ({ tasks, onToggle, onDelete }) => {
+    const { t } = useLanguage();
+
     if (tasks.length === 0) {
         return (
             <View style={styles.empty}>
@@ -75,10 +81,10 @@ const GroupsTasksList: React.FC<Props> = ({ tasks, onToggle, onDelete }) => {
                     ✅
                 </ThemedText>
                 <ThemedText style={styles.emptyTitle} fontSize={18}>
-                    All clear!
+                    {t("groups.todoList.emptyTitle")}
                 </ThemedText>
                 <ThemedText style={styles.emptySubtitle} fontSize={14}>
-                    Add a task above to get started.
+                    {t("groups.todoList.emptySubtitle")}
                 </ThemedText>
             </View>
         );

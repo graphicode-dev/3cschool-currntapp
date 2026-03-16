@@ -1,6 +1,7 @@
 import { ThemedText } from "@/components/themed-text";
 import { Icons } from "@/constants/icons";
 import { Palette } from "@/constants/theme";
+import { useLanguage } from "@/contexts/language-context";
 import { Group } from "@/services/groups/groups.types";
 import { Image } from "expo-image";
 import { router } from "expo-router";
@@ -55,6 +56,7 @@ function formatSchedule(g: Group): { date: string; time: string } {
 // ─── Component ───────────────────────────────────────────────────────────────
 
 const GroupsListItem = ({ group }: GroupsListItemProps) => {
+    const { t } = useLanguage();
     const status = deriveStatus(group);
     const badge = STATUS_STYLES[status];
     const { date, time } = formatSchedule(group);
@@ -104,7 +106,9 @@ const GroupsListItem = ({ group }: GroupsListItemProps) => {
                                 <Icons.CalenderIcon color="black" size={16} />
                                 <ThemedText
                                     style={styles.dateBadgeText}
-                                    fontSize={10}>
+                                    fontSize={10}
+                                    fontWeight="medium"
+                                >
                                     {date}
                                 </ThemedText>
                             </View>
@@ -114,7 +118,9 @@ const GroupsListItem = ({ group }: GroupsListItemProps) => {
                                 <Icons.ClockIcon color="black" size={16} />
                                 <ThemedText
                                     style={styles.dateBadgeText}
-                                    fontSize={10}>
+                                    fontSize={10}
+                                    fontWeight="medium"
+                                >
                                     {time}
                                 </ThemedText>
                             </View>
@@ -130,10 +136,13 @@ const GroupsListItem = ({ group }: GroupsListItemProps) => {
                             backgroundColor: badge.bg,
                             borderColor: badge.border,
                         },
-                    ]}>
+                    ]}
+                >
                     <ThemedText
                         style={[styles.statusText, { color: badge.text }]}
-                        fontSize={10}>
+                        fontSize={10}
+                        fontWeight="medium"
+                    >
                         {status}
                     </ThemedText>
                 </View>
@@ -145,27 +154,39 @@ const GroupsListItem = ({ group }: GroupsListItemProps) => {
                     <ThemedText
                         style={styles.title}
                         numberOfLines={1}
-                        fontSize={13}>
+                        fontSize={13}
+                        fontWeight="bold"
+                    >
                         {group.name}
                     </ThemedText>
                     <ThemedText
                         style={styles.description}
                         numberOfLines={2}
-                        fontSize={10}>
+                        fontSize={10}
+                    >
                         {group.course?.title ?? ""}
                     </ThemedText>
                 </View>
                 <View style={styles.instructorRow}>
                     <View style={styles.instructorRow}>
                         <Icons.InstructorIcon color="black" size={16} />
-                        <ThemedText style={styles.instructorText} fontSize={10}>
+                        <ThemedText
+                            style={styles.instructorText}
+                            fontSize={10}
+                            fontWeight="medium"
+                        >
                             {group.teacher?.full_name ?? "Instructor"}
                         </ThemedText>
                     </View>
                     <View style={styles.instructorRow}>
                         <Icons.UserIcon color="black" size={16} />
-                        <ThemedText style={styles.instructorText} fontSize={10}>
-                            Members: {group?.course?.capacity ?? "-"}
+                        <ThemedText
+                            style={styles.instructorText}
+                            fontSize={10}
+                            fontWeight="medium"
+                        >
+                            {t("groups.listItem.members")}:{" "}
+                            {group?.course?.capacity ?? "-"}
                         </ThemedText>
                     </View>
                 </View>
@@ -200,9 +221,14 @@ const GroupsListItem = ({ group }: GroupsListItemProps) => {
                 <TouchableOpacity
                     style={styles.sessionsBtn}
                     onPress={onSessionsPress}
-                    activeOpacity={0.85}>
-                    <ThemedText style={styles.sessionsBtnText} fontSize={10}>
-                        Sessions
+                    activeOpacity={0.85}
+                >
+                    <ThemedText
+                        style={styles.sessionsBtnText}
+                        fontSize={10}
+                        fontWeight="medium"
+                    >
+                        {t("groups.listItem.sessions")}
                     </ThemedText>
                     <Icons.ArrowIcon color={Palette.white} size={16} />
                 </TouchableOpacity>
@@ -257,11 +283,9 @@ const styles = StyleSheet.create({
         paddingHorizontal: 6,
     },
     statusText: {
-        fontFamily: "Poppins-Medium",
         textTransform: "capitalize",
     },
     dateBadgeText: {
-        fontFamily: "Poppins-Medium",
         color: "#393838",
         textTransform: "capitalize",
     },
@@ -276,12 +300,10 @@ const styles = StyleSheet.create({
         gap: 2,
     },
     title: {
-        fontFamily: "Poppins-SemiBold",
         color: "#393838",
         textTransform: "capitalize",
     },
     description: {
-        fontFamily: "Poppins-Regular",
         color: "#7A7A7A",
     },
     instructorRow: {
@@ -290,7 +312,6 @@ const styles = StyleSheet.create({
         gap: 4,
     },
     instructorText: {
-        fontFamily: "Poppins-Medium",
         color: "#393838",
         textTransform: "capitalize",
     },
@@ -326,7 +347,6 @@ const styles = StyleSheet.create({
         borderColor: "#393838",
     },
     sessionsBtnText: {
-        fontFamily: "Poppins-Medium",
         color: "#E9F7FC",
         textTransform: "capitalize",
     },

@@ -1,5 +1,6 @@
 import { Icons } from "@/constants/icons";
 import { Images } from "@/constants/images";
+import { useLanguage } from "@/contexts/language-context";
 import { Session } from "@/services/sessions/sessions.types";
 import { ImageBackground, StyleSheet, View } from "react-native";
 import { ThemedText } from "../themed-text";
@@ -76,11 +77,12 @@ function fmtTime(timeStr: string) {
 }
 
 export function SessionCard({ session }: Props) {
+    const { t } = useLanguage();
     const status = deriveStatus(session);
     const badge = STATUS_COLORS[status];
     const title =
-        session.group?.course?.title ?? `Session #${session.session_number}`;
-    const desc = `Session #${session.session_number}`;
+        session.group?.course?.title ?? t("groups.sessionCard.sessionNumber");
+    const desc = t("groups.sessionCard.sessionNumber");
 
     return (
         <View style={styles.card}>
@@ -94,24 +96,33 @@ export function SessionCard({ session }: Props) {
                         <ThemedText
                             style={styles.title}
                             fontSize={16}
-                            numberOfLines={1}
+                            numberOfLines={2}
+                            fontWeight="bold"
                         >
                             {title}
                         </ThemedText>
                         <ThemedText style={styles.desc} fontSize={13}>
-                            {desc}
+                            {desc} #{session.session_number}
                         </ThemedText>
                     </View>
                     <View style={styles.metaRow}>
                         <View style={styles.metaItem}>
                             <Icons.CalenderIcon color="white" size={16} />
-                            <ThemedText style={styles.metaText} fontSize={13}>
+                            <ThemedText
+                                style={styles.metaText}
+                                fontSize={13}
+                                fontWeight="medium"
+                            >
                                 {fmtDate(session.start_date)}
                             </ThemedText>
                         </View>
                         <View style={styles.metaItem}>
                             <Icons.ClockIcon color="white" size={16} />
-                            <ThemedText style={styles.metaText} fontSize={13}>
+                            <ThemedText
+                                style={styles.metaText}
+                                fontSize={13}
+                                fontWeight="medium"
+                            >
                                 {fmtTime(session.start_time)}
                             </ThemedText>
                         </View>
@@ -130,6 +141,7 @@ export function SessionCard({ session }: Props) {
                     <ThemedText
                         style={[styles.badgeText, { color: badge.text }]}
                         fontSize={10}
+                        fontWeight="medium"
                     >
                         {status}
                     </ThemedText>
@@ -157,18 +169,15 @@ const styles = StyleSheet.create({
     info: { flex: 1, gap: 6 },
     textGroup: { gap: 2 },
     title: {
-        fontFamily: "Poppins-SemiBold",
         color: "#E9F7FC",
         textTransform: "capitalize",
     },
     desc: {
-        fontFamily: "Poppins-Regular",
         color: "#EBEBEB",
     },
     metaRow: { flexDirection: "row", alignItems: "center", gap: 12 },
     metaItem: { flexDirection: "row", alignItems: "center", gap: 4 },
     metaText: {
-        fontFamily: "Poppins-Medium",
         color: "#E9F7FC",
     },
     badge: {
@@ -179,7 +188,6 @@ const styles = StyleSheet.create({
         alignSelf: "flex-start",
     },
     badgeText: {
-        fontFamily: "Poppins-Medium",
         textTransform: "capitalize",
     },
 });

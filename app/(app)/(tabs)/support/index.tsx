@@ -5,6 +5,7 @@ import { PullToRefreshScrollView } from "@/components/ui/Pulltorefresh";
 import { Icons } from "@/constants/icons";
 import { Images } from "@/constants/images";
 import { Palette, Spacing } from "@/constants/theme";
+import { useLanguage } from "@/contexts/language-context";
 import { MappedTicket, useTicketChat } from "@/hooks/useTicketChat";
 import { router } from "expo-router";
 import {
@@ -81,6 +82,7 @@ const formatDate = (ts: number | string) => {
 // ─── Ticket Card Component ─────────────────────────────────────────────────────
 
 const TicketCard = ({ ticket }: { ticket: MappedTicket }) => {
+    const { t } = useLanguage();
     const pc = priorityColor(ticket.priority);
     const sc = statusColor(ticket.status);
 
@@ -97,15 +99,24 @@ const TicketCard = ({ ticket }: { ticket: MappedTicket }) => {
                     pathname: "/(app)/(tabs)/support/[id]",
                     params: { id: String(ticket.id) },
                 })
-            }>
+            }
+        >
             <View style={styles.ticketHeader}>
-                <ThemedText style={styles.ticketTitle} fontSize={14}>
+                <ThemedText
+                    style={styles.ticketTitle}
+                    fontWeight="bold"
+                    fontSize={14}
+                >
                     {ticket.title}
                 </ThemedText>
                 <View style={styles.headerRight}>
                     {ticket.unreadCount > 0 && (
                         <View style={styles.unreadBadge}>
-                            <ThemedText style={styles.unreadText} fontSize={10}>
+                            <ThemedText
+                                style={styles.unreadText}
+                                fontWeight="bold"
+                                fontSize={10}
+                            >
                                 {ticket.unreadCount}
                             </ThemedText>
                         </View>
@@ -117,10 +128,13 @@ const TicketCard = ({ ticket }: { ticket: MappedTicket }) => {
                                 backgroundColor: sc.bg,
                                 borderColor: sc.text,
                             },
-                        ]}>
+                        ]}
+                    >
                         <ThemedText
                             style={[styles.statusText, { color: sc.text }]}
-                            fontSize={10}>
+                            fontWeight="medium"
+                            fontSize={10}
+                        >
                             {ticket.status.replace("_", " ")}
                         </ThemedText>
                     </View>
@@ -133,17 +147,25 @@ const TicketCard = ({ ticket }: { ticket: MappedTicket }) => {
                 <ThemedText
                     style={styles.ticketDescription}
                     numberOfLines={1}
-                    fontSize={12}>
+                    fontSize={12}
+                >
                     {ticket.lastMessage.attachment
-                        ? "📎 " + (ticket.lastMessage.message || "Attachment")
-                        : ticket.lastMessage.message || "No message"}
+                        ? "📎 " +
+                          (ticket.lastMessage.message ||
+                              t("support.index.attachment"))
+                        : ticket.lastMessage.message ||
+                          t("support.index.noMessage")}
                 </ThemedText>
             )}
             <View style={styles.ticketFooter}>
                 <View style={styles.ticketLeftInfo}>
                     <View style={styles.dateContainer}>
                         <Icons.ClockIcon size={18} color={Palette.brand[500]} />
-                        <ThemedText style={styles.dateText} fontSize={11}>
+                        <ThemedText
+                            style={styles.dateText}
+                            fontWeight="medium"
+                            fontSize={11}
+                        >
                             {formatDate(ticket.created_at)}
                         </ThemedText>
                     </View>
@@ -153,7 +175,8 @@ const TicketCard = ({ ticket }: { ticket: MappedTicket }) => {
                             {
                                 backgroundColor: pc.bg,
                             },
-                        ]}>
+                        ]}
+                    >
                         <ThemedText
                             style={[
                                 styles.priorityText,
@@ -161,14 +184,20 @@ const TicketCard = ({ ticket }: { ticket: MappedTicket }) => {
                                     color: pc.text,
                                 },
                             ]}
-                            fontSize={10}>
+                            fontWeight="bold"
+                            fontSize={10}
+                        >
                             #{ticket.priority}
                         </ThemedText>
                     </View>
                 </View>
                 <View style={styles.viewButton}>
-                    <ThemedText style={styles.viewText} fontSize={10}>
-                        View
+                    <ThemedText
+                        style={styles.viewText}
+                        fontWeight="bold"
+                        fontSize={10}
+                    >
+                        {t("support.index.view")}
                     </ThemedText>
                     <Icons.ArrowIcon
                         size={16}
@@ -186,6 +215,7 @@ const TicketCard = ({ ticket }: { ticket: MappedTicket }) => {
 export default function SupportScreen() {
     const { tickets, refetch, isLoading } = useTicketChat();
     const { width } = useWindowDimensions();
+    const { t } = useLanguage();
     const fabSize = Math.round((width / 375) * 60);
 
     const onNewTicketPress = () => {
@@ -195,11 +225,12 @@ export default function SupportScreen() {
     return (
         <>
             <ScreenWrapper>
-                <CustomHeader title="Help & Support" />
+                <CustomHeader title={t("support.index.title")} />
                 <PullToRefreshScrollView
                     refetches={[refetch]}
                     style={styles.scrollView}
-                    contentContainerStyle={styles.scrollContent}>
+                    contentContainerStyle={styles.scrollContent}
+                >
                     {/* Hero Section */}
                     <View style={styles.heroSection}>
                         <View style={styles.heroBackground}>
@@ -212,7 +243,8 @@ export default function SupportScreen() {
                                     justifyContent: "center",
                                     alignItems: "center",
                                     gap: 16,
-                                }}>
+                                }}
+                            >
                                 {/* Content */}
                                 <View style={styles.heroIconContainer}>
                                     <Icons.QuestionIcon
@@ -223,13 +255,16 @@ export default function SupportScreen() {
                                 <View style={styles.heroTextContainer}>
                                     <ThemedText
                                         style={styles.heroTitle}
-                                        fontSize={16}>
-                                        How can we help you?
+                                        fontWeight="bold"
+                                        fontSize={16}
+                                    >
+                                        {t("support.index.heroTitle")}
                                     </ThemedText>
                                     <ThemedText
                                         style={styles.heroSubtitle}
-                                        fontSize={13}>
-                                        Our support team here for you!
+                                        fontSize={13}
+                                    >
+                                        {t("support.index.heroSubtitle")}
                                     </ThemedText>
                                 </View>
                             </ImageBackground>
@@ -238,8 +273,12 @@ export default function SupportScreen() {
 
                     {/* My Tickets Section */}
                     <View style={styles.ticketsSection}>
-                        <ThemedText style={styles.sectionTitle} fontSize={16}>
-                            My Tickets
+                        <ThemedText
+                            style={styles.sectionTitle}
+                            fontWeight="bold"
+                            fontSize={16}
+                        >
+                            {t("support.index.myTickets")}
                         </ThemedText>
                         <View style={styles.ticketsList}>
                             {tickets.map((ticket) => (
@@ -256,13 +295,16 @@ export default function SupportScreen() {
                                 />
                                 <ThemedText
                                     style={styles.emptyText}
-                                    fontSize={18}>
-                                    No tickets yet
+                                    fontWeight="bold"
+                                    fontSize={18}
+                                >
+                                    {t("support.index.noTicketsYet")}
                                 </ThemedText>
                                 <ThemedText
                                     style={styles.emptySubText}
-                                    fontSize={13}>
-                                    Tap the + button to open a support ticket
+                                    fontSize={13}
+                                >
+                                    {t("support.index.tapPlusToOpen")}
                                 </ThemedText>
                             </View>
                         )}
@@ -280,7 +322,8 @@ export default function SupportScreen() {
                         height: fabSize,
                         bottom: Math.round((width / 375) * 140),
                     },
-                ]}>
+                ]}
+            >
                 <Icons.TicketChatIcon
                     size={Math.round(fabSize * 0.5)}
                     color="white"
@@ -353,12 +396,10 @@ const styles = StyleSheet.create({
         width: 218,
     },
     heroTitle: {
-        fontFamily: "Poppins_600SemiBold",
         color: "#ebebeb",
         textTransform: "capitalize",
     },
     heroSubtitle: {
-        fontFamily: "Poppins_400Regular",
         color: "#bbe6f6",
         textTransform: "capitalize",
     },
@@ -367,7 +408,6 @@ const styles = StyleSheet.create({
         paddingBottom: 100,
     },
     sectionTitle: {
-        fontFamily: "Poppins_600SemiBold",
         color: "#393838",
         textTransform: "capitalize",
     },
@@ -389,7 +429,6 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     ticketTitle: {
-        fontFamily: "Poppins_600SemiBold",
         color: "#393838",
         textTransform: "capitalize",
         fontWeight: "bold",
@@ -403,12 +442,10 @@ const styles = StyleSheet.create({
         paddingVertical: 2,
     },
     statusText: {
-        fontFamily: "Poppins_500Medium",
         color: "#6cc8ec",
         textTransform: "capitalize",
     },
     ticketDescription: {
-        fontFamily: "Poppins_400Regular",
         color: "#7a7a7a",
         textTransform: "capitalize",
     },
@@ -428,12 +465,10 @@ const styles = StyleSheet.create({
         gap: 4,
     },
     dateText: {
-        fontFamily: "Poppins_500Medium",
         color: Palette.brand[500],
         textTransform: "capitalize",
     },
     priorityText: {
-        fontFamily: "Poppins_600SemiBold",
         textTransform: "capitalize",
     },
     priorityBadge: {
@@ -447,7 +482,6 @@ const styles = StyleSheet.create({
         gap: 4,
     },
     viewText: {
-        fontFamily: "Poppins_600SemiBold",
         color: "#393838",
         textTransform: "capitalize",
         fontWeight: "bold",
@@ -470,11 +504,9 @@ const styles = StyleSheet.create({
         gap: 12,
     },
     emptyText: {
-        fontFamily: "Poppins-SemiBold",
         color: Palette.slate400,
     },
     emptySubText: {
-        fontFamily: "Poppins-Regular",
         color: Palette.slate300,
         textAlign: "center",
     },
@@ -493,7 +525,6 @@ const styles = StyleSheet.create({
         justifyContent: "center",
     },
     unreadText: {
-        fontFamily: "Poppins_600SemiBold",
         color: "white",
         textAlign: "center",
     },

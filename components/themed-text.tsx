@@ -18,12 +18,11 @@ export function ThemedText({
     style,
     type = "default",
     fontSize,
-    fontWeight,
+    fontWeight = "regular",
     ...rest
 }: ThemedTextProps) {
-    const { language } = useLanguage();
+    const { isRTL } = useLanguage();
     const { width } = useWindowDimensions();
-    const lang = language === "ar" ? "ar" : "en";
 
     // Scale fontSize responsively based on screen width
     const responsiveFontSize =
@@ -33,7 +32,7 @@ export function ThemedText({
 
     // Get font based on language and type
     const getFontFamily = () => {
-        const isArabic = lang === "ar";
+        const isArabic = isRTL;
 
         // If fontWeight is provided, map it to the appropriate font family
         if (fontWeight !== undefined) {
@@ -72,7 +71,6 @@ export function ThemedText({
         <Text
             style={[
                 { fontFamily: getFontFamily() },
-                fontWeight !== undefined && { fontWeight },
                 type === "default" ? styles.default : undefined,
                 type === "title" ? styles.title : undefined,
                 type === "defaultSemiBold" ? styles.defaultSemiBold : undefined,

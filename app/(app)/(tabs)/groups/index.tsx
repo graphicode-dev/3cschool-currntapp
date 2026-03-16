@@ -17,6 +17,7 @@ import { RenderSection } from "@/components/RenderSection";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import { ThemedText } from "@/components/themed-text";
 import { PullToRefreshScrollView } from "@/components/ui/Pulltorefresh";
+import { useLanguage } from "@/contexts/language-context";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useGroupsList } from "@/services/groups/groups.queries";
 import { useAllSessions } from "@/services/sessions/sessions.queries";
@@ -64,6 +65,7 @@ function pickBannerSession(upcoming: Session[]): Session | null {
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
 export default function GroupsScreen() {
+    const { t } = useLanguage();
     // Search and filter state
     const [searchText, setSearchText] = useState("");
 
@@ -169,13 +171,15 @@ export default function GroupsScreen() {
             <PullToRefreshScrollView
                 refetches={[refetchGroups, refetchSessions]}
                 style={styles.scroll}
-                contentContainerStyle={styles.content}>
+                contentContainerStyle={styles.content}
+            >
                 {/* ── 1. Session banner ───────────────────────────────────── */}
                 <View style={styles.bannerSection}>
                     <RenderSection
                         isLoading={sessionsLoading}
                         error=""
-                        data={bannerSession}>
+                        data={bannerSession}
+                    >
                         {bannerSession ? (
                             <SessionCard session={bannerSession} />
                         ) : null}
@@ -185,7 +189,7 @@ export default function GroupsScreen() {
                     {!sessionsLoading && (
                         <>
                             <ProgressCard
-                                label="Next Session"
+                                label={t("groups.index.nextSession")}
                                 highlight={`${nextSessionDate?.toLocaleDateString()} - ${nextSessionDate?.toLocaleTimeString()}`}
                                 elapsed={doneSessions}
                                 total={Math.max(totalSessions, 1)}
@@ -198,7 +202,7 @@ export default function GroupsScreen() {
                 {/* ── 2. My Groups ────────────────────────────────────────── */}
                 <View style={styles.section}>
                     <ThemedText style={styles.sectionTitle} fontSize={20}>
-                        My Groups
+                        {t("groups.index.myGroups")}
                     </ThemedText>
 
                     {/* Search */}
@@ -210,7 +214,8 @@ export default function GroupsScreen() {
                     <RenderSection
                         isLoading={groupsLoading}
                         error={groupsError?.message ?? ""}
-                        data={groups}>
+                        data={groups}
+                    >
                         <GroupsList data={groups} />
                     </RenderSection>
                 </View>
@@ -218,7 +223,7 @@ export default function GroupsScreen() {
                 {/* ── 3. My To-Do ─────────────────────────────────────────── */}
                 <View style={styles.section}>
                     <ThemedText style={styles.sectionTitle} fontSize={20}>
-                        My To-Do
+                        {t("groups.index.myTodo")}
                     </ThemedText>
                     <GroupsMyTasks />
                 </View>
@@ -246,7 +251,6 @@ const styles = StyleSheet.create({
     section: { gap: 14 },
 
     sectionTitle: {
-        fontFamily: "Poppins-SemiBold",
         color: "#393838",
         textTransform: "capitalize",
     },

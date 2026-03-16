@@ -4,12 +4,14 @@ import ScreenWrapper from "@/components/ScreenWrapper";
 import SessionsList from "@/components/sessions/sessions-list";
 import { PullToRefreshScrollView } from "@/components/ui/Pulltorefresh";
 import { Spacing } from "@/constants/theme";
+import { useLanguage } from "@/contexts/language-context";
 import { useGroup } from "@/services/groups/groups.queries";
 import { useGroupSessions } from "@/services/sessions/sessions.queries";
 import { useLocalSearchParams } from "expo-router";
 import { StyleSheet } from "react-native";
 
 const GroupDetailsScreen = () => {
+    const { t } = useLanguage();
     const { id } = useLocalSearchParams<{ id: string }>();
     const groupId = id as string;
 
@@ -24,7 +26,9 @@ const GroupDetailsScreen = () => {
 
     const sessions = sessionsData?.sessions ?? [];
     const groupName =
-        groupDetail?.group?.name ?? sessionsData?.group_name ?? "Group Details";
+        groupDetail?.group?.name ??
+        sessionsData?.group_name ??
+        t("groups.groupDetails.title");
 
     return (
         <ScreenWrapper>
@@ -42,7 +46,7 @@ const GroupDetailsScreen = () => {
                 >
                     <SessionsList
                         sessions={sessions}
-                        title="Sessions"
+                        title={t("groups.groupDetails.sessions")}
                         count={sessions.length}
                     />
                 </RenderSection>

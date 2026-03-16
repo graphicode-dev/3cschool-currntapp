@@ -5,7 +5,17 @@
         "play": "تشغيل",
         "explore": "استكشف",
         "video": "فيديو",
-        "image": "صورة"
+        "image": "صورة",
+        "cancel": "إلغاء",
+        "delete": "حذف",
+        "yesDelete": "نعم، حذف",
+        "removeTask": "إزالة \"{task}\"؟\n\nلا يمكن التراجع عن هذا الإجراء.",
+        "deleteTask": "🗑 حذف المهمة",
+        "session": "جلسة",
+        "done": "تم",
+        "todo": "المهام",
+        "addTask": "أضف مهمة سريعة..",
+        "sessions": "الجلسات"
     },
     "home": {
         "banner": {
@@ -39,5 +49,152 @@
         "upcomingSessions": {
             "title": "الجلسات القادمة"
         }
+    },
+    "groups": {
+        "index": {
+            "myGroups": "مجموعاتي",
+            "myTodo": "مهامي",
+            "nextSession": "الجلسة التالية"
+        },
+        "progressCard": {
+            "startsIn": "تبدأ خلال",
+            "ended": "انتهت"
+        },
+        "sessionCard": {
+            "sessionNumber": "جلسة"
+        },
+        "myTasks": {
+            "toDo": "المهام",
+            "done": "تم"
+        },
+        "todoList": {
+            "emptyTitle": "لا توجد مهام بعد",
+            "emptySubtitle": "أضف أول مهمة للبدء!"
+        },
+        "groupDetails": {
+            "title": "تفاصيل المجموعة",
+            "sessions": "الجلسات"
+        },
+        "list": {
+            "noGroupsFound": "لم يتم العثور على مجموعات"
+        },
+        "listItem": {
+            "members": "الأعضاء",
+            "sessions": "الجلسات"
+        }
+    },
+    "profile": {
+        "index": {
+            "title": "الملف الشخصي",
+            "language": "اللغة",
+            "phone": "الهاتف",
+            "parentPhone": "هاتف الوالد",
+            "subscription": "الاشتراك",
+            "currentGroups": "المجموعات الحالية",
+            "address": "العنوان",
+            "logOut": "تسجيل الخروج",
+            "id": "الرقم التعريفي",
+            "age": "العمر",
+            "level": "المستوى",
+            "code": "الرمز"
+        }
+    },
+    "support": {
+        "index": {
+            "title": "المساعدة والدعم",
+            "heroTitle": "كيف يمكننا مساعدتك؟",
+            "heroSubtitle": "فريق الدعم هنا من أجلك!",
+            "myTickets": "تذاكري",
+            "noTicketsYet": "لا توجد تذاكر بعد",
+            "tapPlusToOpen": "اضغط على زر + لفتح تذكرة دعم",
+            "view": "عرض",
+            "attachment": "مرفق",
+            "noMessage": "لا توجد رسالة"
+        },
+        "create": {
+            "title": "إرسال المساعدة",
+            "headline": "نحن هنا لمساعدتك!",
+            "titleLabel": "العنوان",
+            "titlePlaceholder": "وصف موجز لمشكلتك",
+            "titleRequired": "العنوان مطلوب",
+            "messageLabel": "الرسالة",
+            "messagePlaceholder": "يرجى وصف مشكلتك بالتفصيل",
+            "messageRequired": "يرجى وصف مشكلتك",
+            "priorityLabel": "الأولوية",
+            "high": "عالية",
+            "medium": "متوسطة",
+            "low": "منخفضة",
+            "submit": "إرسال التذكرة",
+            "ticketCreated": "تم إنشاء التذكرة",
+            "ticketCreatedMessage": "سنتواصل معك قريباً.",
+            "error": "خطأ",
+            "createTicketError": "فشل في إنشاء التذكرة. يرجى المحاولة مرة أخرى."
+        },
+        "chat": {
+            "closeTicket": "إغلاق التذكرة",
+            "closeTicketConfirm": "هل أنت متأكد من أنك تريد إغلاق هذه التذكرة؟ لن تتمكن من إرسال المزيد من الرسائل.",
+            "cancel": "إلغاء",
+            "somethingWentWrong": "حدث خطأ ما",
+            "errorLoadingTicket": "خطأ في تحميل التذكرة",
+            "ticketNotFound": "التذكرة غير موجودة",
+            "ticketClosed": "✅ تم إغلاق هذه التذكرة"
+        }
+    },
+    "chats": {
+        "index": {
+            "title": "المحادثات",
+            "chatsCount": "محادثات",
+            "noConversationsYet": "لا توجد محادثات بعد"
+        },
+        "conversation": {
+            "title": "محادثة المجموعة",
+            "members": "الأعضاء",
+            "capacityNotAvailable": "السعة غير متاحة"
+        }
+    },
+    "auth": {
+        "login": {
+            "welcome": "مرحبا!",
+            "startCoding": "لنبدأ البرمجة معاً ✨",
+            "subtitle": "أدخل بريدك الإلكتروني وكلمة المرور لتسجيل الدخول",
+            "email": "البريد الإلكتروني",
+            "password": "كلمة المرور",
+            "emailRequired": "البريد الإلكتروني مطلوب",
+            "invalidEmail": "تنسيق البريد الإلكتروني غير صالح",
+            "passwordRequired": "كلمة المرور مطلوبة",
+            "emailPlaceholder": "student@student.com",
+            "passwordPlaceholder": "**********",
+            "success": "تم تسجيل الدخول بنجاح",
+            "error": "فشل تسجيل الدخول",
+            "loginButton": "تسجيل الدخول",
+            "loggingIn": "جاري تسجيل الدخول..."
+        }
+    },
+    "tabs": {
+        "home": "الرئيسية",
+        "groups": "المجموعات",
+        "chats": "المحادثات",
+        "support": "الدعم",
+        "profile": "الملف الشخصي"
+    },
+    "notifications": {
+        "title": "الإشعارات",
+        "loading": "جاري تحميل الإشعارات...",
+        "loadingMore": "جاري تحميل المزيد...",
+        "error": "خطأ في تحميل الإشعارات",
+        "errorDetail": "حدث خطأ غير معروف",
+        "retry": "إعادة المحاولة",
+        "markAllAsRead": "تعيين الكل كمقروء",
+        "noNotifications": "لا توجد إشعارات",
+        "noNotificationsDescription": "لقد تمكنت من متابعة كل شيء! لا توجد إشعارات جديدة لعرضها.",
+        "emptyState": "لا توجد إشعارات بعد",
+        "emptyStateDescription": "عندما تتلقى إشعارات، ستظهر هنا."
+    },
+    "sessions": {
+        "recording": "تسجيل",
+        "instructor": "المدرب"
+    },
+    "search": {
+        "groupsPlaceholder": "البحث عن المجموعات..."
     }
 }

@@ -5,18 +5,28 @@
         "play": "Play",
         "explore": "Explore",
         "video": "VIDEO",
-        "image": "IMAGE"
+        "image": "IMAGE",
+        "cancel": "Cancel",
+        "delete": "Delete",
+        "yesDelete": "Yes, Delete",
+        "removeTask": "Remove \"{task}\"?\n\nThis action cannot be undone.",
+        "deleteTask": " Delete Task",
+        "session": "Session",
+        "done": "Done",
+        "todo": "To Do",
+        "addTask": "Add A Quick Task..",
+        "sessions": "Sessions"
     },
     "home": {
         "banner": {
             "video": {
-                "badge": "🎬 VIDEO",
-                "watched": "✓ Watched",
-                "play": "▶ Play"
+                "badge": " VIDEO",
+                "watched": " Watched",
+                "play": " Play"
             },
             "image": {
-                "badge": "🖼 IMAGE",
-                "explore": "→ Explore"
+                "badge": " IMAGE",
+                "explore": " Explore"
             }
         },
         "header": {
@@ -30,7 +40,7 @@
                 "chat": "Chat with your classmates."
             },
             "teacher": {
-                "motivational": "You’re Making an Impact! Keep Inspiring!",
+                "motivational": "You're Making an Impact! Keep Inspiring!",
                 "continueButton": "Continue Session",
                 "shareIdeas": "Share ideas with your teaching team.",
                 "chat": "Chat with students and manage discussions."
@@ -39,5 +49,152 @@
         "upcomingSessions": {
             "title": "Upcoming Sessions"
         }
+    },
+    "groups": {
+        "index": {
+            "myGroups": "My Groups",
+            "myTodo": "My To-Do",
+            "nextSession": "Next Session"
+        },
+        "progressCard": {
+            "startsIn": "Starts in",
+            "ended": "Ended"
+        },
+        "sessionCard": {
+            "sessionNumber": "Session"
+        },
+        "myTasks": {
+            "toDo": "To Do",
+            "done": "Done"
+        },
+        "todoList": {
+            "emptyTitle": "No tasks yet",
+            "emptySubtitle": "Add your first task to get started!"
+        },
+        "groupDetails": {
+            "title": "Group Details",
+            "sessions": "Sessions"
+        },
+        "list": {
+            "noGroupsFound": "No groups found"
+        },
+        "listItem": {
+            "members": "Members",
+            "sessions": "Sessions"
+        }
+    },
+    "profile": {
+        "index": {
+            "title": "Profile",
+            "language": "Language",
+            "phone": "Phone",
+            "parentPhone": "Parent Phone",
+            "subscription": "Subscription",
+            "currentGroups": "Current Groups",
+            "address": "Address",
+            "logOut": "Log Out",
+            "id": "ID",
+            "age": "Age",
+            "level": "Level",
+            "code": "Code"
+        }
+    },
+    "support": {
+        "index": {
+            "title": "Help & Support",
+            "heroTitle": "How can we help you?",
+            "heroSubtitle": "Our support team here for you!",
+            "myTickets": "My Tickets",
+            "noTicketsYet": "No tickets yet",
+            "tapPlusToOpen": "Tap the + button to open a support ticket",
+            "view": "View",
+            "attachment": "Attachment",
+            "noMessage": "No message"
+        },
+        "create": {
+            "title": "Send Help",
+            "headline": "We're Here to Help!",
+            "titleLabel": "Title",
+            "titlePlaceholder": "Brief description of your issue",
+            "titleRequired": "Title is required",
+            "messageLabel": "Message",
+            "messagePlaceholder": "Please describe your issue in detail",
+            "messageRequired": "Please describe your issue",
+            "priorityLabel": "Priority",
+            "high": "High",
+            "medium": "Medium",
+            "low": "Low",
+            "submit": "Submit Ticket",
+            "ticketCreated": "Ticket created",
+            "ticketCreatedMessage": "We'll get back to you soon.",
+            "error": "Error",
+            "createTicketError": "Failed to create ticket. Please try again."
+        },
+        "chat": {
+            "closeTicket": "Close Ticket",
+            "closeTicketConfirm": "Are you sure you want to close this ticket? You won't be able to send more messages.",
+            "cancel": "Cancel",
+            "somethingWentWrong": "Something went wrong",
+            "errorLoadingTicket": "Error loading ticket",
+            "ticketNotFound": "Ticket not found",
+            "ticketClosed": " This ticket has been closed"
+        }
+    },
+    "chats": {
+        "index": {
+            "title": "Conversations",
+            "chatsCount": "Chats",
+            "noConversationsYet": "No Conversations Yet"
+        },
+        "conversation": {
+            "title": "Group Chat",
+            "members": "Members",
+            "capacityNotAvailable": "Capacity not available"
+        }
+    },
+    "auth": {
+        "login": {
+            "welcome": "Welcome!",
+            "startCoding": "Let's Start Coding Together ",
+            "subtitle": "enter your email and password to log in",
+            "email": "Email",
+            "password": "Password",
+            "emailRequired": "Email is required",
+            "invalidEmail": "Invalid email format",
+            "passwordRequired": "Password is required",
+            "emailPlaceholder": "student@student.com",
+            "passwordPlaceholder": "**********",
+            "success": "Login successful",
+            "error": "Login failed",
+            "loginButton": "Log In",
+            "loggingIn": "Logging in..."
+        }
+    },
+    "tabs": {
+        "home": "Home",
+        "groups": "Groups",
+        "chats": "Chats",
+        "support": "Support",
+        "profile": "Profile"
+    },
+    "notifications": {
+        "title": "Notifications",
+        "loading": "Loading notifications...",
+        "loadingMore": "Loading more...",
+        "error": "Error loading notifications",
+        "errorDetail": "Unknown error occurred",
+        "retry": "Retry",
+        "markAllAsRead": "Mark All as Read",
+        "noNotifications": "No notifications",
+        "noNotificationsDescription": "You're all caught up! No new notifications to show.",
+        "emptyState": "No notifications yet",
+        "emptyStateDescription": "When you receive notifications, they'll appear here."
+    },
+    "sessions": {
+        "recording": "Recording",
+        "instructor": "Instructor"
+    },
+    "search": {
+        "groupsPlaceholder": "Search groups..."
     }
 }

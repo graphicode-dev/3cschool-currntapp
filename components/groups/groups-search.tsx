@@ -1,5 +1,6 @@
 import { Icons } from "@/constants/icons";
 import { Palette } from "@/constants/theme";
+import { useLanguage } from "@/contexts/language-context";
 import { StyleSheet, TextInput, View } from "react-native";
 
 interface GroupsSearchProps {
@@ -11,6 +12,8 @@ export function GroupsSearch({
     searchValue,
     onSearchChange,
 }: GroupsSearchProps) {
+    const { t } = useLanguage();
+
     return (
         <View style={styles.container}>
             {/* Search Input */}
@@ -18,7 +21,7 @@ export function GroupsSearch({
                 <Icons.MagnifyingGlassIcon size={20} color={Palette.slate400} />
                 <TextInput
                     style={styles.searchInput}
-                    placeholder="Search groups..."
+                    placeholder={t("search.groupsPlaceholder")}
                     placeholderTextColor={Palette.slate400}
                     value={searchValue}
                     onChangeText={onSearchChange}
@@ -48,7 +51,6 @@ const styles = StyleSheet.create({
     },
     searchInput: {
         flex: 1,
-        fontFamily: "Poppins-Regular",
         fontSize: 14,
         color: Palette.slate900,
         padding: 0,

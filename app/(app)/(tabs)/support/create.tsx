@@ -4,6 +4,7 @@ import { ThemedText } from "@/components/themed-text";
 import { toast } from "@/components/ui/Toast";
 import { Icons } from "@/constants/icons";
 import { Palette } from "@/constants/theme";
+import { useLanguage } from "@/contexts/language-context";
 import { useCreateTicket } from "@/services/tickets/tickets.mutations";
 import { router } from "expo-router";
 import { Controller, useForm } from "react-hook-form";
@@ -42,6 +43,7 @@ const PRIORITIES: {
 
 export default function SupportCreateScreen() {
     const { mutateAsync: createTicket, isPending } = useCreateTicket();
+    const { t } = useLanguage();
 
     const {
         control,
@@ -54,48 +56,66 @@ export default function SupportCreateScreen() {
     const onSubmit = async (data: FormData) => {
         try {
             await createTicket(data);
-            toast.success("Ticket created", "We'll get back to you soon.");
+            toast.success(
+                t("support.create.ticketCreated"),
+                t("support.create.ticketCreatedMessage"),
+            );
             router.back();
         } catch {
-            toast.error("Error", "Failed to create ticket. Please try again.");
+            toast.error(
+                t("support.create.error"),
+                t("support.create.createTicketError"),
+            );
         }
     };
 
     return (
         <ScreenWrapper>
-            <CustomHeader title="Send Help" />
+            <CustomHeader title={t("support.create.title")} />
 
             <ScrollView
                 contentContainerStyle={styles.scrollContent}
                 showsVerticalScrollIndicator={false}
                 scrollEventThrottle={16}
-                overScrollMode="never">
+                overScrollMode="never"
+            >
                 {/* Headline */}
                 <View style={styles.headRow}>
-                    <ThemedText style={styles.headTitle} fontSize={26}>
-                        We&apos;re Here to Help!
+                    <ThemedText
+                        style={styles.headTitle}
+                        fontSize={24}
+                        fontWeight="bold"
+                    >
+                        {t("support.create.headline")}
                     </ThemedText>
                     <Icons.RobotIcon size={28} color={Palette.brand[500]} />
                 </View>
 
                 {/* Title */}
                 <View style={styles.field}>
-                    <ThemedText style={styles.label} fontSize={14}>
-                        Title
+                    <ThemedText
+                        style={styles.label}
+                        fontSize={14}
+                        fontWeight="bold"
+                    >
+                        {t("support.create.titleLabel")}
                     </ThemedText>
                     <Controller
                         control={control}
                         name="title"
-                        rules={{ required: "Title is required" }}
+                        rules={{ required: t("support.create.titleRequired") }}
                         render={({ field: { onChange, value } }) => (
                             <View
                                 style={[
                                     styles.inputBox,
                                     !!errors.title && styles.inputError,
-                                ]}>
+                                ]}
+                            >
                                 <TextInput
                                     style={styles.input}
-                                    placeholder="Brief description of your issue"
+                                    placeholder={t(
+                                        "support.create.titlePlaceholder",
+                                    )}
                                     placeholderTextColor={Palette.slate400}
                                     value={value}
                                     onChangeText={onChange}
@@ -104,7 +124,11 @@ export default function SupportCreateScreen() {
                         )}
                     />
                     {errors.title && (
-                        <ThemedText style={styles.errorText} fontSize={12}>
+                        <ThemedText
+                            style={styles.errorText}
+                            fontSize={12}
+                            fontWeight="regular"
+                        >
                             {errors.title.message}
                         </ThemedText>
                     )}
@@ -112,23 +136,32 @@ export default function SupportCreateScreen() {
 
                 {/* Message / Description */}
                 <View style={styles.field}>
-                    <ThemedText style={styles.label} fontSize={14}>
-                        Message
+                    <ThemedText
+                        style={styles.label}
+                        fontSize={14}
+                        fontWeight="bold"
+                    >
+                        {t("support.create.messageLabel")}
                     </ThemedText>
                     <Controller
                         control={control}
                         name="message"
-                        rules={{ required: "Please describe your issue" }}
+                        rules={{
+                            required: t("support.create.messageRequired"),
+                        }}
                         render={({ field: { onChange, value } }) => (
                             <View
                                 style={[
                                     styles.inputBox,
                                     styles.textAreaBox,
                                     !!errors.message && styles.inputError,
-                                ]}>
+                                ]}
+                            >
                                 <TextInput
                                     style={[styles.input, styles.textArea]}
-                                    placeholder="Please describe your issue in detail"
+                                    placeholder={t(
+                                        "support.create.messagePlaceholder",
+                                    )}
                                     placeholderTextColor={Palette.slate400}
                                     value={value}
                                     onChangeText={onChange}
@@ -140,7 +173,11 @@ export default function SupportCreateScreen() {
                         )}
                     />
                     {errors.message && (
-                        <ThemedText style={styles.errorText} fontSize={12}>
+                        <ThemedText
+                            style={styles.errorText}
+                            fontSize={12}
+                            fontWeight="regular"
+                        >
                             {errors.message.message}
                         </ThemedText>
                     )}
@@ -148,8 +185,12 @@ export default function SupportCreateScreen() {
 
                 {/* Priority */}
                 <View style={styles.field}>
-                    <ThemedText style={styles.label} fontSize={14}>
-                        Priority
+                    <ThemedText
+                        style={styles.label}
+                        fontSize={14}
+                        fontWeight="bold"
+                    >
+                        {t("support.create.priorityLabel")}
                     </ThemedText>
                     <Controller
                         control={control}
@@ -168,14 +209,16 @@ export default function SupportCreateScreen() {
                                                     borderColor: p.color,
                                                 },
                                             ]}
-                                            onPress={() => onChange(p.value)}>
+                                            onPress={() => onChange(p.value)}
+                                        >
                                             <View
                                                 style={[
                                                     styles.radio,
                                                     selected && {
                                                         borderColor: p.color,
                                                     },
-                                                ]}>
+                                                ]}
+                                            >
                                                 {selected && (
                                                     <View
                                                         style={[
@@ -195,8 +238,12 @@ export default function SupportCreateScreen() {
                                                         color: p.color,
                                                     },
                                                 ]}
-                                                fontSize={13}>
-                                                {p.label}
+                                                fontSize={13}
+                                                fontWeight="medium"
+                                            >
+                                                {t(
+                                                    `support.create.${p.value.toLowerCase()}`,
+                                                )}
                                             </ThemedText>
                                         </TouchableOpacity>
                                     );
@@ -213,12 +260,13 @@ export default function SupportCreateScreen() {
                         isPending && styles.submitBtnDisabled,
                     ]}
                     onPress={handleSubmit(onSubmit)}
-                    disabled={isPending}>
+                    disabled={isPending}
+                >
                     {isPending ? (
                         <ActivityIndicator color="white" />
                     ) : (
                         <ThemedText style={styles.submitText} fontSize={16}>
-                            Send
+                            {t("support.create.submit")}
                         </ThemedText>
                     )}
                 </TouchableOpacity>
@@ -241,13 +289,11 @@ const styles = StyleSheet.create({
         marginBottom: 4,
     },
     headTitle: {
-        fontFamily: "Poppins-SemiBold",
         color: Palette.slate900,
     },
 
     field: { gap: 6 },
     label: {
-        fontFamily: "Poppins-SemiBold",
         color: Palette.slate900,
         textTransform: "capitalize",
     },
@@ -263,14 +309,12 @@ const styles = StyleSheet.create({
     inputError: { borderColor: "#e53e3e" },
     input: {
         fontSize: 14,
-        fontFamily: "Poppins-Regular",
         color: Palette.slate900,
         padding: 0,
     },
     textArea: { height: "100%", textAlignVertical: "top" },
     errorText: {
         color: "#e53e3e",
-        fontFamily: "Poppins-Regular",
     },
 
     // Priority
@@ -298,7 +342,6 @@ const styles = StyleSheet.create({
     },
     radioDot: { width: 7, height: 7, borderRadius: 4 },
     priorityLabel: {
-        fontFamily: "Poppins-Medium",
         color: Palette.slate500,
         textTransform: "capitalize",
     },
@@ -314,7 +357,6 @@ const styles = StyleSheet.create({
     },
     submitBtnDisabled: { opacity: 0.5 },
     submitText: {
-        fontFamily: "Poppins-SemiBold",
         color: "#fff",
         textTransform: "capitalize",
     },

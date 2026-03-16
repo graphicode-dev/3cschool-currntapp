@@ -1,3 +1,4 @@
+import { useLanguage } from "@/contexts/language-context";
 import React, { useEffect, useRef } from "react";
 import { Animated, StyleSheet, TouchableOpacity } from "react-native";
 import { ThemedText } from "../themed-text";
@@ -24,6 +25,7 @@ const GroupsTasksListItem: React.FC<Props> = ({
     onDelete,
     index,
 }) => {
+    const { t } = useLanguage();
     const isDone = task.status === "done";
 
     // Mount: staggered fade + slide-up
@@ -90,7 +92,8 @@ const GroupsTasksListItem: React.FC<Props> = ({
                 styles.card,
                 isDone && styles.cardDone,
                 { opacity: mountOpacity, transform: [{ translateY: mountY }] },
-            ]}>
+            ]}
+        >
             {/* Checkbox */}
             <TouchableOpacity onPress={handleToggle} activeOpacity={0.8}>
                 <Animated.View
@@ -98,7 +101,8 @@ const GroupsTasksListItem: React.FC<Props> = ({
                         styles.checkbox,
                         isDone && styles.checkboxDone,
                         { transform: [{ scale: checkScale }] },
-                    ]}>
+                    ]}
+                >
                     {isDone && (
                         <ThemedText style={styles.checkmark} fontSize={16}>
                             ✓
@@ -111,17 +115,20 @@ const GroupsTasksListItem: React.FC<Props> = ({
             <TouchableOpacity
                 style={styles.textContainer}
                 onPress={handleToggle}
-                activeOpacity={0.7}>
+                activeOpacity={0.7}
+            >
                 <ThemedText
                     style={[styles.title, isDone && styles.titleDone]}
                     numberOfLines={2}
-                    fontSize={14}>
+                    fontSize={14}
+                >
                     {task.title}
                 </ThemedText>
                 <ThemedText
                     style={styles.subtitle}
                     numberOfLines={1}
-                    fontSize={12}>
+                    fontSize={12}
+                >
                     {task.subtitle}
                 </ThemedText>
             </TouchableOpacity>
@@ -131,14 +138,16 @@ const GroupsTasksListItem: React.FC<Props> = ({
                 style={[
                     styles.badge,
                     isDone ? styles.badgeDone : styles.badgeTodo,
-                ]}>
+                ]}
+            >
                 <ThemedText
                     style={[
                         styles.badgeText,
                         isDone ? styles.badgeTextDone : styles.badgeTextTodo,
                     ]}
-                    fontSize={12}>
-                    {isDone ? "Done" : "To Do"}
+                    fontSize={12}
+                >
+                    {isDone ? t("common.done") : t("common.todo")}
                 </ThemedText>
             </Animated.View>
 
@@ -148,7 +157,8 @@ const GroupsTasksListItem: React.FC<Props> = ({
                     style={styles.deleteBtn}
                     onPress={handleDeletePress}
                     activeOpacity={0.8}
-                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                >
                     <ThemedText fontSize={15}>🗑</ThemedText>
                 </TouchableOpacity>
             </Animated.View>

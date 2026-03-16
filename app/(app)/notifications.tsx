@@ -173,11 +173,11 @@ export default function NotificationsScreen() {
                     style={styles.loadingText}
                     fontSize={Typography.sizes.base}
                 >
-                    Loading more...
+                    {t("notifications.loadingMore")}
                 </ThemedText>
             </View>
         );
-    }, [isFetchingNextPage]);
+    }, [isFetchingNextPage, t]);
 
     if (isLoading && notifications.length === 0) {
         return (
@@ -201,19 +201,19 @@ export default function NotificationsScreen() {
     if (error && notifications.length === 0) {
         return (
             <ScreenWrapper>
-                <CustomHeader title="notifications" />
+                <CustomHeader title={t("notifications.title")} />
                 <View style={styles.errorContainer}>
                     <ThemedText
                         style={styles.errorText}
                         fontSize={Typography.sizes.base}
                     >
-                        Error loading notifications
+                        {t("notifications.error")}
                     </ThemedText>
                     <ThemedText
                         style={styles.errorDetail}
                         fontSize={Typography.sizes.sm}
                     >
-                        {error?.message || "Unknown error occurred"}
+                        {error?.message || t("notifications.errorDetail")}
                     </ThemedText>
                     <TouchableOpacity
                         style={styles.retryButton}
@@ -223,7 +223,7 @@ export default function NotificationsScreen() {
                             style={styles.retryButtonText}
                             fontSize={Typography.sizes.base}
                         >
-                            Retry
+                            {t("notifications.retry")}
                         </ThemedText>
                     </TouchableOpacity>
                 </View>
@@ -234,7 +234,7 @@ export default function NotificationsScreen() {
     return (
         <ScreenWrapper>
             {/* Header */}
-            <CustomHeader title="Notifications" />
+            <CustomHeader title={t("notifications.title")} />
 
             {/* All Notifications Section */}
             <View style={styles.allNotificationsSection}>
@@ -243,7 +243,7 @@ export default function NotificationsScreen() {
                         style={styles.sectionTitle}
                         fontSize={Typography.sizes.xl}
                     >
-                        all notifications
+                        {t("notifications.title")}
                     </ThemedText>
                     <View style={styles.notificationBadge}>
                         <ThemedText
@@ -262,13 +262,13 @@ export default function NotificationsScreen() {
                             style={styles.emptyText}
                             fontSize={Typography.sizes.xl}
                         >
-                            No notifications yet
+                            {t("notifications.emptyState")}
                         </ThemedText>
                         <ThemedText
                             style={styles.emptySubText}
                             fontSize={Typography.sizes.md}
                         >
-                            You&apos;ll see your notifications here
+                            {t("notifications.emptyStateDescription")}
                         </ThemedText>
                     </View>
                 ) : (
@@ -416,12 +416,14 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: "center",
         justifyContent: "center",
-        paddingVertical: Spacing["3xl"],
+        paddingVertical: Spacing.xl,
+        paddingHorizontal: Spacing.xl,
     },
     emptyText: {
-        color: Palette.brand[300],
+        color: Palette.slate400,
         textAlign: "center",
         marginBottom: Spacing.sm,
+        fontWeight: Typography.weights.semiBold,
     },
     emptySubText: {
         color: Palette.brand[200],

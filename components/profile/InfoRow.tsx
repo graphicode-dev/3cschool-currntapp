@@ -28,7 +28,6 @@ const styles = StyleSheet.create({
         textTransform: "capitalize",
     },
     infoValue: {
-        fontFamily: "Poppins_500Medium",
         color: Palette.brand[500],
         textTransform: "capitalize",
     },

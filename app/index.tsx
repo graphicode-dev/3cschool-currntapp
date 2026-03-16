@@ -99,11 +99,11 @@ function Bubble({
                     <ThemedText
                         style={{
                             color: labelColor,
-                            fontFamily: "Poppins-Medium",
                             textAlign: "center",
                             textTransform: "capitalize",
                         }}
                         fontSize={ms(fontSize)}
+                        fontWeight="medium"
                     >
                         {label}
                     </ThemedText>
@@ -183,10 +183,15 @@ export default function SplashScreen() {
                     },
                 ]}
             >
-                <ThemedText style={styles.title} fontSize={ms(32)}>
+                <ThemedText
+                    style={styles.title}
+                    fontWeight="bold"
+                    fontSize={ms(32)}
+                >
                     <ThemedText
                         style={[styles.title, { color: Palette.brand[500] }]}
                         fontSize={ms(32)}
+                        fontWeight="bold"
                     >
                         Code
                     </ThemedText>
@@ -194,6 +199,7 @@ export default function SplashScreen() {
                     <ThemedText
                         style={[styles.title, { color: Palette.brand[500] }]}
                         fontSize={ms(32)}
+                        fontWeight="bold"
                     >
                         Anytime.
                     </ThemedText>
@@ -404,7 +410,6 @@ const styles = StyleSheet.create({
     },
     skipText: {
         color: "#24ADE3",
-        fontFamily: "Poppins-Regular",
         textTransform: "capitalize",
     },
     titleContainer: {
@@ -414,7 +419,6 @@ const styles = StyleSheet.create({
         right: hs(16),
     },
     title: {
-        fontFamily: "Poppins-SemiBold",
         color: "#393838",
         lineHeight: ms(36),
     },

@@ -302,7 +302,6 @@ const styles = StyleSheet.create({
     input: {
         flex: 1,
         fontSize: 12,
-        fontFamily: "Poppins-Medium",
         color: Palette.slate700,
         paddingVertical: 0,
         paddingHorizontal: 4,

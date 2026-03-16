@@ -25,7 +25,11 @@ const HomeHeader = ({ user }: { user: User }) => {
                 />
 
                 {/* Greeting ThemedText */}
-                <ThemedText style={styles.greetingText} fontSize={16}>
+                <ThemedText
+                    style={styles.greetingText}
+                    fontSize={16}
+                    fontWeight="bold"
+                >
                     {t("home.header.greeting")}, {user?.full_name}! 👋
                 </ThemedText>
             </View>
@@ -67,7 +71,6 @@ const styles = StyleSheet.create({
         fontWeight: "600",
         color: Palette.slate900, // #393838 equivalent
         textTransform: "capitalize",
-        fontFamily: "Poppins-SemiBold",
     },
     notificationContainer: {
         position: "relative",

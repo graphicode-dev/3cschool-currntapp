@@ -15,6 +15,8 @@ import {
     useWindowDimensions,
 } from "react-native";
 
+import { useLanguage } from "@/contexts/language-context";
+import { moderateScale } from "@/utils";
 import Animated, {
     interpolateColor,
     useAnimatedStyle,
@@ -88,18 +90,18 @@ function getTabIcon(routeName: string, color: string) {
     }
 }
 
-function getTabLabel(routeName: string) {
+function getTabLabel(routeName: string, t: (key: string) => string) {
     switch (routeName) {
         case "support":
-            return "Support";
+            return t("tabs.support");
         case "groups":
-            return "Groups";
+            return t("tabs.groups");
         case "home":
-            return "Home";
+            return t("tabs.home");
         case "chats":
-            return "Chats";
+            return t("tabs.chats");
         case "profile":
-            return "Profile";
+            return t("tabs.profile");
         default:
             return routeName;
     }
@@ -126,6 +128,7 @@ function AnimatedTabItem({
     badge?: number;
     scaleFont: (size: number) => number;
 }) {
+    const { t } = useLanguage();
     const progress = useSharedValue(isFocused ? 1 : 0);
     const dotScale = useSharedValue(isFocused ? 1 : 0);
     const dotOpacity = useSharedValue(isFocused ? 1 : 0);
@@ -156,7 +159,8 @@ function AnimatedTabItem({
             activeOpacity={0.7}
             onPress={onPress}
             onLongPress={onLongPress}
-            style={[styles.tabItem, { minWidth: R.tabItemMinWidth }]}>
+            style={[styles.tabItem, { minWidth: R.tabItemMinWidth }]}
+        >
             <View>
                 {getTabIcon(routeName, color)}
                 {!!badge && badge > 0 && (
@@ -164,26 +168,26 @@ function AnimatedTabItem({
                         style={[
                             styles.badge,
                             { width: R.badgeSize, height: R.badgeSize },
-                        ]}>
+                        ]}
+                    >
                         <ThemedText
                             style={[
                                 styles.badgeText,
                                 { fontSize: scaleFont(R.fontSize - 2) },
-                            ]}>
+                            ]}
+                        >
                             {badge > 99 ? "99+" : badge}
                         </ThemedText>
                     </View>
                 )}
             </View>
-            <Animated.Text
-                style={[
-                    styles.tabLabel,
-                    animatedLabelStyle,
-                    { fontSize: scaleFont(R.fontSize) },
-                ]}
-                numberOfLines={1}>
-                {getTabLabel(routeName)}
-            </Animated.Text>
+            <ThemedText
+                style={[styles.tabLabel]}
+                numberOfLines={1}
+                fontSize={moderateScale(10)}
+            >
+                {getTabLabel(routeName, t)}
+            </ThemedText>
             <Animated.View style={[styles.tabActiveDot, animatedDotStyle]} />
         </TouchableOpacity>
     );
@@ -251,7 +255,8 @@ export function CustomTabBar({
             style={[
                 styles.container,
                 { paddingBottom: insets.bottom > 0 ? insets.bottom - 10 : 8 },
-            ]}>
+            ]}
+        >
             <View style={styles.tabBarWrapper}>
                 {/* Center raised button */}
                 <View style={styles.centerButtonContainer}>
@@ -271,7 +276,8 @@ export function CustomTabBar({
                                     sortedRoutes[centerIndex].route,
                                 );
                             }
-                        }}>
+                        }}
+                    >
                         <View
                             style={[
                                 styles.centerButtonOuter,
@@ -280,7 +286,8 @@ export function CustomTabBar({
                                     height: R.centerButtonSize,
                                     borderRadius: R.centerButtonSize / 2,
                                 },
-                            ]}>
+                            ]}
+                        >
                             <View style={styles.centerButtonBlur}>
                                 <LinearGradient
                                     colors={[
@@ -295,7 +302,8 @@ export function CustomTabBar({
                                             borderRadius:
                                                 R.centerButtonSize / 2,
                                         },
-                                    ]}>
+                                    ]}
+                                >
                                     <HomeIcon
                                         size={R.iconSize}
                                         color="#FFFFFF"
@@ -320,7 +328,8 @@ export function CustomTabBar({
                                 backgroundColor: colors.tabBarBackground,
                                 borderColor: colors.tabBarBorder,
                             },
-                        ]}>
+                        ]}
+                    >
                         {/*
                          * Use flex layout instead of space-between so each side
                          * gets exactly 50% minus half the spacer — prevents overflow
@@ -330,13 +339,15 @@ export function CustomTabBar({
                             style={[
                                 styles.tabsContainer,
                                 { paddingHorizontal: R.sidePadding },
-                            ]}>
+                            ]}
+                        >
                             {/* Left tabs — flex:1 so they take equal share */}
                             <View
                                 style={[
                                     styles.sideGroup,
                                     { gap: R.sideGroupGap },
-                                ]}>
+                                ]}
+                            >
                                 {sortedRoutes
                                     .filter((_, i) => i < centerIndex)
                                     .map((item) => {
@@ -376,7 +387,8 @@ export function CustomTabBar({
                                 style={[
                                     styles.sideGroup,
                                     { gap: R.sideGroupGap },
-                                ]}>
+                                ]}
+                            >
                                 {sortedRoutes
                                     .filter((_, i) => i > centerIndex)
                                     .map((item) => {
@@ -465,7 +477,6 @@ const styles = StyleSheet.create({
     },
     tabLabel: {
         fontWeight: "500",
-        fontFamily: Platform.OS === "ios" ? "System" : "sans-serif-medium",
         // fontSize set inline (responsive)
     },
     centerButtonContainer: {

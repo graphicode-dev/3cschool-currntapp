@@ -48,13 +48,16 @@ export default function LoginScreen() {
             },
             {
                 onSuccess: () => {
-                    toast.success(t("auth.success"), "Login successful");
+                    toast.success(
+                        t("auth.login.success"),
+                        t("auth.login.success"),
+                    );
                 },
                 onError: (error) => {
                     console.error("Login error:", error);
                     toast.error(
-                        t("auth.error"),
-                        error?.message || "Login failed",
+                        t("auth.login.error"),
+                        error?.message || t("auth.login.error"),
                     );
                 },
             },
@@ -84,7 +87,7 @@ export default function LoginScreen() {
                             style={styles.welcomeText}
                             fontSize={35}
                         >
-                            Welcome!
+                            {t("auth.login.welcome")}
                         </ThemedText>
                         <ThemedText
                             type="title"
@@ -93,14 +96,14 @@ export default function LoginScreen() {
                             fontSize={20}
                             numberOfLines={1}
                         >
-                            Let&apos;s Start Coding Together ✨
+                            {t("auth.login.startCoding")}
                         </ThemedText>
                         <ThemedText
                             style={styles.subtitle}
                             numberOfLines={1}
                             fontSize={14}
                         >
-                            enter your email and password to log in
+                            {t("auth.login.subtitle")}
                         </ThemedText>
                     </View>
 
@@ -112,24 +115,26 @@ export default function LoginScreen() {
                             style={styles.label}
                             fontSize={16}
                         >
-                            Email
+                            {t("auth.login.email")}
                         </ThemedText>
                         <View style={styles.inputContainer}>
                             <Controller
                                 control={control}
                                 name="email"
                                 rules={{
-                                    required: "Email is required",
+                                    required: t("auth.login.emailRequired"),
                                     pattern: {
                                         value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                                        message: "Invalid email format",
+                                        message: t("auth.login.invalidEmail"),
                                     },
                                 }}
                                 render={({ field: { onChange, value } }) => (
                                     <>
                                         <TextInput
                                             style={styles.input}
-                                            placeholder="student@student.com"
+                                            placeholder={t(
+                                                "auth.login.emailPlaceholder",
+                                            )}
                                             placeholderTextColor="#999"
                                             value={value}
                                             onChangeText={onChange}
@@ -159,20 +164,22 @@ export default function LoginScreen() {
                             style={styles.label}
                             fontSize={16}
                         >
-                            Password
+                            {t("auth.login.password")}
                         </ThemedText>
                         <View style={styles.inputContainer}>
                             <Controller
                                 control={control}
                                 name="password"
                                 rules={{
-                                    required: "Password is required",
+                                    required: t("auth.login.passwordRequired"),
                                 }}
                                 render={({ field: { onChange, value } }) => (
                                     <>
                                         <TextInput
                                             style={styles.input}
-                                            placeholder="**********"
+                                            placeholder={t(
+                                                "auth.login.passwordPlaceholder",
+                                            )}
                                             placeholderTextColor="#999"
                                             value={value}
                                             onChangeText={onChange}
@@ -215,7 +222,9 @@ export default function LoginScreen() {
                                 style={styles.loginButtonText}
                                 fontSize={18}
                             >
-                                {isPending ? "Logging in..." : "Log In"}
+                                {isPending
+                                    ? t("auth.login.loggingIn")
+                                    : t("auth.login.loginButton")}
                             </ThemedText>
                         </TouchableOpacity>
                     </View>

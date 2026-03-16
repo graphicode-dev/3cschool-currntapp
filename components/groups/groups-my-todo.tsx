@@ -1,3 +1,4 @@
+import { useLanguage } from "@/contexts/language-context";
 import { useTasksStore } from "@/services/tasks/tasks.store";
 import React, { useCallback, useRef, useState } from "react";
 import {
@@ -15,6 +16,7 @@ import GroupsTasksList from "./groups-todo-list";
 type Filter = "all" | "todo" | "done";
 
 const GroupsMyTasks: React.FC = () => {
+    const { t } = useLanguage();
     const { tasks, addTask, toggleTask, deleteTask } = useTasksStore();
     const [inputValue, setInputValue] = useState("");
     const [filter, setFilter] = useState<Filter>("todo");
@@ -51,13 +53,14 @@ const GroupsMyTasks: React.FC = () => {
     return (
         <KeyboardAvoidingView
             style={styles.flex}
-            behavior={Platform.OS === "ios" ? "padding" : "height"}>
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+        >
             <View style={styles.container}>
                 {/* Add input */}
                 <View style={styles.inputRow}>
                     <TextInput
                         style={styles.input}
-                        placeholder="Add A Quick Task.."
+                        placeholder={t("common.addTask")}
                         placeholderTextColor="#b0c8d4"
                         value={inputValue}
                         onChangeText={setInputValue}
@@ -65,17 +68,20 @@ const GroupsMyTasks: React.FC = () => {
                         returnKeyType="done"
                     />
                     <Animated.View
-                        style={{ transform: [{ scale: addBtnScale }] }}>
+                        style={{ transform: [{ scale: addBtnScale }] }}
+                    >
                         <TouchableOpacity
                             style={[
                                 styles.addButton,
                                 !inputValue.trim() && styles.addButtonDisabled,
                             ]}
                             onPress={handleAddTask}
-                            activeOpacity={0.85}>
+                            activeOpacity={0.85}
+                        >
                             <ThemedText
                                 style={styles.addButtonIcon}
-                                fontSize={22}>
+                                fontSize={22}
+                            >
                                 ＋
                             </ThemedText>
                         </TouchableOpacity>
@@ -94,12 +100,13 @@ const GroupsMyTasks: React.FC = () => {
                                 prev === "todo" ? "all" : "todo",
                             )
                         }
-                        activeOpacity={0.8}>
+                        activeOpacity={0.8}
+                    >
                         <ThemedText style={styles.statNumber} fontSize={14}>
                             {todoCount}
                         </ThemedText>
                         <ThemedText style={styles.statLabel} fontSize={13}>
-                            To Do
+                            {t("groups.myTasks.toDo")}
                         </ThemedText>
                     </TouchableOpacity>
 
@@ -114,17 +121,20 @@ const GroupsMyTasks: React.FC = () => {
                                 prev === "done" ? "all" : "done",
                             )
                         }
-                        activeOpacity={0.8}>
+                        activeOpacity={0.8}
+                    >
                         <ThemedText
                             style={[styles.statNumber, styles.statNumberDone]}
-                            fontSize={14}>
+                            fontSize={14}
+                        >
                             {doneCount}
                         </ThemedText>
                         <ThemedText
                             style={[styles.statLabel, styles.statLabelDone]}
-                            fontSize={13}>
+                            fontSize={13}
+                        >
                             {" "}
-                            Done
+                            {t("groups.myTasks.done")}
                         </ThemedText>
                     </TouchableOpacity>
                 </View>

@@ -23,10 +23,18 @@
             "greeting": "hi"
         },
         "infoSection": {
-            "motivational": "You're Doing Great! Keep Going!",
-            "continueButton": "Continue Session",
-            "shareIdeas": "Share ideas and learn as a team.",
-            "chat": "Chat with your classmates."
+            "student": {
+                "motivational": "You're Doing Great! Keep Going!",
+                "continueButton": "Continue Session",
+                "shareIdeas": "Share ideas and learn as a team.",
+                "chat": "Chat with your classmates."
+            },
+            "teacher": {
+                "motivational": "You’re Making an Impact! Keep Inspiring!",
+                "continueButton": "Continue Session",
+                "shareIdeas": "Share ideas with your teaching team.",
+                "chat": "Chat with students and manage discussions."
+            }
         },
         "upcomingSessions": {
             "title": "Upcoming Sessions"

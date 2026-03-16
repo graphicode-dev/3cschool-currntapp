@@ -3,38 +3,35 @@ import { Icons } from "@/constants/icons";
 import { Images } from "@/constants/images";
 import { Palette } from "@/constants/theme";
 import { useAuthStore } from "@/services/auth/auth.store";
+import {
+    horizontalScale as hs,
+    moderateScale as ms,
+    verticalScale as vs,
+} from "@/utils/responsiveSize";
+import { ImageBackground } from "expo-image";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useRef } from "react";
 import {
     Animated,
-    Dimensions,
     Image,
     StyleSheet,
     TouchableOpacity,
     View,
 } from "react-native";
 
-const { width, height } = Dimensions.get("window");
-
-// ─── Scale helpers (design base: 390×844) ───────────────────────────────────
-const BASE_W = 390;
-const BASE_H = 844;
-const sx = (x: number) => (x / BASE_W) * width;
-const sy = (y: number) => (y / BASE_H) * height;
-const sc = (v: number) => (v / BASE_W) * width;
-
 // ─── Bubble Component ────────────────────────────────────────────────────────
 interface BubbleProps {
-    size: number; // design px
-    left: number; // design px
-    top: number; // design px
+    size: number;
+    left: number;
+    top: number;
     label: string;
     labelColor: string;
     rotation: number;
     delay: number;
     bgColor: string;
     fontSize?: number;
+    borderColor?: string;
 }
 
 function Bubble({
@@ -46,7 +43,7 @@ function Bubble({
     rotation,
     delay,
     bgColor,
-    fontSize = 20,
+    fontSize = 14,
 }: BubbleProps) {
     const aScale = useRef(new Animated.Value(0)).current;
     const aOpac = useRef(new Animated.Value(0)).current;
@@ -69,7 +66,7 @@ function Bubble({
         ]).start();
     }, []);
 
-    const sz = sc(size);
+    const sz = hs(size);
 
     return (
         <Animated.View
@@ -77,79 +74,42 @@ function Bubble({
                 position: "absolute",
                 width: sz,
                 height: sz,
-                left: sx(left),
-                top: sy(top),
+                left: hs(left),
+                top: vs(top),
                 opacity: aOpac,
                 transform: [{ scale: aScale }],
                 alignItems: "center",
                 justifyContent: "center",
-            }}>
+            }}
+        >
             <View
                 style={{
-                    borderWidth: 1,
-                    borderRadius: 100,
+                    borderWidth: 2,
+                    borderColor: "black",
+                    borderRadius: sz / 2,
                     width: sz,
                     height: sz,
                     transform: [{ rotate: `${rotation}deg` }],
                     alignItems: "center",
                     justifyContent: "center",
                     backgroundColor: bgColor,
-                }}>
-                <ThemedText
-                    style={{
-                        color: labelColor,
-                        fontFamily: "Poppins-Medium",
-                        textAlign: "center",
-                        lineHeight: sc(fontSize) * 1.35,
-                        textTransform: "capitalize",
-                    }}
-                    fontSize={sc(fontSize)}>
-                    {label}
-                </ThemedText>
+                }}
+            >
+                {label ? (
+                    <ThemedText
+                        style={{
+                            color: labelColor,
+                            fontFamily: "Poppins-Medium",
+                            textAlign: "center",
+                            textTransform: "capitalize",
+                        }}
+                        fontSize={ms(fontSize)}
+                    >
+                        {label}
+                    </ThemedText>
+                ) : null}
             </View>
         </Animated.View>
-    );
-}
-
-// ─── Animated Bubble Image Component ───────────────────────────────────────
-interface AnimatedBubbleImageProps {
-    source: any;
-    style: any;
-    delay: number;
-}
-
-function AnimatedBubbleImage({
-    source,
-    style,
-    delay,
-}: AnimatedBubbleImageProps) {
-    const aScale = useRef(new Animated.Value(0)).current;
-    const aOpac = useRef(new Animated.Value(0)).current;
-
-    useEffect(() => {
-        Animated.parallel([
-            Animated.spring(aScale, {
-                toValue: 1,
-                delay,
-                useNativeDriver: true,
-                tension: 60,
-                friction: 8,
-            }),
-            Animated.timing(aOpac, {
-                toValue: 1,
-                duration: 300,
-                delay,
-                useNativeDriver: true,
-            }),
-        ]).start();
-    }, []);
-
-    return (
-        <Animated.Image
-            source={source}
-            style={[style, { opacity: aOpac, transform: [{ scale: aScale }] }]}
-            resizeMode="contain"
-        />
     );
 }
 
@@ -162,7 +122,6 @@ export default function SplashScreen() {
     const navigateDependingOnAuth = () => {
         const { isAuthenticated } = useAuthStore.getState();
         if (isAuthenticated) {
-            // Try using push for animation, then replace to clean stack
             router.push("/(app)/(tabs)/home");
         } else {
             router.push("/(auth)/login");
@@ -196,17 +155,20 @@ export default function SplashScreen() {
     }, []);
 
     return (
-        <View style={styles.container}>
+        <ImageBackground source={Images.splashBg} style={styles.container}>
             <StatusBar style="auto" />
+
+            {/* Logo */}
+            <Image source={Images.logo} style={styles.headerLogo} />
 
             {/* Skip button */}
             <Animated.View style={[styles.skipBtn, { opacity: skipOpacity }]}>
                 <TouchableOpacity onPress={navigateDependingOnAuth}>
                     <View style={styles.skipBtnContent}>
-                        <ThemedText style={styles.skipText} fontSize={sc(15)}>
+                        <ThemedText style={styles.skipText} fontSize={ms(13)}>
                             skip
                         </ThemedText>
-                        <Icons.ArrowIcon color={Palette.brand[500]} size={20} />
+                        <Icons.ArrowIcon color={Palette.brand[500]} size={16} />
                     </View>
                 </TouchableOpacity>
             </Animated.View>
@@ -219,176 +181,214 @@ export default function SplashScreen() {
                         opacity: titleOpacity,
                         transform: [{ translateY: titleTranslate }],
                     },
-                ]}>
-                <ThemedText style={styles.title} fontSize={sc(36)}>
-                    Code, Practice, And Level Up—{"\n"}Anytime.
+                ]}
+            >
+                <ThemedText style={styles.title} fontSize={ms(32)}>
+                    <ThemedText
+                        style={[styles.title, { color: Palette.brand[500] }]}
+                        fontSize={ms(32)}
+                    >
+                        Code
+                    </ThemedText>
+                    {", Practice, And\nLevel Up—"}
+                    <ThemedText
+                        style={[styles.title, { color: Palette.brand[500] }]}
+                        fontSize={ms(32)}
+                    >
+                        Anytime.
+                    </ThemedText>
                 </ThemedText>
             </Animated.View>
 
-            {/* Student illustration */}
-            <View style={styles.illustrationWrap}>
-                <Image
-                    source={Images.student}
-                    style={styles.illustration}
-                    resizeMode="contain"
-                />
-            </View>
-
-            {/* Daisy flower */}
-            <AnimatedBubbleImage
-                source={Images.flower}
-                style={styles.daisy}
-                delay={600}
-            />
-            <AnimatedBubbleImage
-                source={Images.logo}
-                style={styles.daisy}
-                delay={650}
+            {/* Girl in circle — bottom-left, partially behind bubbles */}
+            <Image
+                source={Images.girl}
+                style={styles.illustration}
+                resizeMode="cover"
             />
 
-            {/* ── Bubbles ── */}
-            <Bubble
-                bgColor="#e9f7fc"
-                size={139}
-                left={37}
-                top={430}
-                label="TechSkills"
-                labelColor="#24ADE3"
-                rotation={-6.93}
-                delay={750}
-            />
-            <Bubble
-                bgColor="#e9f7fc"
-                size={27}
-                left={10}
-                top={530}
-                label=""
-                labelColor=""
-                rotation={-6.93}
-                delay={320}
-            />
+            {/* ── Bubbles (right cluster) ── */}
+
+            {/* Sessions - top right */}
             <Bubble
                 bgColor="#fff6e6"
-                size={117}
-                left={237}
-                top={459}
+                size={90}
+                left={220}
+                top={340}
                 label="Sessions"
                 labelColor="#24ADE3"
                 rotation={-6.93}
                 delay={580}
+                fontSize={13}
             />
+
+            {/* Progress - right of FunCoding */}
             <Bubble
-                bgColor="#a7b5ff"
-                size={123}
-                left={136}
-                top={553}
-                label="FunCoding"
-                labelColor="#E9F7FC"
-                rotation={-6.93}
-                delay={410}
-            />
-            <Bubble
-                bgColor="#a7b5ff"
-                size={27}
-                left={170}
-                top={690}
-                label=""
-                labelColor=""
-                rotation={-6.93}
-                delay={890}
-            />
-            <Bubble
-                bgColor="#bbe6f6"
-                size={97}
-                left={277}
-                top={591}
+                bgColor="#c8eaf6"
+                size={95}
+                left={265}
+                top={450}
                 label="Progress"
                 labelColor="#24ADE3"
                 rotation={-12.23}
                 delay={230}
-                fontSize={16}
+                fontSize={12}
             />
+
+            {/* FunCoding - center */}
             <Bubble
-                bgColor="#7a7a7a"
-                size={27}
-                left={350}
-                top={700}
-                label=""
-                labelColor=""
-                rotation={-12.23}
-                delay={670}
-                fontSize={16}
+                bgColor="#a7b5ff"
+                size={130}
+                left={125}
+                top={425}
+                label="FunCoding"
+                labelColor="#ffffff"
+                rotation={-6.93}
+                delay={410}
+                fontSize={13}
             />
+
+            {/* TechSkills - left of sessions */}
             <Bubble
-                bgColor="#9ad9f2"
-                size={27}
-                left={192}
-                top={508}
-                label=""
-                labelColor="#FFFFFF"
-                rotation={0}
-                delay={490}
-                fontSize={10}
+                bgColor="#e9f7fc"
+                size={100}
+                left={15}
+                top={470}
+                label="TechSkills"
+                labelColor="#24ADE3"
+                rotation={-6.93}
+                delay={750}
+                fontSize={13}
             />
+
+            {/* Beginner Friendly - bottom left */}
             <Bubble
                 bgColor="#393838"
-                size={136}
-                left={34}
-                top={699}
+                size={150}
+                left={20}
+                top={600}
                 label={"Beginner\nFriendly"}
                 labelColor="#EBEBEB"
                 rotation={-9.5}
                 delay={850}
+                fontSize={13}
             />
-            <Bubble
-                bgColor="#e9f7fc"
-                size={27}
-                left={10}
-                top={800}
-                label=""
-                labelColor=""
-                rotation={-6.93}
-                delay={360}
-            />
+
+            {/* Smart Learning - bottom center */}
             <Bubble
                 bgColor="#24ade3"
-                size={156}
-                left={192}
-                top={685}
+                size={180}
+                left={180}
+                top={570}
                 label={"Smart\nLearning"}
                 labelColor="#E9F7FC"
                 rotation={-6.01}
                 delay={540}
+                fontSize={14}
             />
-        </View>
+
+            {/* ── Decorative small dots ── */}
+            <Bubble
+                bgColor="#9AD9F2"
+                size={30}
+                left={180}
+                top={370}
+                label=""
+                labelColor=""
+                rotation={0}
+                delay={320}
+            />
+            <Bubble
+                bgColor="#D7DDFF"
+                size={25}
+                left={340}
+                top={400}
+                label=""
+                labelColor=""
+                rotation={0}
+                delay={490}
+            />
+            <Bubble
+                bgColor="#7A7A7A"
+                size={25}
+                left={330}
+                top={570}
+                label=""
+                labelColor=""
+                rotation={0}
+                delay={490}
+            />
+            <Bubble
+                bgColor="#9AD9F2"
+                size={25}
+                left={340}
+                top={770}
+                label=""
+                labelColor=""
+                rotation={0}
+                delay={490}
+            />
+            <Bubble
+                bgColor="#A7B5FF"
+                size={30}
+                left={155}
+                top={595}
+                label=""
+                labelColor=""
+                rotation={0}
+                delay={320}
+            />
+            <Bubble
+                bgColor="#E9F7FC"
+                size={25}
+                left={10}
+                top={770}
+                label=""
+                labelColor=""
+                rotation={0}
+                delay={490}
+            />
+            <Bubble
+                bgColor="#24ADE3"
+                size={25}
+                left={10}
+                top={450}
+                label=""
+                labelColor=""
+                rotation={0}
+                delay={490}
+            />
+            <Bubble
+                bgColor="#E9F7FC"
+                size={25}
+                left={100}
+                top={460}
+                label=""
+                labelColor=""
+                rotation={0}
+                delay={490}
+            />
+        </ImageBackground>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#D6E8F5",
     },
-    bgVector1: {
+    headerLogo: {
         position: "absolute",
-        width: width * 1.35,
-        height: height * 0.55,
-        top: -height * 0.12,
-        left: -width * 0.18,
-        opacity: 0.9,
-    },
-    bgVector2: {
-        position: "absolute",
-        width: width * 0.9,
-        height: height * 0.55,
-        bottom: -height * 0.08,
-        right: -width * 0.12,
-        opacity: 0.9,
+        top: vs(32),
+        left: hs(16),
+        zIndex: 10,
+        width: hs(74),
+        height: vs(80),
+        resizeMode: "contain",
     },
     skipBtn: {
         position: "absolute",
-        top: sy(46),
-        right: sx(20),
+        top: vs(52),
+        right: hs(16),
         zIndex: 10,
     },
     skipBtnContent: {
@@ -396,8 +396,8 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: "#24ADE3",
         borderRadius: 35,
-        paddingHorizontal: sx(16),
-        paddingVertical: sy(7),
+        paddingHorizontal: hs(14),
+        paddingVertical: vs(6),
         flexDirection: "row",
         alignItems: "center",
         gap: 4,
@@ -407,54 +407,24 @@ const styles = StyleSheet.create({
         fontFamily: "Poppins-Regular",
         textTransform: "capitalize",
     },
-    arrowIcon: {
-        width: sx(19),
-        height: sy(10),
-    },
     titleContainer: {
         position: "absolute",
-        top: sy(115),
-        left: sx(24),
-        width: sx(301),
+        top: vs(118),
+        left: hs(16),
+        right: hs(16),
     },
     title: {
         fontFamily: "Poppins-SemiBold",
         color: "#393838",
-        lineHeight: sc(44),
+        lineHeight: ms(36),
     },
-    illustrationWrap: {
-        position: "absolute",
-        // Figma: center x = 390/2 + 70.87 = 265.87, center y = 844/2 - 75.94 = 346.06
-        // width 336.54, height 253.13
-        left: sx(265.87 - 336.54 / 2),
-        top: sy(346.06 - 253.13 / 2),
-        width: sx(336.54),
-        height: sy(253.13),
-        overflow: "hidden",
-    },
+    // Girl circle: sits left, overlaps the bubble area slightly
     illustration: {
-        width: "90%",
-        height: "100%", // matches Figma overflow
-    },
-    decorativeVector: {
+        width: hs(200),
+        height: hs(200),
         position: "absolute",
-        // Figma node 159:2106: inset 68.24% top, 69.24% right, 18.86% bottom, 2.66% left
-        left: sx(BASE_W * 0.0266),
-        top: sy(BASE_H * 0.6824),
-        width: sx(BASE_W * (1 - 0.0266 - 0.6924)),
-        height: sy(BASE_H * (1 - 0.6824 - 0.1886)),
-    },
-    daisy: {
-        position: "absolute",
-        // Figma: left 5.21%, right 71.79% of width  → left = 5.21%, width = ~23%
-        left: sx(BASE_W * 0.0521),
-        top: sy(584.53),
-        width: sx(BASE_W * (1 - 0.0521 - 0.7179)),
-        height: sx(BASE_W * (1 - 0.0521 - 0.7179)), // square, aspect 1
-    },
-    dot: {
-        position: "absolute",
-        width: sx(23),
-        height: sx(23),
+        top: vs(200),
+        left: hs(0),
+        zIndex: 5,
     },
 });

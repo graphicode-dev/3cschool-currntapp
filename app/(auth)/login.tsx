@@ -16,6 +16,7 @@ import {
 
 import { toast } from "@/components/ui/Toast";
 import { Images } from "@/constants/images";
+import { Palette } from "@/constants/theme";
 import { useLanguage } from "@/contexts/language-context";
 import { FontAwesome } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -76,6 +77,7 @@ export default function LoginScreen() {
                 >
                     {/* Header Section */}
                     <View style={styles.headerSection}>
+                        <Image source={Images.logo} style={styles.headerLogo} />
                         <ThemedText
                             type="title"
                             lang="en"
@@ -136,9 +138,9 @@ export default function LoginScreen() {
                                             autoCorrect={false}
                                         />
                                         <FontAwesome
-                                            name="envelope"
+                                            name="envelope-o"
                                             size={20}
-                                            color="#666"
+                                            color={Palette.slate500}
                                             style={styles.inputIcon}
                                         />
                                     </>
@@ -189,7 +191,7 @@ export default function LoginScreen() {
                                                         : "eye-slash"
                                                 }
                                                 size={20}
-                                                color="#666"
+                                                color={Palette.slate500}
                                             />
                                         </TouchableOpacity>
                                     </>
@@ -244,8 +246,13 @@ const styles = StyleSheet.create({
     },
     headerSection: {
         marginTop: 60,
-        alignItems: "center",
+        alignItems: "flex-start",
         marginBottom: 60,
+    },
+    headerLogo: {
+        width: 70,
+        height: 100,
+        alignSelf: "flex-start",
     },
     welcomeText: {
         fontWeight: "700",

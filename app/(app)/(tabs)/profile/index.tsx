@@ -1,5 +1,6 @@
 import Avatar from "@/components/avatar";
 import CustomHeader from "@/components/custom-header";
+import ChipItem from "@/components/profile/ChipItem";
 import InfoRow from "@/components/profile/InfoRow";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import { ThemedText } from "@/components/themed-text";
@@ -19,9 +20,8 @@ function ProfileScreen() {
     const { user } = useAuthStore();
     const { language, toggleLanguage } = useLanguage();
 
-    // const onEditPress = () => {
-    //     router.push("/profile/edit");
-    // };
+    const isStudent = user?.role_name === "user";
+    const isTeacher = user?.role_name === "teacher";
 
     return (
         <ScreenWrapper bgImage={Images.profileBg}>
@@ -31,55 +31,62 @@ function ProfileScreen() {
                 style={styles.scrollView}
                 contentContainerStyle={styles.scrollContent}
             >
-                {/* Edit button */}
-                {/* <TouchableOpacity
-                    style={styles.editButton}
-                    onPress={onEditPress}
-                >
-                    <Icons.EditIcon size={24} color="black" />
-                </TouchableOpacity> */}
-
                 {/* Avatar section */}
                 <View style={styles.avatarSection}>
                     <Avatar
                         image={user?.avatar!}
                         name={user?.full_name!}
                         size={102}
-                        badge={user?.role_name}
+                        badge={
+                            user?.role_name === "user"
+                                ? "student"
+                                : user?.role_name
+                        }
                     />
 
                     <ThemedText style={styles.profileName} fontSize={16}>
                         {user?.full_name}
                     </ThemedText>
-                    {user?.role_name === "user" && (
-                        <ThemedText style={styles.profileName} fontSize={14}>
-                            Student Code: {user?.student_code}
-                        </ThemedText>
-                    )}
-                    <ThemedText style={styles.profileEmail} fontSize={14}>
+                    <ThemedText
+                        style={styles.profileEmail}
+                        fontSize={14}
+                        fontWeight="regular"
+                    >
                         {user?.email}
                     </ThemedText>
+                    {isStudent && (
+                        <ThemedText
+                            style={styles.studentCode}
+                            fontSize={14}
+                            fontWeight="bold"
+                        >
+                            ID: {user?.id}
+                        </ThemedText>
+                    )}
+
+                    {isStudent && (
+                        <View style={styles.chips}>
+                            <ChipItem
+                                label="Age"
+                                value={user?.age?.toString() || "-"}
+                            />
+                            <ChipItem
+                                label="Level"
+                                value={user?.next_course_id?.toString() || "-"}
+                            />
+                            <ChipItem
+                                label="Code"
+                                value={user?.student_code || "-"}
+                            />
+                        </View>
+                    )}
                 </View>
 
                 {/* Info card */}
                 <View style={styles.infoCard}>
                     {/* English toggle row */}
-                    {/* <View style={styles.infoRow}>
-                        <ThemedText style={styles.infoLabel}>
-                            English
-                        </ThemedText>
-                        <Switch
-                            value={englishEnabled}
-                            onValueChange={setEnglishEnabled}
-                            trackColor={{
-                                false: Palette.slate50,
-                                true: Palette.brand[500],
-                            }}
-                            thumbColor={Palette.white}
-                        />
-                    </View> */}
                     <View style={styles.languageRow}>
-                        <ThemedText style={styles.languageLabel} fontSize={14}>
+                        <ThemedText style={styles.languageLabel} fontSize={13}>
                             Language
                         </ThemedText>
                         <TouchableOpacity
@@ -99,7 +106,7 @@ function ProfileScreen() {
                                         language === "en" &&
                                             styles.languageActiveText,
                                     ]}
-                                    fontSize={13}
+                                    fontSize={12}
                                 >
                                     EN
                                 </ThemedText>
@@ -116,39 +123,44 @@ function ProfileScreen() {
                                         language === "ar" &&
                                             styles.languageActiveText,
                                     ]}
-                                    fontSize={13}
+                                    fontSize={12}
                                 >
                                     AR
                                 </ThemedText>
                             </View>
                         </TouchableOpacity>
                     </View>
-                    {user?.role_name === "user" && (
-                        <InfoRow
-                            label="Age"
-                            value={user?.age?.toString() || "-"}
-                        />
-                    )}
+
                     <InfoRow label="Phone" value={user?.mobile!} />
-                    {user?.role_name === "user" && (
+                    {isStudent && (
                         <>
                             <InfoRow
                                 label="Parent Phone"
                                 value={user?.parent_number! || "-"}
                             />
-                            <InfoRow
-                                label="Session Quota"
-                                value={user?.session_quota?.toString() || "-"}
-                            />
-                            <InfoRow
-                                label="Level"
-                                value={user?.next_course_id?.toString() || "-"}
-                            />
+                            <View style={styles.subscriptionContainer}>
+                                <ThemedText
+                                    style={styles.subscriptionLabel}
+                                    fontSize={13}
+                                >
+                                    Subscription
+                                </ThemedText>
+                                <View style={styles.subscriptionValueContainer}>
+                                    <ThemedText
+                                        style={styles.subscriptionValue}
+                                        fontSize={13}
+                                        fontWeight="bold"
+                                    >
+                                        {user?.session_quota?.toString() || "-"}
+                                    </ThemedText>
+                                </View>
+                            </View>
                         </>
                     )}
-                    {user?.role_name === "teacher" && (
+                    {isTeacher && (
                         <InfoRow label="Current Groups: " value={"-"} />
                     )}
+                    <InfoRow label="Address" value={user?.address || "-"} />
                 </View>
 
                 {/* Logout */}
@@ -200,19 +212,36 @@ const styles = StyleSheet.create({
         alignItems: "center",
         marginTop: 24,
         marginBottom: 19,
-        gap: 18,
+        gap: 5,
     },
 
     profileName: {
-        fontFamily: "Poppins_600SemiBold",
-        color: Palette.slate500,
         textTransform: "capitalize",
         textAlign: "center",
+        fontWeight: "bold",
     },
     profileEmail: {
-        fontFamily: "Poppins_400Regular",
-        color: Palette.slate300,
         textAlign: "center",
+        color: Palette.slate800,
+    },
+    studentCode: {
+        textTransform: "capitalize",
+        textAlign: "center",
+        color: Palette.brand[500],
+    },
+    chips: {
+        flexDirection: "row",
+        gap: 8,
+        flexWrap: "wrap",
+        justifyContent: "center",
+    },
+    chip: {
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 16,
+        backgroundColor: Palette.slate100,
+        borderWidth: 1,
+        borderColor: Palette.slate200,
     },
 
     // Language toggle
@@ -220,11 +249,9 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
-        paddingHorizontal: 4,
     },
     languageLabel: {
-        fontFamily: "Poppins-SemiBold",
-        color: Palette.slate500,
+        fontFamily: "Poppins_500Medium",
         textTransform: "capitalize",
     },
     languageToggle: {
@@ -237,7 +264,7 @@ const styles = StyleSheet.create({
         gap: 2,
     },
     languageOption: {
-        paddingHorizontal: 16,
+        paddingHorizontal: 10,
         paddingVertical: 6,
         borderRadius: 16,
     },
@@ -266,11 +293,31 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
+    },
+    subscriptionContainer: {
+        flex: 1,
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
         paddingVertical: 14,
     },
-    divider: {
-        height: 1,
-        backgroundColor: Palette.brand[100],
+    subscriptionLabel: {
+        textTransform: "capitalize",
+    },
+    subscriptionValueContainer: {
+        backgroundColor: Palette.brand[50],
+        borderWidth: 1,
+        borderColor: Palette.brand[500],
+        borderRadius: 50,
+        paddingHorizontal: 14,
+        alignItems: "center",
+        justifyContent: "center",
+        minWidth: 60,
+    },
+    subscriptionValue: {
+        fontFamily: "Poppins_500Medium",
+        color: Palette.brand[500],
+        textTransform: "capitalize",
     },
 
     // Logout

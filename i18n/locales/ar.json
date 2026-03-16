@@ -23,10 +23,18 @@
             "greeting": "مرحبا"
         },
         "infoSection": {
-            "motivational": "أداء رائع! استمر!",
-            "continueButton": "متابعة الجلسة",
-            "shareIdeas": "شارك الأفكار وتعلم كفريق.",
-            "chat": "تواصل مع زملائك."
+            "student": {
+                "motivational": "أنت تبلي حسناً! استمر!",
+                "continueButton": "متابعة الجلسة",
+                "shareIdeas": "شارك الأفكار وتعلم كفريق.",
+                "chat": "تحدث مع زملائك."
+            },
+            "teacher": {
+                "motivational": "أنت تصنع فرقاً! استمر في الإلهام!",
+                "continueButton": "متابعة الجلسة",
+                "shareIdeas": "شارك الأفكار مع فريق التدريس.",
+                "chat": "تحدث مع الطلاب وأدر النقاشات."
+            }
         },
         "upcomingSessions": {
             "title": "الجلسات القادمة"

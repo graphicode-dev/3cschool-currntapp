@@ -14,11 +14,13 @@ const HomeScreen = () => {
     const { user } = authStore();
     const { t } = useLanguage();
 
+    const userType = user?.role_name === "user" ? "student" : "teacher";
+
     const infoMockData = {
-        motivational: t("home.infoSection.motivational"),
-        continueButtonText: t("home.infoSection.continueButton"),
-        shareIdeasText: t("home.infoSection.shareIdeas"),
-        chatText: t("home.infoSection.chat"),
+        motivational: t(`home.infoSection.${userType}.motivational`),
+        continueButtonText: t(`home.infoSection.${userType}.continueButton`),
+        shareIdeasText: t(`home.infoSection.${userType}.shareIdeas`),
+        chatText: t(`home.infoSection.${userType}.chat`),
     };
 
     if (!user) return null;

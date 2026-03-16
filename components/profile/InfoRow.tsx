@@ -25,8 +25,6 @@ const styles = StyleSheet.create({
         paddingVertical: 14,
     },
     infoLabel: {
-        fontFamily: "Poppins_500Medium",
-        color: Palette.slate500,
         textTransform: "capitalize",
     },
     infoValue: {

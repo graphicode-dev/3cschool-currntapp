@@ -1,12 +1,12 @@
 {
   "expo": {
-    "scheme": "3cschool",
+    "scheme": "threec",
     "platforms": [
       "ios",
       "android",
       "web"
     ],
-    "name": "3cschool",
+    "name": "3c",
     "slug": "3c",
     "version": "1.0.3",
     "orientation": "portrait",
@@ -15,7 +15,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.c3school.app",
-      "buildNumber": "7",
+      "buildNumber": "8",
       "icon": {
         "dark": "./assets/icon/ios-adaptive-dark-icon.png",
         "light": "./assets/icon/ios-adaptive-light-icon.png"

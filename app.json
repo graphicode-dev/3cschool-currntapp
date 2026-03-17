@@ -15,7 +15,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.c3school.app",
-      "buildNumber": "5",
+      "buildNumber": "6",
       "icon": {
         "dark": "./assets/icon/ios-adaptive-dark-icon.png",
         "light": "./assets/icon/ios-adaptive-light-icon.png"
@@ -35,7 +35,7 @@
       "googleServicesFile": "./google-services.json",
       "predictiveBackGestureEnabled": false,
       "package": "app.c3school.current",
-      "versionCode": 7
+      "versionCode": 8
     },
     "plugins": [
       "expo-router",

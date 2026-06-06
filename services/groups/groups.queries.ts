@@ -10,6 +10,7 @@ import type {
     Group,
     GroupChatPage,
     GroupDetail,
+    RecordedSession,
     UnreadMessagesResponse,
 } from "./groups.types";
 
@@ -45,6 +46,20 @@ export function useUnreadMessages(
         queryKey: groupsKeys.unread(),
         queryFn: ({ signal }) => groupsApi.getUnreadMessages(signal),
         refetchInterval: 1000 * 60,
+        ...options,
+    });
+}
+
+export function useRecordedSession(
+    groupId: string | number,
+    sessionId: string | number,
+    options?: Partial<UseQueryOptions<RecordedSession, Error>>,
+) {
+    return useQuery({
+        queryKey: groupsKeys.recordedSession(groupId, sessionId),
+        queryFn: ({ signal }) =>
+            groupsApi.getRecordedSession(groupId, sessionId, signal),
+        enabled: !!groupId && !!sessionId,
         ...options,
     });
 }

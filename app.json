@@ -29,13 +29,10 @@
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/icon/android-adaptive-icon.png"
       },
-      "permissions": [
-        "NOTIFICATIONS"
-      ],
       "googleServicesFile": "./google-services.json",
       "predictiveBackGestureEnabled": false,
       "package": "app.c3school.current",
-      "versionCode": 8
+      "versionCode": 10
     },
     "plugins": [
       "expo-router",
@@ -55,7 +52,8 @@
         "expo-notifications",
         {
           "icon": "./assets/icon/notification.png",
-          "color": "#ffffff"
+          "color": "#ffffff",
+          "defaultChannel": "default"
         }
       ],
       "expo-localization",
@@ -63,7 +61,7 @@
       [
         "expo-video",
         {
-          "supportsBackgroundPlayback": true,
+          "supportsBackgroundPlayback": false,
           "supportsPictureInPicture": true
         }
       ],

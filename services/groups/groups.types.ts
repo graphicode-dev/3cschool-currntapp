@@ -302,3 +302,29 @@ export interface MessageSendResponse {
 export interface BroadcastResponse {
     recipients_count: number;
 }
+
+export interface RecordedVideo {
+    id: number;
+    lesson: {
+        id: number;
+        title: string;
+    };
+    title: string;
+    description: string | null;
+    duration: string | null;
+    provider: string;
+    videoReferenceAr: string;
+    videoReferenceEn: string | null;
+    embedHtmlAr: string;
+    thumbnailAr: string;
+    embedHtmlEn: string | null;
+    thumbnailEn: string | null;
+    isActive: number;
+    createdAt: string;
+    updatedAt: string;
+    progress: number | null;
+}
+
+export interface RecordedSession {
+    items: RecordedVideo[];
+}

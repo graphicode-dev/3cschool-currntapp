@@ -1,38 +1,36 @@
 import CustomHeader from "@/components/custom-header";
+import GroupsSessionPlaylist from "@/components/groups/groups-session-playlist";
 import { RenderSection } from "@/components/RenderSection";
 import ScreenWrapper from "@/components/ScreenWrapper";
-import SessionsList from "@/components/sessions/sessions-list";
 import { PullToRefreshScrollView } from "@/components/ui/Pulltorefresh";
 import { Spacing } from "@/constants/theme";
 import { useLanguage } from "@/contexts/language-context";
-import { useGroup } from "@/services/groups/groups.queries";
-import { useGroupSessions } from "@/services/sessions/sessions.queries";
+import { useRecordedSession } from "@/services/groups/groups.queries";
 import { useLocalSearchParams } from "expo-router";
 import { StyleSheet } from "react-native";
 
-const GroupDetailsScreen = () => {
+const PlaylistScreen = () => {
     const { t } = useLanguage();
-    const { id } = useLocalSearchParams<{ id: string }>();
+    const { id, sessionId } = useLocalSearchParams<{
+        id: string;
+        sessionId?: string;
+    }>();
     const groupId = id as string;
-
-    const { data: groupDetail } = useGroup(groupId, { enabled: !!groupId });
+    const sid = (sessionId as string) || "";
 
     const {
-        data: sessionsData,
+        data: recordedData,
         isLoading,
         error,
         refetch,
-    } = useGroupSessions(groupId, { enabled: !!groupId });
+    } = useRecordedSession(groupId, sid, {
+        enabled: !!groupId && !!sid,
+    });
 
-    const sessions = sessionsData?.sessions ?? [];
-    const groupName =
-        groupDetail?.group?.name ??
-        sessionsData?.group_name ??
-        t("groups.groupDetails.title");
-
+    const videos = recordedData?.items ?? [];
     return (
         <ScreenWrapper>
-            <CustomHeader title={groupName} />
+            <CustomHeader title={t("groups.playlist.title")} />
 
             <PullToRefreshScrollView
                 refetches={[refetch]}
@@ -42,25 +40,16 @@ const GroupDetailsScreen = () => {
                 <RenderSection
                     isLoading={isLoading}
                     error={error?.message ?? ""}
-                    data={sessions}
+                    data={videos}
                 >
-                    <SessionsList
-                        sessions={sessions}
-                        title={t("groups.groupDetails.sessions")}
-                        count={sessions.length}
-                        groupId={groupId}
-                    />
+                    <GroupsSessionPlaylist videos={videos} />
                 </RenderSection>
             </PullToRefreshScrollView>
-
-            {/* <GroupsFloatingMessageButton
-                groupId={groupDetail!.group.id.toString()}
-            /> */}
         </ScreenWrapper>
     );
 };
 
-export default GroupDetailsScreen;
+export default PlaylistScreen;
 
 const styles = StyleSheet.create({
     scrollView: {

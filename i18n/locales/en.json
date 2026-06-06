@@ -75,6 +75,10 @@
             "title": "Group Details",
             "sessions": "Sessions"
         },
+        "playlist": {
+            "title": "Playlist",
+            "videos": "Videos"
+        },
         "list": {
             "noGroupsFound": "No groups found"
         },

@@ -18,6 +18,7 @@ import {
     SingleChatIcon,
     TicketChatIcon,
     TrashIcon,
+    VideoListIcon,
     XIcon,
 } from "./general.icons";
 import { BellIcon, ChatLoveIcon, ShareIcon } from "./home.icons";
@@ -63,4 +64,5 @@ export const Icons = {
     MagnifyingGlassIcon,
     TrashIcon,
     TicketChatIcon,
+    VideoListIcon,
 };

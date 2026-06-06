@@ -20,6 +20,7 @@ const HomeUpcomingSessions = () => {
                 sessions={upcomingSessions}
                 title={t("home.upcomingSessions.title")}
                 count={totalUpcoming}
+                isUpcoming={upcomingSessions.length > 0}
             />
         </RenderSection>
     );

@@ -9,6 +9,7 @@ import {
     GroupDetail,
     MessageSendPayload,
     MessageSendResponse,
+    RecordedSession,
     UnreadMessagesResponse,
 } from "./groups.types";
 
@@ -180,6 +181,21 @@ export const groupsApi = {
     ): Promise<UnreadMessagesResponse> => {
         const response = await api.get<ApiResponse<UnreadMessagesResponse>>(
             "/messages/unread",
+            { signal },
+        );
+        if (response.error) throw response.error;
+        if (!response.data?.data)
+            throw new Error("No data returned from server");
+        return response.data.data;
+    },
+
+    getRecordedSession: async (
+        groupId: string | number,
+        sessionId: string | number,
+        signal?: AbortSignal,
+    ): Promise<RecordedSession> => {
+        const response = await api.get<ApiResponse<RecordedSession>>(
+            `${BASE_URL}/${groupId}/sessions/${sessionId}/recorded`,
             { signal },
         );
         if (response.error) throw response.error;

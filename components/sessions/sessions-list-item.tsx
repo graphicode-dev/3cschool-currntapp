@@ -2,11 +2,14 @@ import { Icons } from "@/constants/icons";
 import { Palette } from "@/constants/theme";
 import { useLanguage } from "@/contexts/language-context";
 import { SessionWithInfo } from "@/services/sessions/sessions.types";
+import { router } from "expo-router";
 import { Linking, StyleSheet, TouchableOpacity, View } from "react-native";
 import { ThemedText } from "../themed-text";
 
 type Props = {
     session: SessionWithInfo;
+    groupId: string;
+    isUpcoming?: boolean;
 };
 
 function fmtDate(dateStr: string) {
@@ -66,7 +69,7 @@ function getStatusBadgeStyle(
     }
 }
 
-const SessionsListItem = ({ session }: Props) => {
+const SessionsListItem = ({ groupId, session, isUpcoming = false }: Props) => {
     const { t } = useLanguage();
     const title =
         session.session_info?.title ?? `Session #${session.session_number}`;
@@ -93,26 +96,40 @@ const SessionsListItem = ({ session }: Props) => {
                     >
                         {title}
                     </ThemedText>
-                    <View
-                        style={[
-                            styles.typeBadge,
-                            {
-                                backgroundColor: statusStyle.backgroundColor,
-                                borderColor: statusStyle.borderColor,
-                            },
-                        ]}
+
+                    <TouchableOpacity
+                        disabled={isUpcoming}
+                        style={{
+                            opacity: isUpcoming ? 0.3 : 1,
+                        }}
+                        onPress={() => {
+                            const sessionId = session.id;
+
+                            console.log(
+                                "session: ",
+                                JSON.stringify(session, null, 2),
+                            );
+                            console.log("sessionId", sessionId);
+                            console.log("groupId", groupId);
+                            if (sessionId && groupId) {
+                                router.push({
+                                    pathname: "/groups/playlist/[id]",
+                                    params: {
+                                        id: groupId.toString(),
+                                        sessionId: sessionId.toString(),
+                                    },
+                                });
+                            }
+                        }}
                     >
-                        <ThemedText
-                            style={[
-                                styles.typeText,
-                                { color: statusStyle.textColor },
-                            ]}
-                            fontWeight="medium"
-                            fontSize={10}
-                        >
-                            {statusStyle.label}
-                        </ThemedText>
-                    </View>
+                        <Icons.VideoListIcon
+                            color={
+                                isUpcoming
+                                    ? Palette.slate900
+                                    : Palette.brand[500]
+                            }
+                        />
+                    </TouchableOpacity>
                 </View>
 
                 {/* Date + Time */}
@@ -212,14 +229,7 @@ const styles = StyleSheet.create({
         color: Palette.slate900,
         textTransform: "capitalize",
     },
-    typeBadge: {
-        backgroundColor: "#f6f8ff",
-        borderWidth: 1,
-        borderColor: "#98a5e8",
-        borderRadius: 10,
-        paddingHorizontal: 8,
-        paddingVertical: 2,
-    },
+
     typeText: {
         fontWeight: "500",
         color: "#98a5e8",

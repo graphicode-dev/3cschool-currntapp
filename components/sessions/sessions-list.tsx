@@ -7,10 +7,18 @@ import SessionsListItem from "./sessions-list-item";
 type Props = {
     sessions: SessionWithInfo[];
     title: string;
+    groupId?: string;
     count?: number;
+    isUpcoming?: boolean;
 };
 
-const SessionsList = ({ sessions, title, count }: Props) => {
+const SessionsList = ({
+    sessions,
+    title,
+    groupId,
+    count,
+    isUpcoming = false,
+}: Props) => {
     return (
         <View style={styles.container}>
             <View style={styles.header}>
@@ -27,7 +35,11 @@ const SessionsList = ({ sessions, title, count }: Props) => {
             {sessions.map((session, i) => (
                 <View key={session.id}>
                     {i > 0 && <View style={styles.separator} />}
-                    <SessionsListItem session={session} />
+                    <SessionsListItem
+                        groupId={groupId!}
+                        session={session}
+                        isUpcoming={isUpcoming}
+                    />
                 </View>
             ))}
         </View>

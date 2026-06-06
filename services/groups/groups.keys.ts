@@ -25,6 +25,10 @@ export const groupsKeys = {
         ] as const,
 
     unread: () => [...groupsKeys.all, "unread"] as const,
+
+    recorded: () => [...groupsKeys.all, "recorded"] as const,
+    recordedSession: (groupId: string | number, sessionId: string | number) =>
+        [...groupsKeys.recorded(), String(groupId), String(sessionId)] as const,
 };
 
 export type GroupsQueryKey =
@@ -37,4 +41,6 @@ export type GroupsQueryKey =
     | ReturnType<typeof groupsKeys.groupChat>
     | ReturnType<typeof groupsKeys.privateMessages>
     | ReturnType<typeof groupsKeys.privateMessagesList>
-    | ReturnType<typeof groupsKeys.unread>;
+    | ReturnType<typeof groupsKeys.unread>
+    | ReturnType<typeof groupsKeys.recorded>
+    | ReturnType<typeof groupsKeys.recordedSession>;

@@ -13,6 +13,8 @@ const HomeHeader = ({ user }: { user: User }) => {
     const { data: unreadData } = useUnreadCount();
     const unreadCount = unreadData?.count ?? 0;
 
+    const greeting = `${t("home.header.greeting")}, ${user?.full_name}! 👋`;
+
     return (
         <View style={styles.container}>
             {/* Left Side */}
@@ -27,27 +29,30 @@ const HomeHeader = ({ user }: { user: User }) => {
                 {/* Greeting ThemedText */}
                 <ThemedText
                     style={styles.greetingText}
-                    fontSize={16}
+                    fontSize={greeting.length > 20 ? 13 : 16}
                     fontWeight="bold"
+                    numberOfLines={2}
                 >
-                    {t("home.header.greeting")}, {user?.full_name}! 👋
+                    {greeting}
                 </ThemedText>
             </View>
 
             {/* Right Side - Notification Icon */}
-            <TouchableOpacity
-                style={styles.notificationContainer}
-                onPress={() => router.push("/(app)/notifications")}
-            >
-                <Icons.BellIcon color="black" size={25} />
-                {unreadCount > 0 && (
-                    <View style={styles.notificationBadge}>
-                        <ThemedText style={styles.badgeText} fontSize={10}>
-                            {unreadCount > 99 ? "99+" : unreadCount}
-                        </ThemedText>
-                    </View>
-                )}
-            </TouchableOpacity>
+            <View style={{ flex: 2, alignItems: "flex-end" }}>
+                <TouchableOpacity
+                    style={styles.notificationContainer}
+                    onPress={() => router.push("/(app)/notifications")}
+                >
+                    <Icons.BellIcon color="black" size={25} />
+                    {unreadCount > 0 && (
+                        <View style={styles.notificationBadge}>
+                            <ThemedText style={styles.badgeText} fontSize={10}>
+                                {unreadCount > 99 ? "99+" : unreadCount}
+                            </ThemedText>
+                        </View>
+                    )}
+                </TouchableOpacity>
+            </View>
         </View>
     );
 };
@@ -63,11 +68,13 @@ const styles = StyleSheet.create({
         paddingVertical: 20,
     },
     leftSide: {
+        flex: 1,
         flexDirection: "row",
         alignItems: "center",
         gap: 10,
     },
     greetingText: {
+        maxWidth: "75%",
         fontWeight: "600",
         color: Palette.slate900, // #393838 equivalent
         textTransform: "capitalize",

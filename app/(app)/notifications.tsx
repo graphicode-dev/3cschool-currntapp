@@ -4,6 +4,7 @@ import ScreenWrapper from "@/components/ScreenWrapper";
 import { ThemedText } from "@/components/themed-text";
 import { Palette, Radii, Spacing, Typography } from "@/constants/theme";
 import { useLanguage } from "@/contexts/language-context";
+import { navigateFromNotification } from "@/lib/notificationNavigation";
 import {
     Notification,
     useMarkAsRead,
@@ -74,67 +75,9 @@ export default function NotificationsScreen() {
         // console.log("Delete notification:", id);
     }, []);
 
-    // Drop-in replacement for handleNavigate in NotificationsScreen
     const handleNavigate = useCallback(
         (item: Notification) => {
-            // Handle chat_message and broadcast_message types - go to group chat
-            if (
-                (item.type === "chat_message" ||
-                    item.type === "broadcast_message" ||
-                    item.type === "group_chat_message") &&
-                item.data?.group_id
-            ) {
-                router.push({
-                    pathname: "/(app)/(tabs)/chats/[id]",
-                    params: {
-                        id: item.data.group_id,
-                        groupId: item.data.group_id,
-                        groupName: item.data.group_name || "Chat",
-                    },
-                } as any);
-                return;
-            }
-
-            // Handle ticket_reply types - go to ticket detail
-            if (item.type === "ticket_reply" && item.data?.ticket_id) {
-                router.push({
-                    pathname: "/(app)/(tabs)/support/[id]",
-                    params: {
-                        id: item.data.ticket_id,
-                    },
-                } as any);
-                return;
-            }
-
-            // Handle push notifications - no navigation (general notifications)
-            if (item.type === "push") {
-                // No navigation for push notifications, just mark as read
-                return;
-            }
-
-            // Handle legacy notifications with navigateTo property
-            if (!item.data?.navigateTo) return;
-
-            const params =
-                (item.data.navigateParams as Record<string, unknown>) ?? {};
-
-            switch (item.data.navigateTo) {
-                case "ticket_detail":
-                    router.push({
-                        pathname: "/(app)/(tabs)/support",
-                        params,
-                    } as any);
-                    break;
-                case "conversation_detail":
-                    if (params.conversationId) {
-                        router.push(
-                            `/(app)/(tabs)/chat/${params.conversationId}` as any,
-                        );
-                    }
-                    break;
-                default:
-                    break;
-            }
+            navigateFromNotification(router, item);
         },
         [router],
     );
@@ -362,7 +305,6 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "space-around",
         paddingHorizontal: Spacing.xl,
-        backdropFilter: "blur(15.9px)",
     },
     navItem: {
         alignItems: "center",

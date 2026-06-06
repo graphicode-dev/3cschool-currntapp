@@ -10,43 +10,44 @@ import type {
     Group,
     GroupChatPage,
     GroupDetail,
+    GroupStudentsResponse,
     UnreadMessagesResponse,
 } from "./groups.types";
 
 // ─── Standard queries ─────────────────────────────────────────────────────────
 
 export function useGroupsList(
-    params?: { search?: string; filter?: string },
-    options?: Partial<UseQueryOptions<Group[], Error>>,
+  params?: { search?: string; filter?: string },
+  options?: Partial<UseQueryOptions<Group[], Error>>,
 ) {
-    return useQuery({
-        queryKey: groupsKeys.list(params),
-        queryFn: ({ signal }) => groupsApi.getList(params, signal),
-        ...options,
-    });
+  return useQuery({
+    queryKey: groupsKeys.list(params),
+    queryFn: ({ signal }) => groupsApi.getList(params, signal),
+    ...options,
+  });
 }
 
 export function useGroup(
-    id: string | number,
-    options?: Partial<UseQueryOptions<GroupDetail, Error>>,
+  id: string | number,
+  options?: Partial<UseQueryOptions<GroupDetail, Error>>,
 ) {
-    return useQuery({
-        queryKey: groupsKeys.detail(id),
-        queryFn: ({ signal }) => groupsApi.getById(id, signal),
-        enabled: !!id,
-        ...options,
-    });
+  return useQuery({
+    queryKey: groupsKeys.detail(id),
+    queryFn: ({ signal }) => groupsApi.getById(id, signal),
+    enabled: !!id,
+    ...options,
+  });
 }
 
 export function useUnreadMessages(
-    options?: Partial<UseQueryOptions<UnreadMessagesResponse, Error>>,
+  options?: Partial<UseQueryOptions<UnreadMessagesResponse, Error>>,
 ) {
-    return useQuery({
-        queryKey: groupsKeys.unread(),
-        queryFn: ({ signal }) => groupsApi.getUnreadMessages(signal),
-        refetchInterval: 1000 * 60,
-        ...options,
-    });
+  return useQuery({
+    queryKey: groupsKeys.unread(),
+    queryFn: ({ signal }) => groupsApi.getUnreadMessages(signal),
+    refetchInterval: 1000 * 60,
+    ...options,
+  });
 }
 
 // ─── Infinite queries (paginated chat) ───────────────────────────────────────
@@ -60,22 +61,22 @@ export function useUnreadMessages(
  * bottom of the inverted list) to load older messages.
  */
 export function useGroupChat(
-    groupId: string | number,
-    options?: Partial<UseInfiniteQueryOptions<GroupChatPage, Error>>,
+  groupId: string | number,
+  options?: Partial<UseInfiniteQueryOptions<GroupChatPage, Error>>,
 ) {
-    return useInfiniteQuery({
-        queryKey: groupsKeys.groupChat(groupId),
-        queryFn: ({ pageParam = 1, signal }) =>
-            groupsApi.getGroupChat(groupId, pageParam as number, signal),
-        getNextPageParam: (lastPage) => {
-            if (!lastPage?.pagination) return undefined;
-            const { current_page, last_page } = lastPage.pagination;
-            return current_page < last_page ? current_page + 1 : undefined;
-        },
-        initialPageParam: 1,
-        enabled: !!groupId,
-        ...options,
-    });
+  return useInfiniteQuery({
+    queryKey: groupsKeys.groupChat(groupId),
+    queryFn: ({ pageParam = 1, signal }) =>
+      groupsApi.getGroupChat(groupId, pageParam as number, signal),
+    getNextPageParam: (lastPage) => {
+      if (!lastPage?.pagination) return undefined;
+      const { current_page, last_page } = lastPage.pagination;
+      return current_page < last_page ? current_page + 1 : undefined;
+    },
+    initialPageParam: 1,
+    enabled: !!groupId,
+    ...options,
+  });
 }
 
 /**
@@ -84,28 +85,40 @@ export function useGroupChat(
  * Same pagination strategy as useGroupChat.
  */
 export function usePrivateMessages(
-    groupId: string | number,
-    userId: string | number,
-    options?: Partial<UseInfiniteQueryOptions<GroupChatPage, Error>>,
+  groupId: string | number,
+  userId: string | number,
+  options?: Partial<UseInfiniteQueryOptions<GroupChatPage, Error>>,
 ) {
-    return useInfiniteQuery({
-        queryKey: groupsKeys.privateMessagesList(groupId, userId),
-        queryFn: ({ pageParam = 1, signal }) =>
-            groupsApi.getPrivateMessages(
-                groupId,
-                userId,
-                pageParam as number,
-                signal,
-            ),
-        getNextPageParam: (lastPage) => {
-            if (!lastPage?.pagination) return undefined;
-            const { current_page, last_page } = lastPage.pagination;
-            return current_page < last_page ? current_page + 1 : undefined;
-        },
-        initialPageParam: 1,
-        enabled: !!groupId && !!userId,
-        refetchOnWindowFocus: false,
-        refetchOnReconnect: true,
-        ...options,
-    });
+  return useInfiniteQuery({
+    queryKey: groupsKeys.privateMessagesList(groupId, userId),
+    queryFn: ({ pageParam = 1, signal }) =>
+      groupsApi.getPrivateMessages(
+        groupId,
+        userId,
+        pageParam as number,
+        signal,
+      ),
+    getNextPageParam: (lastPage) => {
+      if (!lastPage?.pagination) return undefined;
+      const { current_page, last_page } = lastPage.pagination;
+      return current_page < last_page ? current_page + 1 : undefined;
+    },
+    initialPageParam: 1,
+    enabled: !!groupId && !!userId,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: true,
+    ...options,
+  });
+}
+
+export function useGroupStudents(
+  groupId: string | number,
+  options?: Partial<UseQueryOptions<GroupStudentsResponse, Error>>,
+) {
+  return useQuery({
+    queryKey: groupsKeys.studentList(groupId),
+    queryFn: ({ signal }) => groupsApi.getGroupStudents(groupId, signal),
+    enabled: !!groupId,
+    ...options,
+  });
 }

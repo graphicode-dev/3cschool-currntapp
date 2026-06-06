@@ -7,6 +7,7 @@ import {
     Group,
     GroupChatPage,
     GroupDetail,
+    GroupStudentsResponse,
     MessageSendPayload,
     MessageSendResponse,
     RecordedSession,
@@ -181,6 +182,20 @@ export const groupsApi = {
     ): Promise<UnreadMessagesResponse> => {
         const response = await api.get<ApiResponse<UnreadMessagesResponse>>(
             "/messages/unread",
+            { signal },
+        );
+        if (response.error) throw response.error;
+        if (!response.data?.data)
+            throw new Error("No data returned from server");
+        return response.data.data;
+    },
+
+    getGroupStudents: async (
+        groupId: string | number,
+        signal?: AbortSignal,
+    ): Promise<GroupStudentsResponse> => {
+        const response = await api.get<ApiResponse<GroupStudentsResponse>>(
+            `${BASE_URL}/${groupId}/students`,
             { signal },
         );
         if (response.error) throw response.error;

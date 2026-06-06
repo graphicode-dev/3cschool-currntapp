@@ -10,6 +10,7 @@ import type {
     Group,
     GroupChatPage,
     GroupDetail,
+    GroupStudentsResponse,
     RecordedSession,
     UnreadMessagesResponse,
 } from "./groups.types";
@@ -121,6 +122,18 @@ export function usePrivateMessages(
         enabled: !!groupId && !!userId,
         refetchOnWindowFocus: false,
         refetchOnReconnect: true,
+        ...options,
+    });
+}
+
+export function useGroupStudents(
+    groupId: string | number,
+    options?: Partial<UseQueryOptions<GroupStudentsResponse, Error>>,
+) {
+    return useQuery({
+        queryKey: groupsKeys.studentList(groupId),
+        queryFn: ({ signal }) => groupsApi.getGroupStudents(groupId, signal),
+        enabled: !!groupId,
         ...options,
     });
 }

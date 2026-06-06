@@ -1,8 +1,15 @@
 import { useAuthStore } from "@/services/auth/auth.store";
 import { groupsApi } from "@/services/groups/groups.api";
 import { groupsKeys } from "@/services/groups/groups.keys";
-import { useGroupChat, useGroupsList } from "@/services/groups/groups.queries";
-import { GroupMessage, LastGroupMessage } from "@/services/groups/groups.types";
+import {
+    useGroupChat,
+    useGroupStudents,
+    useGroupsList,
+} from "@/services/groups/groups.queries";
+import {
+    GroupMessage,
+    LastGroupMessage
+} from "@/services/groups/groups.types";
 import { useFocusEffect } from "@react-navigation/native";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useMemo, useRef, useState } from "react";
@@ -11,321 +18,321 @@ import { useDebounce } from "./useDebounce";
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface MappedChatMessage {
-    id: string;
-    text: string;
-    sender: "me" | "user";
-    createdAt: string;
-    avatar?: string;
-    senderName?: string;
-    imageUrl?: string;
-    fileUrl?: string;
-    fileName?: string;
-    replyTo?: MappedChatMessage;
+  id: string;
+  text: string;
+  sender: "me" | "user";
+  createdAt: string;
+  avatar?: string;
+  senderName?: string;
+  imageUrl?: string;
+  fileUrl?: string;
+  fileName?: string;
+  replyTo?: MappedChatMessage;
 }
 
 export interface MappedGroup {
-    id: number;
-    name: string;
-    avatar?: string;
-    thumbnail?: string;
-    lastMessage?: LastGroupMessage;
-    unreadCount: number;
-    time: string;
-    courseTitle?: string;
-    capacity?: number;
+  id: number;
+  name: string;
+  avatar?: string;
+  thumbnail?: string;
+  lastMessage?: LastGroupMessage;
+  unreadCount: number;
+  time: string;
+  courseTitle?: string;
+  capacity?: number;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const toChatMessage = (msg: GroupMessage, myId: number): MappedChatMessage => ({
-    id: String(msg.id),
-    text: msg.message ?? "",
-    sender: msg.sender_id === myId ? "me" : "user",
-    createdAt: msg.created_at?.replace(" ", "T") ?? "",
-    avatar: msg.sender?.avatar ?? undefined,
-    senderName: msg.sender?.full_name,
-    imageUrl:
-        msg.attachment_url && msg.attachment_type === "image"
-            ? msg.attachment_url
-            : undefined,
-    fileUrl:
-        msg.attachment_url && msg.attachment_type === "file"
-            ? msg.attachment_url
-            : undefined,
-    fileName:
-        msg.attachment_name && msg.attachment_name !== "file"
-            ? msg.attachment_name
-            : msg.attachment_url
-              ? msg.attachment_url.split("/").pop()?.split("?")[0]
-              : undefined,
+  id: String(msg.id),
+  text: msg.message ?? "",
+  sender: msg.sender_id === myId ? "me" : "user",
+  createdAt: msg.created_at?.replace(" ", "T") ?? "",
+  avatar: msg.sender?.avatar ?? undefined,
+  senderName: msg.sender?.full_name,
+  imageUrl:
+    msg.attachment_url && msg.attachment_type === "image"
+      ? msg.attachment_url
+      : undefined,
+  fileUrl:
+    msg.attachment_url && msg.attachment_type === "file"
+      ? msg.attachment_url
+      : undefined,
+  fileName:
+    msg.attachment_name && msg.attachment_name !== "file"
+      ? msg.attachment_name
+      : msg.attachment_url
+        ? msg.attachment_url.split("/").pop()?.split("?")[0]
+        : undefined,
 });
 
 const toTime = (timestamp: string | number) => {
-    // Handle both Unix timestamps and ISO strings
-    let date: Date;
+  // Handle both Unix timestamps and ISO strings
+  let date: Date;
 
-    if (typeof timestamp === "string") {
-        // Check if string is actually a number (Unix timestamp as string)
-        const numericValue = Number(timestamp);
-        if (!isNaN(numericValue)) {
-            // It's a numeric string, treat as Unix timestamp
-            timestamp = numericValue;
-        }
+  if (typeof timestamp === "string") {
+    // Check if string is actually a number (Unix timestamp as string)
+    const numericValue = Number(timestamp);
+    if (!isNaN(numericValue)) {
+      // It's a numeric string, treat as Unix timestamp
+      timestamp = numericValue;
     }
+  }
 
-    if (typeof timestamp === "number") {
-        // Check if it's in seconds (Unix timestamp) or milliseconds
-        if (timestamp < 10000000000) {
-            // Assume it's seconds (Unix timestamp)
-            date = new Date(timestamp * 1000);
-        } else {
-            // Assume it's already milliseconds
-            date = new Date(timestamp);
-        }
+  if (typeof timestamp === "number") {
+    // Check if it's in seconds (Unix timestamp) or milliseconds
+    if (timestamp < 10000000000) {
+      // Assume it's seconds (Unix timestamp)
+      date = new Date(timestamp * 1000);
     } else {
-        // Handle string input
-        date = new Date(timestamp);
+      // Assume it's already milliseconds
+      date = new Date(timestamp);
     }
+  } else {
+    // Handle string input
+    date = new Date(timestamp);
+  }
 
-    // If date is invalid, return a fallback
-    if (isNaN(date.getTime())) {
-        console.error("Invalid date, returning empty string");
-        return "";
-    }
+  // If date is invalid, return a fallback
+  if (isNaN(date.getTime())) {
+    console.error("Invalid date, returning empty string");
+    return "";
+  }
 
-    const result = date.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-    });
+  const result = date.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 
-    return result;
+  return result;
 };
 
 // ─── Hook ─────────────────────────────────────────────────────────────────────
 
 export const useGroupChats = () => {
-    const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
-    const [searchQuery, setSearchQuery] = useState("");
+  const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
-    // Debounced search value to avoid excessive API calls
-    const debouncedSearch = useDebounce(searchQuery, 500);
+  // Debounced search value to avoid excessive API calls
+  const debouncedSearch = useDebounce(searchQuery, 500);
 
-    const { user } = useAuthStore();
-    const queryClient = useQueryClient();
+  const { user } = useAuthStore();
+  const queryClient = useQueryClient();
 
-    // ── Queries ───────────────────────────────────────────────────────────────
+  // ── Queries ───────────────────────────────────────────────────────────────
 
-    const {
-        data: groups = [],
-        isLoading: groupsLoading,
-        error: groupsError,
-        refetch: refetchGroups,
-    } = useGroupsList({ search: debouncedSearch });
+  const {
+    data: groups = [],
+    isLoading: groupsLoading,
+    error: groupsError,
+    refetch: refetchGroups,
+  } = useGroupsList({ search: debouncedSearch });
 
-    const {
-        data: groupChatData,
-        fetchNextPage,
-        hasNextPage,
-        isFetchingNextPage,
-        refetch,
-    } = useGroupChat(selectedGroupId!, {
-        enabled: !!selectedGroupId,
+  const {
+    data: groupChatData,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    refetch,
+  } = useGroupChat(selectedGroupId!, {
+    enabled: !!selectedGroupId,
+  });
+
+  const { data: groupStudentsData, isLoading: studentsLoading } =
+    useGroupStudents(selectedGroupId!, {
+      enabled: !!selectedGroupId,
     });
 
-    // ── Polling on screen focus ───────────────────────────────────────────────
+  // ── Polling on screen focus ───────────────────────────────────────────────
 
-    const pollingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(
-        null,
-    );
+  const pollingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(
+    null,
+  );
 
-    useFocusEffect(
-        useCallback(() => {
-            if (!selectedGroupId) return;
+  useFocusEffect(
+    useCallback(() => {
+      if (!selectedGroupId) return;
 
-            // Start polling when screen becomes focused
-            pollingIntervalRef.current = setInterval(() => {
-                refetch();
-            }, 1000 * 10); // Poll every 10 seconds
+      // Start polling when screen becomes focused
+      pollingIntervalRef.current = setInterval(() => {
+        refetch();
+      }, 1000 * 10); // Poll every 10 seconds
 
-            // Cleanup on blur
-            return () => {
-                if (pollingIntervalRef.current) {
-                    clearInterval(pollingIntervalRef.current);
-                    pollingIntervalRef.current = null;
-                }
-            };
-        }, [selectedGroupId, refetch]),
-    );
-
-    // ── Mutations ─────────────────────────────────────────────────────────────
-
-    const sendMessageMutation = useMutation({
-        mutationFn: ({
-            text,
-            attachmentUri,
-            fileName,
-        }: {
-            text: string;
-            attachmentUri?: string;
-            fileName?: string;
-        }) =>
-            groupsApi.sendGroupChatMessage(selectedGroupId!, {
-                message: text,
-                attachment: attachmentUri
-                    ? ({
-                          uri: attachmentUri,
-                          name: fileName || "file",
-                          type:
-                              fileName?.endsWith(".jpg") ||
-                              fileName?.endsWith(".jpeg") ||
-                              fileName?.endsWith(".png")
-                                  ? "image/jpeg"
-                                  : "application/octet-stream",
-                      } as any)
-                    : undefined,
-            }),
-        onSuccess: () => {
-            queryClient.invalidateQueries({
-                queryKey: groupsKeys.groupChat(selectedGroupId!),
-            });
-            // Immediately refetch messages after sending
-            refetch();
-        },
-        onError: (error) => {
-            console.error("Failed to send group message:", error);
-        },
-    });
-
-    // ── Mapped data ───────────────────────────────────────────────────────────
-
-    const mappedGroups = useMemo(() => {
-        return groups.map((group) => ({
-            id: group.id,
-            name: group.name,
-            courseTitle: group.course?.title,
-            capacity: group.course?.capacity ?? undefined,
-            avatar: group.teacher?.avatar || undefined,
-            thumbnail: group.course?.thumbnail
-                ? group.course?.thumbnail
-                : undefined,
-            lastMessage: group.last_message || undefined,
-            unreadCount: group.unread_count || 0,
-            time: toTime(group.last_message?.created_at || ""),
-        }));
-    }, [groups]);
-
-    const messages: MappedChatMessage[] = useMemo(() => {
-        if (!groupChatData || !user) return [];
-
-        try {
-            // Handle both infinite query (data.pages) and regular query (data.data)
-            const messagesData =
-                "pages" in groupChatData
-                    ? (groupChatData as any).pages
-                          ?.flatMap((page: any) => page?.data || [])
-                          .filter(Boolean) || []
-                    : (groupChatData as any).data || [];
-
-            return messagesData
-                .filter((msg: any) => msg && msg.id)
-                .sort(
-                    (a: GroupMessage, b: GroupMessage) =>
-                        new Date(
-                            a.created_at?.replace(" ", "T") || "",
-                        ).getTime() -
-                        new Date(
-                            b.created_at?.replace(" ", "T") || "",
-                        ).getTime(),
-                )
-                .map((m: GroupMessage) => toChatMessage(m, user.id))
-                .reverse();
-        } catch (error) {
-            console.error("Error processing messages:", error);
-            return [];
+      // Cleanup on blur
+      return () => {
+        if (pollingIntervalRef.current) {
+          clearInterval(pollingIntervalRef.current);
+          pollingIntervalRef.current = null;
         }
-    }, [groupChatData, user]);
+      };
+    }, [selectedGroupId, refetch]),
+  );
 
-    const selectedGroup = useMemo(() => {
-        if (!selectedGroupId) return null;
-        return (
-            mappedGroups.find((g) => g.id === Number(selectedGroupId)) || null
-        );
-    }, [selectedGroupId, mappedGroups]);
+  // ── Mutations ─────────────────────────────────────────────────────────────
 
-    // ── Handlers ──────────────────────────────────────────────────────────────
+  const sendMessageMutation = useMutation({
+    mutationFn: ({
+      text,
+      attachmentUri,
+      fileName,
+    }: {
+      text: string;
+      attachmentUri?: string;
+      fileName?: string;
+    }) =>
+      groupsApi.sendGroupChatMessage(selectedGroupId!, {
+        message: text,
+        attachment: attachmentUri
+          ? ({
+              uri: attachmentUri,
+              name: fileName || "file",
+              type:
+                fileName?.endsWith(".jpg") ||
+                fileName?.endsWith(".jpeg") ||
+                fileName?.endsWith(".png")
+                  ? "image/jpeg"
+                  : "application/octet-stream",
+            } as any)
+          : undefined,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: groupsKeys.groupChat(selectedGroupId!),
+      });
+      // Immediately refetch messages after sending
+      refetch();
+    },
+    onError: (error) => {
+      console.error("Failed to send group message:", error);
+    },
+  });
 
-    const selectGroup = useCallback(
-        async (groupId: string | number) => {
-            const groupIdStr = String(groupId);
+  // ── Mapped data ───────────────────────────────────────────────────────────
 
-            // Clear first so React sees a state change
-            setSelectedGroupId(null);
+  const mappedGroups = useMemo(() => {
+    return groups.map((group) => ({
+      id: group.id,
+      name: group.name,
+      courseTitle: group.course?.title,
+      capacity: group.course?.capacity ?? undefined,
+      avatar: group.teacher?.avatar || undefined,
+      thumbnail: group.course?.thumbnail ? group.course?.thumbnail : undefined,
+      lastMessage: group.last_message || undefined,
+      unreadCount: group.unread_count || 0,
+      time: toTime(group.last_message?.created_at || ""),
+    }));
+  }, [groups]);
 
-            // Remove cached data so the query starts fresh
-            await queryClient.removeQueries({
-                queryKey: groupsKeys.groupChat(groupIdStr),
-            });
+  const messages: MappedChatMessage[] = useMemo(() => {
+    if (!groupChatData || !user) return [];
 
-            // Set the ID in next microtask
-            queueMicrotask(() => {
-                setSelectedGroupId(groupIdStr);
-            });
-        },
-        [queryClient],
-    );
+    try {
+      // Handle both infinite query (data.pages) and regular query (data.data)
+      const messagesData =
+        "pages" in groupChatData
+          ? (groupChatData as any).pages
+              ?.flatMap((page: any) => page?.data || [])
+              .filter(Boolean) || []
+          : (groupChatData as any).data || [];
 
-    const clearSelection = useCallback(() => {
-        setSelectedGroupId(null);
-    }, []);
+      return messagesData
+        .filter((msg: any) => msg && msg.id)
+        .sort(
+          (a: GroupMessage, b: GroupMessage) =>
+            new Date(a.created_at?.replace(" ", "T") || "").getTime() -
+            new Date(b.created_at?.replace(" ", "T") || "").getTime(),
+        )
+        .map((m: GroupMessage) => toChatMessage(m, user.id))
+        .reverse();
+    } catch (error) {
+      console.error("Error processing messages:", error);
+      return [];
+    }
+  }, [groupChatData, user]);
 
-    const sendMessage = useCallback(
-        async (text: string, attachmentUri?: string, fileName?: string) => {
-            if (!selectedGroupId || (!text.trim() && !attachmentUri)) return;
+  const selectedGroup = useMemo(() => {
+    if (!selectedGroupId) return null;
+    return mappedGroups.find((g) => g.id === Number(selectedGroupId)) || null;
+  }, [selectedGroupId, mappedGroups]);
 
-            try {
-                await sendMessageMutation.mutateAsync({
-                    text,
-                    attachmentUri,
-                    fileName,
-                });
-            } catch (error) {
-                console.error("Failed to send message:", error);
-            }
-        },
-        [selectedGroupId, sendMessageMutation],
-    );
+  // ── Handlers ──────────────────────────────────────────────────────────────
 
-    const loadMoreMessages = useCallback(() => {
-        if (hasNextPage && !isFetchingNextPage) {
-            fetchNextPage();
-        }
-    }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+  const selectGroup = useCallback(
+    async (groupId: string | number) => {
+      const groupIdStr = String(groupId);
 
-    return {
-        // Data
-        groups: mappedGroups,
-        selectedGroup,
-        messages,
-        selectedGroupId,
+      // Clear first so React sees a state change
+      setSelectedGroupId(null);
 
-        // Loading states
-        isLoading: groupsLoading,
-        isLoadingMessages: false, // This would come from the query
-        isSending: sendMessageMutation.isPending,
-        isLoadingMore: isFetchingNextPage,
+      // Remove cached data so the query starts fresh
+      await queryClient.removeQueries({
+        queryKey: groupsKeys.groupChat(groupIdStr),
+      });
 
-        // Error handling
-        error: (groupsError as Error | null)?.message ?? null,
+      // Set the ID in next microtask
+      queueMicrotask(() => {
+        setSelectedGroupId(groupIdStr);
+      });
+    },
+    [queryClient],
+  );
 
-        // Search
-        searchQuery,
-        setSearchQuery,
+  const clearSelection = useCallback(() => {
+    setSelectedGroupId(null);
+  }, []);
 
-        // Actions
-        selectGroup,
-        clearSelection,
-        sendMessage,
-        loadMoreMessages,
-        refetch: refetchGroups,
-    };
+  const sendMessage = useCallback(
+    async (text: string, attachmentUri?: string, fileName?: string) => {
+      if (!selectedGroupId || (!text.trim() && !attachmentUri)) return;
+
+      try {
+        await sendMessageMutation.mutateAsync({
+          text,
+          attachmentUri,
+          fileName,
+        });
+      } catch (error) {
+        console.error("Failed to send message:", error);
+      }
+    },
+    [selectedGroupId, sendMessageMutation],
+  );
+
+  const loadMoreMessages = useCallback(() => {
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  return {
+    // Data
+    groups: mappedGroups,
+    selectedGroup,
+    messages,
+    selectedGroupId,
+    students: groupStudentsData?.students ?? [],
+    studentsCount: groupStudentsData?.students_count ?? 0,
+
+    // Loading states
+    isLoading: groupsLoading,
+    isLoadingMessages: false, // This would come from the query
+    isSending: sendMessageMutation.isPending,
+    isLoadingMore: isFetchingNextPage,
+    isLoadingStudents: studentsLoading,
+
+    // Error handling
+    error: (groupsError as Error | null)?.message ?? null,
+
+    // Search
+    searchQuery,
+    setSearchQuery,
+
+    // Actions
+    selectGroup,
+    clearSelection,
+    sendMessage,
+    loadMoreMessages,
+    refetch: refetchGroups,
+  };
 };

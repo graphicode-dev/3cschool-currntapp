@@ -7,9 +7,42 @@ import { Spacing } from "@/constants/theme";
 import { useLanguage } from "@/contexts/language-context";
 import { useRecordedSession } from "@/services/groups/groups.queries";
 import { useLocalSearchParams } from "expo-router";
-import { StyleSheet } from "react-native";
+import * as ScreenCapture from "expo-screen-capture";
+import { useEffect } from "react";
+import { Alert, StyleSheet } from "react-native";
 
 const PlaylistScreen = () => {
+    useEffect(() => {
+        let subscription: { remove: () => void } | undefined;
+
+        const setupScreenCapture = async () => {
+            await ScreenCapture.preventScreenCaptureAsync().catch((e) => {
+                console.log(e);
+            });
+
+            const { status } = await ScreenCapture.requestPermissionsAsync();
+            if (status === "granted") {
+                subscription = ScreenCapture.addScreenshotListener(() => {
+                    Alert.alert(
+                        "Not Allowed",
+                        "This action is not allowed for our policies. Screenshots and screen recording are prohibited on this screen.",
+                    );
+                });
+            } else {
+                console.error(
+                    "Permissions needed to subscribe to screenshot events are missing!",
+                );
+            }
+        };
+
+        setupScreenCapture();
+
+        return () => {
+            subscription?.remove();
+            ScreenCapture.allowScreenCaptureAsync().catch(() => {});
+        };
+    }, []);
+
     const { t } = useLanguage();
     const { id, sessionId } = useLocalSearchParams<{
         id: string;

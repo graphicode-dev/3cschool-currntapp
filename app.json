@@ -32,7 +32,7 @@
       "googleServicesFile": "./google-services.json",
       "predictiveBackGestureEnabled": false,
       "package": "app.c3school.current",
-      "versionCode": 11
+      "versionCode": 13
     },
     "plugins": [
       "expo-router",

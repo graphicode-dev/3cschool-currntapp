@@ -174,28 +174,32 @@ export default function GroupsScreen() {
                 contentContainerStyle={styles.content}
             >
                 {/* ── 1. Session banner ───────────────────────────────────── */}
-                <View style={styles.bannerSection}>
-                    <RenderSection
-                        isLoading={sessionsLoading}
-                        error=""
-                        data={bannerSession}
-                    >
-                        {bannerSession ? (
+                <View
+                    style={[
+                        styles.bannerSection,
+                        !bannerSession && { paddingBottom: 0, marginBottom: 20 },
+                    ]}
+                >
+                    {bannerSession && (
+                        <RenderSection
+                            isLoading={sessionsLoading}
+                            error=""
+                            data={bannerSession}
+                        >
                             <SessionCard session={bannerSession} />
-                        ) : null}
-                    </RenderSection>
+                        </RenderSection>
+                    )}
 
-                    {/* Progress card sits on top of the banner's bottom edge */}
-                    {!sessionsLoading && (
-                        <>
-                            <ProgressCard
-                                label={t("groups.index.nextSession")}
-                                highlight={`${nextSessionDate?.toLocaleDateString()} - ${nextSessionDate?.toLocaleTimeString()}`}
-                                elapsed={doneSessions}
-                                total={Math.max(totalSessions, 1)}
-                                nextSessionDate={nextSessionDate!}
-                            />
-                        </>
+                    {/* Progress card sits on top of the banner's bottom edge if banner exists */}
+                    {!sessionsLoading && bannerSession && (
+                        <ProgressCard
+                            label={t("groups.index.nextSession")}
+                            highlight={nextSessionDate ? `${nextSessionDate.toLocaleDateString()} - ${nextSessionDate.toLocaleTimeString()}` : undefined}
+                            elapsed={doneSessions}
+                            total={Math.max(totalSessions, 1)}
+                            nextSessionDate={nextSessionDate!}
+                            style={{ position: "absolute", bottom: -36 }}
+                        />
                     )}
                 </View>
 
@@ -204,6 +208,18 @@ export default function GroupsScreen() {
                     <ThemedText style={styles.sectionTitle} fontSize={20}>
                         {t("groups.index.myGroups")}
                     </ThemedText>
+
+                    {/* If there is no banner, ProgressCard moves here between Title and Search */}
+                    {!sessionsLoading && !bannerSession && (
+                        <ProgressCard
+                            label={t("groups.index.nextSession")}
+                            highlight={nextSessionDate ? `${nextSessionDate.toLocaleDateString()} - ${nextSessionDate.toLocaleTimeString()}` : undefined}
+                            elapsed={doneSessions}
+                            total={Math.max(totalSessions, 1)}
+                            nextSessionDate={nextSessionDate!}
+                            style={{ marginBottom: 12, marginTop: 4, width: "100%" }}
+                        />
+                    )}
 
                     {/* Search */}
                     <GroupsSearch

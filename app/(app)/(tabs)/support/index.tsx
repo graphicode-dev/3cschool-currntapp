@@ -214,9 +214,11 @@ const TicketCard = ({ ticket }: { ticket: MappedTicket }) => {
 
 export default function SupportScreen() {
     const { tickets, refetch, isLoading } = useTicketChat();
-    const { width } = useWindowDimensions();
+    const { width, height } = useWindowDimensions();
     const { t } = useLanguage();
-    const fabSize = Math.round((width / 375) * 60);
+    const shortDimension = Math.min(width, height);
+    const scaleFactor = Math.min(shortDimension / 375, 1.25);
+    const fabSize = Math.round(scaleFactor * 60);
 
     const onNewTicketPress = () => {
         router.push("/(app)/(tabs)/support/create");
@@ -320,7 +322,7 @@ export default function SupportScreen() {
                     {
                         width: fabSize,
                         height: fabSize,
-                        bottom: Math.round((width / 375) * 140),
+                        bottom: Math.round(scaleFactor * 140),
                     },
                 ]}
             >

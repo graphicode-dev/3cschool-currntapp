@@ -35,8 +35,10 @@ export default function ChatConversationScreen() {
 
   const resolvedGroupId = params.groupId ?? params.id ?? "";
   const flatListRef = useRef<FlatList>(null);
-  const { width } = useWindowDimensions();
-  const responsivePaddingBottom = Math.round((width / 375) * 100);
+  const { width, height } = useWindowDimensions();
+  const shortDimension = Math.min(width, height);
+  const scaleFactor = Math.min(shortDimension / 375, 1.25);
+  const responsivePaddingBottom = Math.round(scaleFactor * 100);
 
   const {
     selectGroup,

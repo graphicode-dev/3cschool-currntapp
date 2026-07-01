@@ -18,6 +18,7 @@ interface ProgressCardProps {
     elapsed: number;
     total: number;
     nextSessionDate?: Date;
+    style?: any;
 }
 
 export function ProgressCard({
@@ -26,6 +27,7 @@ export function ProgressCard({
     elapsed,
     total,
     nextSessionDate,
+    style,
 }: ProgressCardProps) {
     const { t } = useLanguage();
     const [timeLeft, setTimeLeft] = useState<TimeLeft | null>(null);
@@ -157,7 +159,7 @@ export function ProgressCard({
             : t("groups.progressCard.ended");
 
     return (
-        <View style={styles.card}>
+        <View style={[styles.card, style]}>
             <View style={styles.left}>
                 <ThemedText style={styles.label} fontSize={13}>
                     {label}
@@ -185,10 +187,8 @@ export function ProgressCard({
 
 const styles = StyleSheet.create({
     card: {
-        position: "absolute",
-        top: 120,
         width: "80%",
-        left: "10%",
+        alignSelf: "center",
         height: 72,
         borderRadius: 16,
         backgroundColor: "#FFF3DD",

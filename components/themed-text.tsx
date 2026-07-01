@@ -22,12 +22,14 @@ export function ThemedText({
     ...rest
 }: ThemedTextProps) {
     const { isRTL } = useLanguage();
-    const { width } = useWindowDimensions();
+    const { width, height } = useWindowDimensions();
 
     // Scale fontSize responsively based on screen width
+    const shortDimension = Math.min(width, height);
+    const scaleFactor = Math.min(shortDimension / 375, 1.25);
     const responsiveFontSize =
         fontSize !== undefined
-            ? Math.round((width / 375) * fontSize)
+            ? Math.round(scaleFactor * fontSize)
             : undefined;
 
     // Get font based on language and type
@@ -89,21 +91,17 @@ export function ThemedText({
 const styles = StyleSheet.create({
     default: {
         fontSize: 16,
-        lineHeight: 24,
     },
     defaultSemiBold: {
         fontSize: 16,
-        lineHeight: 24,
     },
     title: {
         fontSize: 32,
-        lineHeight: 32,
     },
     subtitle: {
         fontSize: 20,
     },
     link: {
-        lineHeight: 30,
         fontSize: 16,
         color: "#0a7ea4",
     },

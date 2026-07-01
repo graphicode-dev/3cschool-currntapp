@@ -30,8 +30,10 @@ interface Attachment {
 const ChatInput = ({ onSend, isSending }: Props) => {
     const [text, setText] = useState("");
     const [attachment, setAttachment] = useState<Attachment | null>(null);
-    const { width } = useWindowDimensions();
-    const scaleFont = (size: number) => Math.round((width / 375) * size);
+    const { width, height } = useWindowDimensions();
+    const shortDimension = Math.min(width, height);
+    const scaleFactor = Math.min(shortDimension / 375, 1.25);
+    const scaleFont = (size: number) => Math.round(scaleFactor * size);
 
     const canSend =
         (text.trim().length > 0 || attachment !== null) && !isSending;

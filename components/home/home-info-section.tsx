@@ -22,8 +22,10 @@ const HomeInfoSection = ({
     shareIdeasText,
     chatText,
 }: Props) => {
-    const { width } = useWindowDimensions();
-    const scaleFont = (size: number) => Math.round((width / 375) * size);
+    const { width, height } = useWindowDimensions();
+    const shortDimension = Math.min(width, height);
+    const scaleFactor = Math.min(shortDimension / 375, 1.25);
+    const scaleFont = (size: number) => Math.round(scaleFactor * size);
 
     return (
         <View style={styles.container}>
@@ -31,7 +33,7 @@ const HomeInfoSection = ({
             <View style={styles.motivationalCard}>
                 <View style={styles.motivationalContent}>
                     <ThemedText
-                        style={[styles.motivationalText]}
+                        style={[styles.motivationalText, { lineHeight: scaleFont(40) }]}
                         fontSize={scaleFont(25)}
                         fontWeight="bold"
                     >
@@ -64,7 +66,7 @@ const HomeInfoSection = ({
                     <Icons.ShareIcon />
 
                     <ThemedText
-                        style={[styles.smallCardText]}
+                        style={[styles.smallCardText, { lineHeight: scaleFont(22) }]}
                         fontSize={scaleFont(14)}
                         fontWeight="medium"
                     >
@@ -77,7 +79,7 @@ const HomeInfoSection = ({
                     <Icons.ChatLoveIcon />
 
                     <ThemedText
-                        style={[styles.smallCardText]}
+                        style={[styles.smallCardText, { lineHeight: scaleFont(22) }]}
                         fontSize={scaleFont(14)}
                         fontWeight="medium"
                     >
@@ -120,7 +122,6 @@ const styles = StyleSheet.create({
     motivationalText: {
         fontWeight: "700",
         color: Palette.slate900,
-        lineHeight: 40,
     },
 
     /* ================= BUTTON ================= */
@@ -170,6 +171,5 @@ const styles = StyleSheet.create({
         flex: 1,
         fontWeight: "600",
         color: Palette.slate900,
-        lineHeight: 20,
     },
 });

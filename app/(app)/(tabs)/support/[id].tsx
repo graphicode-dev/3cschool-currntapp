@@ -26,9 +26,11 @@ export default function TicketChatScreen() {
     const { id } = useLocalSearchParams<{ id: string }>();
     const { t } = useLanguage();
     const flatListRef = useRef<FlatList>(null);
-    const { width } = useWindowDimensions();
-    const scaleFont = (size: number) => Math.round((width / 375) * size);
-    const responsivePaddingBottom = Math.round((width / 375) * 100);
+    const { width, height } = useWindowDimensions();
+    const shortDimension = Math.min(width, height);
+    const scaleFactor = Math.min(shortDimension / 375, 1.25);
+    const scaleFont = (size: number) => Math.round(scaleFactor * size);
+    const responsivePaddingBottom = Math.round(scaleFactor * 100);
 
     const {
         selectTicket,

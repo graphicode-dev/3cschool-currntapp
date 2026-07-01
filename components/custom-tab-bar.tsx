@@ -217,8 +217,10 @@ export function CustomTabBar({
 }: BottomTabBarProps) {
     const insets = useSafeAreaInsets();
     const colors = Colors["light"];
-    const { width } = useWindowDimensions();
-    const scaleFont = (size: number) => Math.round((width / 375) * size);
+    const { width, height } = useWindowDimensions();
+    const shortDimension = Math.min(width, height);
+    const scaleFactor = Math.min(shortDimension / 375, 1.25);
+    const scaleFont = (size: number) => Math.round(scaleFactor * size);
 
     const sortedRoutes = TAB_ORDER.map((name) => {
         const index = state.routes.findIndex((r) => r.name === name);

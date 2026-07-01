@@ -12,9 +12,7 @@ function Providers({ children }: { children: ReactNode }) {
             <LanguageProvider>
                 <ThemeProvider value={DefaultTheme}>
                     <ToastProvider>
-                        {/* <NotificationProvider> */}
-                            {children}
-                            {/* </NotificationProvider> */}
+                        <NotificationProvider>{children}</NotificationProvider>
                     </ToastProvider>
                 </ThemeProvider>
             </LanguageProvider>

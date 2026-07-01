@@ -1,6 +1,6 @@
 import { toast } from "@/components/ui/Toast";
 import { usePathname } from "expo-router";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 const useNotificationHandler = (receivedNotification: any | null) => {

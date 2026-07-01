@@ -9,10 +9,11 @@
     "name": "3c",
     "slug": "3c",
     "version": "1.0.4",
-    "orientation": "portrait",
+    "orientation": "default",
     "icon": "./assets/icon/ios-adaptive-light-icon.png",
     "userInterfaceStyle": "automatic",
     "ios": {
+      "requireFullScreen": false,
       "supportsTablet": true,
       "bundleIdentifier": "com.c3school.app",
       "buildNumber": "11",

@@ -31,7 +31,7 @@ export const sessionsApi = {
     getAllSessions: async (
         signal?: AbortSignal,
     ): Promise<AllSessionsResponse> => {
-        const response = await api.get<ApiResponse<AllSessionsResponse>>(
+        const response = await api.get<ApiResponse<any>>(
             `${BASE_URL}/all-sessions`,
             { signal },
         );
@@ -44,7 +44,25 @@ export const sessionsApi = {
             throw new Error("No data returned from server");
         }
 
-        return response.data.data;
+        const rawData = response.data.data;
+        
+        // Normalize the data if backend returns an array
+        if (Array.isArray(rawData)) {
+            return {
+                upcoming: rawData,
+                past: [],
+                total_upcoming: rawData.length,
+                total_past: 0,
+            };
+        }
+
+        // Normalize if backend returns snake_case or standard keys
+        return {
+            upcoming: rawData.upcoming ?? rawData.upcoming_sessions ?? [],
+            past: rawData.past ?? rawData.past_sessions ?? [],
+            total_upcoming: rawData.total_upcoming ?? rawData.upcoming?.length ?? rawData.upcoming_sessions?.length ?? 0,
+            total_past: rawData.total_past ?? rawData.past?.length ?? rawData.past_sessions?.length ?? 0,
+        };
     },
 
     /**
@@ -54,7 +72,7 @@ export const sessionsApi = {
         groupId: string | number,
         signal?: AbortSignal,
     ): Promise<GroupSessionsResponse> => {
-        const response = await api.get<ApiResponse<GroupSessionsResponse>>(
+        const response = await api.get<ApiResponse<any>>(
             `${BASE_URL}/${groupId}/sessions`,
             { signal },
         );
@@ -67,7 +85,22 @@ export const sessionsApi = {
             throw new Error("No data returned from server");
         }
 
-        return response.data.data;
+        const rawData = response.data.data;
+
+        // Normalize if backend returns an array
+        if (Array.isArray(rawData)) {
+            return {
+                group_id: Number(groupId),
+                group_name: "Group",
+                sessions: rawData,
+            };
+        }
+
+        return {
+            group_id: rawData.group_id ?? Number(groupId),
+            group_name: rawData.group_name ?? "Group",
+            sessions: rawData.sessions ?? [],
+        };
     },
 };
 

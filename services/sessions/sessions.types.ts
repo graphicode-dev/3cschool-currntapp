@@ -8,6 +8,7 @@ export interface Session {
     session_status: "upcoming" | "completed" | "current" | null;
     bbb_meeting_id: string | null;
     recording_url: string | null;
+    api_join_url: string | null;
     group: {
         id: number;
         name: string;

@@ -3,8 +3,11 @@ import { Palette } from "@/constants/theme";
 import { useLanguage } from "@/contexts/language-context";
 import { SessionWithInfo } from "@/services/sessions/sessions.types";
 import { router } from "expo-router";
-import { Linking, StyleSheet, TouchableOpacity, View } from "react-native";
+import * as WebBrowser from "expo-web-browser";
+import React, { useState } from "react";
+import { Linking, StyleSheet, TouchableOpacity, View, Alert, ActivityIndicator } from "react-native";
 import { ThemedText } from "../themed-text";
+import { api } from "@/services/api";
 
 type Props = {
     session: SessionWithInfo;
@@ -71,9 +74,11 @@ function getStatusBadgeStyle(
 
 const SessionsListItem = ({ groupId, session, isUpcoming = false }: Props) => {
     const { t } = useLanguage();
+    const [isJoining, setIsJoining] = useState(false);
     const title =
         session.session_info?.title ?? `Session #${session.session_number}`;
     const hasRecording = !!session.recording_url;
+    const hasJoin = !!session.api_join_url;
     const statusStyle = getStatusBadgeStyle(session.session_status);
 
     return (
@@ -104,18 +109,19 @@ const SessionsListItem = ({ groupId, session, isUpcoming = false }: Props) => {
                         }}
                         onPress={() => {
                             const sessionId = session.id;
+                            const actualGroupId = groupId || session.group?.id;
 
                             console.log(
                                 "session: ",
                                 JSON.stringify(session, null, 2),
                             );
                             console.log("sessionId", sessionId);
-                            console.log("groupId", groupId);
-                            if (sessionId && groupId) {
+                            console.log("groupId", actualGroupId);
+                            if (sessionId && actualGroupId) {
                                 router.push({
                                     pathname: "/groups/playlist/[id]",
                                     params: {
-                                        id: groupId.toString(),
+                                        id: actualGroupId.toString(),
                                         sessionId: sessionId.toString(),
                                     },
                                 });
@@ -173,26 +179,79 @@ const SessionsListItem = ({ groupId, session, isUpcoming = false }: Props) => {
                         </ThemedText>
                     </View>
 
-                    {hasRecording && (
-                        <TouchableOpacity
-                            style={styles.recordingButton}
-                            onPress={() =>
-                                Linking.openURL(session.recording_url!).catch(
-                                    () => {},
-                                )
-                            }
+                    <TouchableOpacity
+                        disabled={!hasRecording}
+                        style={[
+                            styles.recordingButton,
+                            {
+                                opacity: !hasRecording ? 0.5 : 1,
+                            },
+                        ]}
+                        onPress={() =>
+                            Linking.openURL(session.recording_url!).catch(
+                                () => {},
+                            )
+                        }
+                    >
+                        <ThemedText
+                            style={styles.recordingText}
+                            fontWeight="medium"
+                            fontSize={10}
                         >
-                            <ThemedText
-                                style={styles.recordingText}
-                                fontWeight="medium"
-                                fontSize={10}
-                            >
-                                {t("sessions.recording")}
-                            </ThemedText>
-                            <Icons.ArrowIcon size={16} color="white" />
-                        </TouchableOpacity>
-                    )}
+                            {t("sessions.recording")}
+                        </ThemedText>
+                        <Icons.ArrowIcon size={16} color="white" />
+                    </TouchableOpacity>
                 </View>
+
+                <TouchableOpacity
+                    disabled={!hasJoin || isJoining}
+                    onPress={async () => {
+                        if (session.api_join_url) {
+                            setIsJoining(true);
+                            try {
+                                const response = await api.get<{success: boolean; join_url: string; message: string}>(
+                                    session.api_join_url,
+                                );
+
+                                console.log('response', response)
+                                
+                                // Our api.get returns { success, data, error, message } wrapper
+                                const responseData = response.data;
+                                
+                                if (response.success && responseData?.join_url) {
+                                    await WebBrowser.openBrowserAsync(
+                                        responseData.join_url,
+                                    );
+                                } else {
+                                    Alert.alert(
+                                        "Error", 
+                                        responseData?.message || "Unable to join the session."
+                                    );
+                                }
+                            } catch (e: any) {
+                                console.error("Failed to fetch join URL:", e);
+                                Alert.alert("Error Joining Session", e.message || "An unexpected error occurred.");
+                            } finally {
+                                setIsJoining(false);
+                            }
+                        }
+                    }}
+                    style={[
+                        styles.joinLiveButton,
+                        {
+                            opacity: (!hasJoin || isJoining) ? 0.5 : 1,
+                        },
+                    ]}
+                >
+                    {isJoining ? (
+                        <ActivityIndicator size="small" color="white" />
+                    ) : (
+                        <ThemedText style={styles.joinLiveText} fontWeight="medium">
+                            Join Live
+                        </ThemedText>
+                    )}
+                </TouchableOpacity>
             </View>
         </View>
     );
@@ -270,6 +329,25 @@ const styles = StyleSheet.create({
         gap: 4,
     },
     recordingText: {
+        color: "#e9f7fc",
+        textTransform: "capitalize",
+    },
+
+    joinLiveButton: {
+        width: "100%",
+        backgroundColor: Palette.brand[500],
+        borderWidth: 1,
+        borderColor: Palette.slate900,
+        borderRadius: 35,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        alignSelf: "center",
+        paddingHorizontal: 11,
+        paddingVertical: 2,
+        gap: 4,
+    },
+    joinLiveText: {
         color: "#e9f7fc",
         textTransform: "capitalize",
     },

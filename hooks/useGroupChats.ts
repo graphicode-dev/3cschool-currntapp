@@ -10,7 +10,7 @@ import {
     GroupMessage,
     LastGroupMessage
 } from "@/services/groups/groups.types";
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect } from "expo-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useDebounce } from "./useDebounce";

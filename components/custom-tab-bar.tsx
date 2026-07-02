@@ -1,7 +1,7 @@
 import { Icons } from "@/constants/icons";
 import { HomeIcon } from "@/constants/icons/tab.icons";
 import { Colors, Palette } from "@/constants/theme";
-import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
+import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 // import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";

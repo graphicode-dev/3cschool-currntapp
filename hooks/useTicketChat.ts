@@ -6,7 +6,7 @@ import {
     TicketLatestMessage,
     TicketMessage,
 } from "@/services/tickets/tickets.types";
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect } from "expo-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useMemo, useRef, useState } from "react";
 

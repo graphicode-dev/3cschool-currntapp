@@ -70,7 +70,9 @@
           "supportsPictureInPicture": true
         }
       ],
-      "expo-font"
+      "expo-font",
+      "expo-build-properties",
+      "./plugins/withDisableStrictConcurrency.js"
     ],
     "experiments": {
       "typedRoutes": true,

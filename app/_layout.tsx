@@ -10,6 +10,8 @@ import { useEffect, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
 
+export { default as ErrorBoundary } from "@/components/ErrorBoundary";
+
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -33,15 +35,26 @@ export default function RootLayout() {
     // Hydrate auth token from SecureStore into the in-memory cache so that
     // the synchronous Axios interceptor always finds it on cold start.
     useEffect(() => {
-        tokenService.ensureHydrated().then(() => setTokenReady(true));
+        tokenService.ensureHydrated()
+            .then(() => setTokenReady(true))
+            .catch((err) => {
+                console.error("Token hydration error:", err);
+                setTokenReady(true); // Fallback so app doesn't hang
+            });
     }, []);
 
     // Apply the persisted RTL/LTR direction before the first frame renders.
     useEffect(() => {
-        loadSavedLanguage().then((lang) => {
-            applyRTL(lang);
-            setDirectionReady(true);
-        });
+        loadSavedLanguage()
+            .then((lang) => {
+                applyRTL(lang);
+                setDirectionReady(true);
+            })
+            .catch((err) => {
+                console.error("Language load error:", err);
+                applyRTL("ar"); // Fallback
+                setDirectionReady(true);
+            });
     }, []);
 
     useEffect(() => {

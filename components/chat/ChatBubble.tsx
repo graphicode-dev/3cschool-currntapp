@@ -541,7 +541,7 @@ const styles = StyleSheet.create({
         borderRadius: Radii.sm,
     },
     moreOverlay: {
-        ...StyleSheet.absoluteFillObject,
+        ...StyleSheet.absoluteFill,
         backgroundColor: "rgba(0,0,0,0.5)",
         borderRadius: Radii.sm,
         alignItems: "center",

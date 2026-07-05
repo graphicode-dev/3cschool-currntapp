@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Task } from "@/components/groups/groups-tasks-list-item";
+import { Task } from "@/components/groups/groups-todo-list-item";
 
 const TASKS_STORAGE_KEY = "user_tasks";
 

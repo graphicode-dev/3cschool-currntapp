@@ -1,6 +1,4 @@
-import { Router } from "expo-router";
-
-export function navigateFromNotification(router: Router, payload: any) {
+export function navigateFromNotification(router: any, payload: any) {
     const data = payload?.data ?? payload ?? {};
     const type = payload?.type || data?.type || "";
 

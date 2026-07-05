@@ -525,18 +525,18 @@ const styles = StyleSheet.create({
         backgroundColor: "#111",
     },
     cardImage: {
-        ...StyleSheet.absoluteFillObject,
+        ...StyleSheet.absoluteFill,
         width: "100%",
         height: "100%",
         resizeMode: "cover",
     },
     videoView: {
-        ...StyleSheet.absoluteFillObject,
+        ...StyleSheet.absoluteFill,
         width: "100%",
         height: "100%",
     },
     videoPlayOverlay: {
-        ...StyleSheet.absoluteFillObject,
+        ...StyleSheet.absoluteFill,
         justifyContent: "center",
         alignItems: "center",
     },
@@ -576,7 +576,7 @@ const styles = StyleSheet.create({
         letterSpacing: 0.3,
     },
     gradient: {
-        ...StyleSheet.absoluteFillObject,
+        ...StyleSheet.absoluteFill,
     },
     topStrip: {
         position: "absolute",

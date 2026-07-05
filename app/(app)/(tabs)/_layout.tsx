@@ -1,11 +1,10 @@
 import { CustomTabBar } from "@/components/custom-tab-bar";
 import { Tabs } from "expo-router";
-import React from "react";
 
 function TabLayoutInner() {
     return (
         <Tabs
-            tabBar={(props) => <CustomTabBar {...props} />}
+            tabBar={(props: any) => <CustomTabBar {...props} />}
             screenOptions={{
                 headerShown: false,
                 animation: "shift",

@@ -84,7 +84,6 @@ const ChatBubble = ({
                 if (supported) {
                     await Linking.openURL(files[0].url);
                 } else {
-                    console.log(`Cannot open URL: ${files[0].url}`);
                     // Fallback: try to open in browser
                     await Linking.openURL(files[0].url);
                 }

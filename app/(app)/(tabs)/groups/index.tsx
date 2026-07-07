@@ -32,10 +32,18 @@ function pickBannerSession(upcoming: Session[]): Session | null {
 
     const now = new Date();
 
+    // Helper to safely parse dates across JS engines (iOS JSC)
+    const parseSafe = (s: Session) => {
+        if (s.start_date.includes(" ") && s.start_date.includes(":")) {
+            return new Date(s.start_date.replace(" ", "T"));
+        }
+        return new Date(`${s.start_date}T${s.start_time}`);
+    };
+
     // 1. Prefer ongoing (started within the past 3 h and not yet finished)
     const ongoing = upcoming.find((s) => {
         try {
-            const start = new Date(`${s.start_date}T${s.start_time}`);
+            const start = parseSafe(s);
             const ms = now.getTime() - start.getTime();
             return ms >= 0 && ms < 3 * 60 * 60 * 1000;
         } catch {
@@ -48,16 +56,18 @@ function pickBannerSession(upcoming: Session[]): Session | null {
     const future = upcoming
         .filter((s) => {
             try {
-                return new Date(`${s.start_date}T${s.start_time}`) > now;
+                return parseSafe(s) > now;
             } catch {
                 return false;
             }
         })
-        .sort(
-            (a, b) =>
-                new Date(`${a.start_date}T${a.start_time}`).getTime() -
-                new Date(`${b.start_date}T${b.start_time}`).getTime(),
-        );
+        .sort((a, b) => {
+            try {
+                return parseSafe(a).getTime() - parseSafe(b).getTime();
+            } catch {
+                return 0;
+            }
+        });
 
     return future[0] ?? upcoming[0];
 }
@@ -108,29 +118,22 @@ export default function GroupsScreen() {
     const nextSessionDate = useMemo(() => {
         const now = Date.now();
 
+        // Helper to safely parse dates across JS engines (iOS JSC)
+        const parseSafe = (s: Session) => {
+            if (s.start_date.includes(" ") && s.start_date.includes(":")) {
+                return new Date(s.start_date.replace(" ", "T"));
+            }
+            return new Date(`${s.start_date}T${s.start_time}`);
+        };
+
         const future = (sessionsData?.upcoming ?? [])
             .filter((s) => {
                 try {
-                    // Parse date properly - handle both date formats
-                    let sessionDate: Date;
-
-                    // If start_date already includes time, use it directly
-                    if (
-                        s.start_date.includes(" ") &&
-                        s.start_date.includes(":")
-                    ) {
-                        sessionDate = new Date(s.start_date);
-                    } else {
-                        // Otherwise combine start_date and start_time
-                        sessionDate = new Date(
-                            `${s.start_date}T${s.start_time}`,
-                        );
-                    }
-
+                    const sessionDate = parseSafe(s);
                     const sessionTime = sessionDate.getTime();
-                    const isFuture = sessionTime > now;
-
-                    return isFuture;
+                    // Must be valid date to be future
+                    if (isNaN(sessionTime)) return false;
+                    return sessionTime > now;
                 } catch (error) {
                     console.error(`❌ Invalid date for session ${s.id}:`, {
                         start_date: s.start_date,
@@ -141,15 +144,9 @@ export default function GroupsScreen() {
                 }
             })
             .sort((a, b) => {
-                const dateA =
-                    a.start_date.includes(" ") && a.start_date.includes(":")
-                        ? new Date(a.start_date).getTime()
-                        : new Date(`${a.start_date}T${a.start_time}`).getTime();
-                const dateB =
-                    b.start_date.includes(" ") && b.start_date.includes(":")
-                        ? new Date(b.start_date).getTime()
-                        : new Date(`${b.start_date}T${b.start_time}`).getTime();
-                return dateA - dateB;
+                const dateA = parseSafe(a).getTime();
+                const dateB = parseSafe(b).getTime();
+                return (isNaN(dateA) ? 0 : dateA) - (isNaN(dateB) ? 0 : dateB);
             });
 
         if (!future.length) {
@@ -157,13 +154,9 @@ export default function GroupsScreen() {
             return undefined;
         }
 
-        const nextSession =
-            future[0].start_date.includes(" ") &&
-            future[0].start_date.includes(":")
-                ? new Date(future[0].start_date)
-                : new Date(`${future[0].start_date}T${future[0].start_time}`);
-
-        return nextSession;
+        const nextSession = parseSafe(future[0]);
+        // Double check it's a valid date object before returning
+        return isNaN(nextSession.getTime()) ? undefined : nextSession;
     }, [sessionsData?.upcoming]);
 
     return (

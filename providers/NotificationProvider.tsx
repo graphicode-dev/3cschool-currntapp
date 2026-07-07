@@ -1,4 +1,3 @@
-
 /* eslint-disable react-hooks/exhaustive-deps */
 import useNotificationHandler from "@/hooks/useNotificationHandler";
 import { navigateFromNotification } from "@/lib/notificationNavigation";
@@ -7,8 +6,8 @@ import { notificationsApi } from "@/services/notifications/notifications.api";
 import { notificationsKeys } from "@/services/notifications/notifications.keys";
 import { useQueryClient } from "@tanstack/react-query";
 import Constants, { ExecutionEnvironment } from "expo-constants";
-import { useRouter } from "expo-router";
 import * as Notifications from "expo-notifications";
+import { useRouter } from "expo-router";
 import React, {
     Component,
     createContext,
@@ -93,8 +92,6 @@ const NotificationProviderInner: React.FC<{ children: ReactNode }> = ({
     const [notification, setNotification] =
         useState<Notifications.Notification | null>(null);
 
-    console.log("[Received Notification]:", notification);
-
     useNotificationHandler(notification);
 
     const registerForPushNotifications = async () => {
@@ -137,7 +134,9 @@ const NotificationProviderInner: React.FC<{ children: ReactNode }> = ({
             setNotification(receivedNotification);
 
             // Refresh notifications list and unread count when notification is received
-            queryClient.invalidateQueries({ queryKey: notificationsKeys.list() });
+            queryClient.invalidateQueries({
+                queryKey: notificationsKeys.list(),
+            });
             queryClient.invalidateQueries({
                 queryKey: notificationsKeys.unreadCount(),
             });

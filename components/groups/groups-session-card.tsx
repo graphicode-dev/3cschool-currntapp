@@ -34,9 +34,12 @@ function deriveStatus(session: Session): "upcoming" | "ongoing" | "completed" {
         const now = new Date();
 
         // Parse date and time more safely
-        const startDate = new Date(session.start_date);
-        const [hours, minutes] = session.start_time.split(":").map(Number);
-        startDate.setHours(hours, minutes, 0, 0);
+        const safeDateStr = session.start_date.includes(" ") ? session.start_date.replace(" ", "T") : session.start_date;
+        const startDate = new Date(safeDateStr);
+        if (session.start_time) {
+            const [hours, minutes] = session.start_time.split(":").map(Number);
+            startDate.setHours(hours, minutes, 0, 0);
+        }
 
         const diffMs = now.getTime() - startDate.getTime();
 
@@ -57,7 +60,10 @@ function deriveStatus(session: Session): "upcoming" | "ongoing" | "completed" {
 
 function fmtDate(dateStr: string) {
     try {
-        return new Date(dateStr).toLocaleDateString("en-US", {
+        const safeDateStr = dateStr.includes(" ") ? dateStr.replace(" ", "T") : dateStr;
+        const d = new Date(safeDateStr);
+        if (isNaN(d.getTime())) return dateStr.split(" ")[0] || dateStr;
+        return d.toLocaleDateString("en-US", {
             month: "short",
             day: "numeric",
         });

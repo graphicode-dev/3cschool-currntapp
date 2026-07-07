@@ -1,13 +1,20 @@
 import { Icons } from "@/constants/icons";
 import { Palette } from "@/constants/theme";
 import { useLanguage } from "@/contexts/language-context";
+import { api } from "@/services/api";
 import { SessionWithInfo } from "@/services/sessions/sessions.types";
 import { router } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import React, { useState } from "react";
-import { Linking, StyleSheet, TouchableOpacity, View, Alert, ActivityIndicator } from "react-native";
+import {
+    ActivityIndicator,
+    Alert,
+    Linking,
+    StyleSheet,
+    TouchableOpacity,
+    View,
+} from "react-native";
 import { ThemedText } from "../themed-text";
-import { api } from "@/services/api";
 
 type Props = {
     session: SessionWithInfo;
@@ -17,7 +24,12 @@ type Props = {
 
 function fmtDate(dateStr: string) {
     try {
-        return new Date(dateStr).toLocaleDateString("en-US", {
+        const safeDateStr = dateStr.includes(" ")
+            ? dateStr.replace(" ", "T")
+            : dateStr;
+        const d = new Date(safeDateStr);
+        if (isNaN(d.getTime())) return dateStr.split(" ")[0] || dateStr;
+        return d.toLocaleDateString("en-US", {
             month: "short",
             day: "numeric",
             year: "numeric",
@@ -111,12 +123,6 @@ const SessionsListItem = ({ groupId, session, isUpcoming = false }: Props) => {
                             const sessionId = session.id;
                             const actualGroupId = groupId || session.group?.id;
 
-                            console.log(
-                                "session: ",
-                                JSON.stringify(session, null, 2),
-                            );
-                            console.log("sessionId", sessionId);
-                            console.log("groupId", actualGroupId);
                             if (sessionId && actualGroupId) {
                                 router.push({
                                     pathname: "/groups/playlist/[id]",
@@ -210,28 +216,36 @@ const SessionsListItem = ({ groupId, session, isUpcoming = false }: Props) => {
                         if (session.api_join_url) {
                             setIsJoining(true);
                             try {
-                                const response = await api.get<{success: boolean; join_url: string; message: string}>(
-                                    session.api_join_url,
-                                );
+                                const response = await api.get<{
+                                    success: boolean;
+                                    join_url: string;
+                                    message: string;
+                                }>(session.api_join_url);
 
-                                console.log('response', response)
-                                
                                 // Our api.get returns { success, data, error, message } wrapper
                                 const responseData = response.data;
-                                
-                                if (response.success && responseData?.join_url) {
+
+                                if (
+                                    response.success &&
+                                    responseData?.join_url
+                                ) {
                                     await WebBrowser.openBrowserAsync(
                                         responseData.join_url,
                                     );
                                 } else {
                                     Alert.alert(
-                                        "Error", 
-                                        responseData?.message || "Unable to join the session."
+                                        "Error",
+                                        responseData?.message ||
+                                            "Unable to join the session.",
                                     );
                                 }
                             } catch (e: any) {
                                 console.error("Failed to fetch join URL:", e);
-                                Alert.alert("Error Joining Session", e.message || "An unexpected error occurred.");
+                                Alert.alert(
+                                    "Error Joining Session",
+                                    e.message ||
+                                        "An unexpected error occurred.",
+                                );
                             } finally {
                                 setIsJoining(false);
                             }
@@ -240,14 +254,17 @@ const SessionsListItem = ({ groupId, session, isUpcoming = false }: Props) => {
                     style={[
                         styles.joinLiveButton,
                         {
-                            opacity: (!hasJoin || isJoining) ? 0.5 : 1,
+                            opacity: !hasJoin || isJoining ? 0.5 : 1,
                         },
                     ]}
                 >
                     {isJoining ? (
                         <ActivityIndicator size="small" color="white" />
                     ) : (
-                        <ThemedText style={styles.joinLiveText} fontWeight="medium">
+                        <ThemedText
+                            style={styles.joinLiveText}
+                            fontWeight="medium"
+                        >
                             Join Live
                         </ThemedText>
                     )}

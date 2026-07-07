@@ -6,7 +6,8 @@
  *   date  →  "Today" | "Yesterday" | "dd/mm/yy"
  */
 export function formatMessageTime(isoString: string, isMe: boolean): string {
-    const date = new Date(isoString);
+    const safeString = isoString.includes(" ") ? isoString.replace(" ", "T") : isoString;
+    const date = new Date(safeString);
     if (isNaN(date.getTime())) return "";
 
     const now = new Date();

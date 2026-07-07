@@ -41,7 +41,12 @@ function formatSchedule(g: Group): { date: string; time: string } {
         return { date: s.day_label ?? "", time: s.start_time ?? "" };
     }
     if (g.start_date) {
-        const d = new Date(g.start_date);
+        // Safe parsing for iOS JSC: replace space with T
+        const safeDateStr = g.start_date.includes(" ") ? g.start_date.replace(" ", "T") : g.start_date;
+        const d = new Date(safeDateStr);
+        if (isNaN(d.getTime())) {
+            return { date: g.start_date.split(" ")[0] || "", time: "" };
+        }
         return {
             date: d.toLocaleDateString("en-US", {
                 month: "short",

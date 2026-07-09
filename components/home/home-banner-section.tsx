@@ -5,14 +5,14 @@ import { useEvent } from "expo";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Linking from "expo-linking";
 import { useVideoPlayer, VideoView } from "expo-video";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
     AppState,
-    Dimensions,
     FlatList,
     Image,
     StyleSheet,
     TouchableOpacity,
+    useWindowDimensions,
     View,
     ViewToken,
 } from "react-native";
@@ -24,10 +24,6 @@ import Animated, {
 import { RenderSection } from "../RenderSection";
 import { ThemedText } from "../themed-text";
 
-// ─── Constants ────────────────────────────────────────────────────────────────
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
-
-const SLIDE_WIDTH = SCREEN_WIDTH;
 const BANNER_HEIGHT = 220;
 
 const DOT_ACTIVE_WIDTH = 28;
@@ -75,10 +71,12 @@ const InlineVideoCard = ({
     banner,
     onPlayingChange,
     isActive,
+    slideWidth,
 }: {
     banner: Banner;
     onPlayingChange: (isPlaying: boolean) => void;
     isActive: boolean;
+    slideWidth: number;
 }) => {
     const { t } = useLanguage();
     const [hasFinished, setHasFinished] = useState(false);
@@ -141,7 +139,7 @@ const InlineVideoCard = ({
     const showOverlay = !isPlaying && (!userTappedPlay || hasFinished);
 
     return (
-        <View style={styles.slide}>
+        <View style={[styles.slide, { width: slideWidth }]}>
             {/* Thumbnail poster — visible until video starts playing */}
             {banner.thumbnail_url && showOverlay && (
                 <Image
@@ -268,7 +266,13 @@ const InlineVideoCard = ({
 };
 
 // ─── Image Banner Card ────────────────────────────────────────────────────────
-const ImageBannerCard = ({ banner }: { banner: Banner }) => {
+const ImageBannerCard = ({
+    banner,
+    slideWidth,
+}: {
+    banner: Banner;
+    slideWidth: number;
+}) => {
     const { t } = useLanguage();
 
     const handlePress = async () => {
@@ -283,7 +287,7 @@ const ImageBannerCard = ({ banner }: { banner: Banner }) => {
 
     return (
         <TouchableOpacity
-            style={styles.slide}
+            style={[styles.slide, { width: slideWidth }]}
             onPress={handlePress}
             activeOpacity={0.95}
         >
@@ -348,6 +352,7 @@ const ImageBannerCard = ({ banner }: { banner: Banner }) => {
 // ─── Main Section ─────────────────────────────────────────────────────────────
 const HomeBannerSection = () => {
     const { data: banners = [], isLoading, error } = useBannersList();
+    const { width: SLIDE_WIDTH } = useWindowDimensions();
 
     const [activeIndex, setActiveIndex] = useState(0);
     const [activeInfiniteIndex, setActiveInfiniteIndex] = useState(0);
@@ -391,7 +396,7 @@ const HomeBannerSection = () => {
                 animated: true,
             });
         }, 3500);
-    }, [sortedBanners.length, stopAutoSlide]);
+    }, [sortedBanners.length, stopAutoSlide, SLIDE_WIDTH]);
 
     const handlePlayingChange = useCallback(
         (playing: boolean) => {
@@ -443,7 +448,7 @@ const HomeBannerSection = () => {
                 });
             }
         },
-        [sortedBanners.length],
+        [sortedBanners.length, SLIDE_WIDTH],
     );
 
     const renderItem = useCallback(
@@ -453,11 +458,12 @@ const HomeBannerSection = () => {
                     banner={item}
                     onPlayingChange={handlePlayingChange}
                     isActive={index === activeInfiniteIndex}
+                    slideWidth={SLIDE_WIDTH}
                 />
             ) : (
-                <ImageBannerCard banner={item} />
+                <ImageBannerCard banner={item} slideWidth={SLIDE_WIDTH} />
             ),
-        [handlePlayingChange, activeInfiniteIndex],
+        [handlePlayingChange, activeInfiniteIndex, SLIDE_WIDTH],
     );
 
     const getItemLayout = useCallback(
@@ -466,7 +472,7 @@ const HomeBannerSection = () => {
             offset: SLIDE_WIDTH * index,
             index,
         }),
-        [],
+        [SLIDE_WIDTH],
     );
 
     return (
@@ -513,13 +519,12 @@ export default HomeBannerSection;
 // ─── Styles ───────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
     container: {
-        width: SCREEN_WIDTH,
+        width: "100%",
     },
     flatListContent: {
         padding: 0,
     },
     slide: {
-        width: SLIDE_WIDTH,
         height: BANNER_HEIGHT,
         overflow: "hidden",
         backgroundColor: "#111",

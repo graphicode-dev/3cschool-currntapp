@@ -14,6 +14,9 @@ const hydrate = (): Promise<void> => {
     if (!hydrationPromise) {
         hydrationPromise = SecureStore.getItemAsync(KEY).then((token) => {
             if (token) cached = token;
+        }).catch((err) => {
+            console.warn("SecureStore hydrate error:", err);
+            cached = undefined;
         });
     }
     return hydrationPromise;

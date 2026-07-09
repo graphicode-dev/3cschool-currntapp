@@ -8,7 +8,7 @@
     ],
     "name": "3c",
     "slug": "3c",
-    "version": "1.0.7",
+    "version": "1.0.9",
     "orientation": "default",
     "icon": "./assets/icon/ios-adaptive-light-icon.png",
     "userInterfaceStyle": "automatic",
@@ -16,7 +16,7 @@
       "requireFullScreen": false,
       "supportsTablet": true,
       "bundleIdentifier": "com.c3school.app",
-      "buildNumber": "17",
+      "buildNumber": "20",
       "icon": {
         "dark": "./assets/icon/ios-adaptive-dark-icon.png",
         "light": "./assets/icon/ios-adaptive-light-icon.png"

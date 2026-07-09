@@ -13,7 +13,7 @@ export function navigateFromNotification(router: any, payload: any) {
         const groupName = String(
             data.group_name || payload?.group_name || "Chat",
         );
-        router.push({
+        routerInstance.push({
             pathname: "/(app)/(tabs)/chats/[id]",
             params: {
                 id: groupId,
@@ -27,7 +27,7 @@ export function navigateFromNotification(router: any, payload: any) {
     // Ticket replies
     if (type === "ticket_reply" && (data.ticket_id || payload?.ticket_id)) {
         const ticketId = String(data.ticket_id || payload?.ticket_id);
-        router.push({
+        routerInstance.push({
             pathname: "/(app)/(tabs)/support/[id]",
             params: {
                 id: ticketId,
@@ -50,14 +50,14 @@ export function navigateFromNotification(router: any, payload: any) {
 
     switch (navigateTo) {
         case "ticket_detail":
-            router.push({
+            routerInstance.push({
                 pathname: "/(app)/(tabs)/support",
                 params,
             } as any);
             break;
         case "conversation_detail":
             if (params.conversationId) {
-                router.push(
+                routerInstance.push(
                     `/(app)/(tabs)/chat/${params.conversationId}` as any,
                 );
             }

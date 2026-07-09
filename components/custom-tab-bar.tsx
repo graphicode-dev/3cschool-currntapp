@@ -27,13 +27,12 @@ import Animated, {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ThemedText } from "./themed-text";
 
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const TAB_BAR_HEIGHT = 76;
 const CENTER_BUTTON_OFFSET = 20;
 
 // Responsive sizing based on screen width
-const getResponsiveSizes = () => {
-    if (SCREEN_WIDTH < 360) {
+const getResponsiveSizes = (screenWidth: number) => {
+    if (screenWidth < 360) {
         return {
             iconSize: 20,
             fontSize: 10,
@@ -44,7 +43,7 @@ const getResponsiveSizes = () => {
             sidePadding: 10,
             centerSpacerExtra: 8,
         };
-    } else if (SCREEN_WIDTH < 400) {
+    } else if (screenWidth < 400) {
         return {
             iconSize: 22,
             fontSize: 11,
@@ -69,22 +68,20 @@ const getResponsiveSizes = () => {
     }
 };
 
-const R = getResponsiveSizes();
-
 const TAB_ORDER = ["groups", "chats", "home", "support", "profile"];
 
-function getTabIcon(routeName: string, color: string) {
+function getTabIcon(routeName: string, color: string, iconSize: number) {
     switch (routeName) {
         case "groups":
-            return <Icons.GroupsIcon size={R.iconSize} color={color} />;
+            return <Icons.GroupsIcon size={iconSize} color={color} />;
         case "chats":
-            return <Icons.ChatIcon size={R.iconSize} color={color} />;
+            return <Icons.ChatIcon size={iconSize} color={color} />;
         case "home":
-            return <Icons.HomeIcon size={R.iconSize} color={color} />;
+            return <Icons.HomeIcon size={iconSize} color={color} />;
         case "support":
-            return <Icons.SupportIcon size={R.iconSize} color={color} />;
+            return <Icons.SupportIcon size={iconSize} color={color} />;
         case "profile":
-            return <Icons.UserIcon size={R.iconSize} color={color} />;
+            return <Icons.UserIcon size={iconSize} color={color} />;
         default:
             return null;
     }
@@ -118,6 +115,10 @@ function AnimatedTabItem({
     onLongPress,
     badge,
     scaleFont,
+    iconSize,
+    badgeSize,
+    fontSize,
+    tabItemMinWidth,
 }: {
     isFocused: boolean;
     routeName: string;
@@ -127,6 +128,10 @@ function AnimatedTabItem({
     onLongPress: () => void;
     badge?: number;
     scaleFont: (size: number) => number;
+    iconSize: number;
+    badgeSize: number;
+    fontSize: number;
+    tabItemMinWidth: number;
 }) {
     const { t } = useLanguage();
     const progress = useSharedValue(isFocused ? 1 : 0);
@@ -159,21 +164,21 @@ function AnimatedTabItem({
             activeOpacity={0.7}
             onPress={onPress}
             onLongPress={onLongPress}
-            style={[styles.tabItem, { minWidth: R.tabItemMinWidth }]}
+            style={[styles.tabItem, { minWidth: tabItemMinWidth }]}
         >
             <View>
-                {getTabIcon(routeName, color)}
+                {getTabIcon(routeName, color, iconSize)}
                 {!!badge && badge > 0 && (
                     <View
                         style={[
                             styles.badge,
-                            { width: R.badgeSize, height: R.badgeSize },
+                            { width: badgeSize, height: badgeSize },
                         ]}
                     >
                         <ThemedText
                             style={[
                                 styles.badgeText,
-                                { fontSize: scaleFont(R.fontSize - 2) },
+                                { fontSize: scaleFont(fontSize - 2) },
                             ]}
                         >
                             {badge > 99 ? "99+" : badge}
@@ -221,6 +226,8 @@ export function CustomTabBar({
     const shortDimension = Math.min(width, height);
     const scaleFactor = Math.min(shortDimension / 375, 1.25);
     const scaleFont = (size: number) => Math.round(scaleFactor * size);
+    
+    const R = getResponsiveSizes(width);
 
     const sortedRoutes = TAB_ORDER.map((name) => {
         const index = state.routes.findIndex((r) => r.name === name);
@@ -376,6 +383,10 @@ export function CustomTabBar({
                                                     handleLongPress(item.route)
                                                 }
                                                 scaleFont={scaleFont}
+                                                iconSize={R.iconSize}
+                                                badgeSize={R.badgeSize}
+                                                fontSize={R.fontSize}
+                                                tabItemMinWidth={R.tabItemMinWidth}
                                             />
                                         );
                                     })}
@@ -417,6 +428,10 @@ export function CustomTabBar({
                                                     handleLongPress(item.route)
                                                 }
                                                 scaleFont={scaleFont}
+                                                iconSize={R.iconSize}
+                                                badgeSize={R.badgeSize}
+                                                fontSize={R.fontSize}
+                                                tabItemMinWidth={R.tabItemMinWidth}
                                             />
                                         );
                                     })}

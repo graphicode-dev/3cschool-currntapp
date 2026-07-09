@@ -55,8 +55,12 @@ export const applyRTL = (lang: string): void => {
  * Called only from within React callbacks — never at module load time.
  */
 export const saveLanguage = async (lang: string): Promise<void> => {
-    const SecureStore = await import("expo-secure-store");
-    await SecureStore.setItemAsync(LANGUAGE_KEY, lang);
+    try {
+        const SecureStore = await import("expo-secure-store");
+        await SecureStore.setItemAsync(LANGUAGE_KEY, lang);
+    } catch (e) {
+        console.warn("Failed to save language", e);
+    }
 };
 
 /**
@@ -64,7 +68,12 @@ export const saveLanguage = async (lang: string): Promise<void> => {
  * Called only from within useEffect — never at module load time.
  */
 export const loadSavedLanguage = async (): Promise<string> => {
-    const SecureStore = await import("expo-secure-store");
-    const saved = await SecureStore.getItemAsync(LANGUAGE_KEY);
-    return saved ?? "en";
+    try {
+        const SecureStore = await import("expo-secure-store");
+        const saved = await SecureStore.getItemAsync(LANGUAGE_KEY);
+        return saved ?? "en";
+    } catch (e) {
+        console.warn("Failed to load language", e);
+        return "en";
+    }
 };

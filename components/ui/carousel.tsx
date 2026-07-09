@@ -8,6 +8,7 @@ import {
     StyleSheet,
     View,
     ViewToken,
+    useWindowDimensions,
 } from "react-native";
 import Animated, {
     useAnimatedStyle,
@@ -15,9 +16,7 @@ import Animated, {
     withTiming,
 } from "react-native-reanimated";
 
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const SLIDE_MARGIN = Spacing.lg;
-const SLIDE_WIDTH = SCREEN_WIDTH - SLIDE_MARGIN * 2;
 
 const DOT_INACTIVE_SIZE = 8;
 const DOT_ACTIVE_WIDTH = 28;
@@ -80,6 +79,8 @@ const Carousel = ({
     autoSlide?: boolean;
     autoSlideInterval?: number;
 }) => {
+    const { width: SCREEN_WIDTH } = useWindowDimensions();
+    const SLIDE_WIDTH = SCREEN_WIDTH - SLIDE_MARGIN * 2;
     const [activeIndex, setActiveIndex] = useState(0);
     const flatListRef = useRef<FlatList>(null);
 
@@ -149,12 +150,12 @@ const Carousel = ({
         ({ item }: { item: any }) => {
             // If item is a React component, render it directly
             if (React.isValidElement(item)) {
-                return <View style={[styles.slide, { height }]}>{item}</View>;
+                return <View style={[styles.slide, { height, width: SLIDE_WIDTH }]}>{item}</View>;
             }
 
             // Otherwise, treat it as an image source
             return (
-                <View style={[styles.slide, { height }]}>
+                <View style={[styles.slide, { height, width: SLIDE_WIDTH }]}>
                     <Image
                         source={item}
                         style={styles.image}
@@ -164,7 +165,7 @@ const Carousel = ({
                 </View>
             );
         },
-        [height],
+        [height, SLIDE_WIDTH],
     );
 
     const getItemLayout = useCallback(
@@ -173,7 +174,7 @@ const Carousel = ({
             offset: (SLIDE_WIDTH + Spacing.sm) * index,
             index,
         }),
-        [],
+        [SLIDE_WIDTH],
     );
 
     return (
@@ -214,7 +215,6 @@ const styles = StyleSheet.create({
         gap: Spacing.sm,
     },
     slide: {
-        width: SLIDE_WIDTH,
         borderRadius: Radii.xl,
         overflow: "hidden",
     },

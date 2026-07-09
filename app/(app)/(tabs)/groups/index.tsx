@@ -27,6 +27,13 @@ import { StyleSheet, View } from "react-native";
 
 // ─── Banner session picker ────────────────────────────────────────────────────
 
+const parseSafe = (s: Session) => {
+    if (s.start_date.includes(" ") && s.start_date.includes(":")) {
+        return new Date(s.start_date.replace(" ", "T"));
+    }
+    return new Date(`${s.start_date}T${s.start_time}`);
+};
+
 function pickBannerSession(upcoming: Session[]): Session | null {
     if (!upcoming.length) return null;
 

@@ -10,7 +10,6 @@ const useNotificationHandler = (receivedNotification: any | null) => {
 
     useEffect(() => {
         if (!receivedNotification) return;
-
         toast.success(t("ui.newNotification"));
 
     }, [receivedNotification, pathname]);

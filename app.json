@@ -70,7 +70,8 @@
           "supportsPictureInPicture": true
         }
       ],
-      "expo-font"
+      "expo-font",
+      "./withRemoveInvalidScheme.js"
     ],
     "experiments": {
       "typedRoutes": true,

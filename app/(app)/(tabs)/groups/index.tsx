@@ -27,13 +27,6 @@ import { StyleSheet, View } from "react-native";
 
 // ─── Banner session picker ────────────────────────────────────────────────────
 
-const parseSafe = (s: Session) => {
-    if (s.start_date.includes(" ") && s.start_date.includes(":")) {
-        return new Date(s.start_date.replace(" ", "T"));
-    }
-    return new Date(`${s.start_date}T${s.start_time}`);
-};
-
 function pickBannerSession(upcoming: Session[]): Session | null {
     if (!upcoming.length) return null;
 
@@ -177,7 +170,10 @@ export default function GroupsScreen() {
                 <View
                     style={[
                         styles.bannerSection,
-                        !bannerSession && { paddingBottom: 0, marginBottom: 20 },
+                        !bannerSession && {
+                            paddingBottom: 0,
+                            marginBottom: 20,
+                        },
                     ]}
                 >
                     {bannerSession && (
@@ -194,7 +190,11 @@ export default function GroupsScreen() {
                     {!sessionsLoading && bannerSession && (
                         <ProgressCard
                             label={t("groups.index.nextSession")}
-                            highlight={nextSessionDate ? `${nextSessionDate.toLocaleDateString()} - ${nextSessionDate.toLocaleTimeString()}` : undefined}
+                            highlight={
+                                nextSessionDate
+                                    ? `${nextSessionDate.toLocaleDateString()} - ${nextSessionDate.toLocaleTimeString()}`
+                                    : undefined
+                            }
                             elapsed={doneSessions}
                             total={Math.max(totalSessions, 1)}
                             nextSessionDate={nextSessionDate!}
@@ -213,11 +213,19 @@ export default function GroupsScreen() {
                     {!sessionsLoading && !bannerSession && (
                         <ProgressCard
                             label={t("groups.index.nextSession")}
-                            highlight={nextSessionDate ? `${nextSessionDate.toLocaleDateString()} - ${nextSessionDate.toLocaleTimeString()}` : undefined}
+                            highlight={
+                                nextSessionDate
+                                    ? `${nextSessionDate.toLocaleDateString()} - ${nextSessionDate.toLocaleTimeString()}`
+                                    : undefined
+                            }
                             elapsed={doneSessions}
                             total={Math.max(totalSessions, 1)}
                             nextSessionDate={nextSessionDate!}
-                            style={{ marginBottom: 12, marginTop: 4, width: "100%" }}
+                            style={{
+                                marginBottom: 12,
+                                marginTop: 4,
+                                width: "100%",
+                            }}
                         />
                     )}
 

@@ -15,7 +15,7 @@
     "ios": {
       "requireFullScreen": false,
       "supportsTablet": true,
-      "bundleIdentifier": "com.graphicode.3cschool",
+      "bundleIdentifier": "3cschool",
       "buildNumber": "3",
       "icon": {
         "dark": "./assets/icon/ios-adaptive-dark-icon.png",

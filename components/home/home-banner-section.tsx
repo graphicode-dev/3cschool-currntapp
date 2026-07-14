@@ -43,7 +43,7 @@ function Dot({ isActive }: { isActive: boolean }) {
             { damping: 14, stiffness: 200 },
         );
         scale.value = withSpring(isActive ? 1.1 : 1);
-    }, [isActive]);
+    }, [isActive, scale, width]);
 
     const animatedStyle = useAnimatedStyle(() => ({
         width: width.value,
@@ -109,14 +109,18 @@ const InlineVideoCard = ({
         setUserTappedPlay(true);
         try {
             player.play();
-        } catch (_) {}
+        } catch {
+            /* ignore play errors */
+        }
     }, [player, hasFinished, onPlayingChange]);
 
     useEffect(() => {
         if (!isActive) {
             try {
                 player.pause();
-            } catch (_) {}
+            } catch {
+                /* ignore pause errors */
+            }
             if (!isPlaying) {
                 setUserTappedPlay(false);
                 onPlayingChange(false);
@@ -129,7 +133,9 @@ const InlineVideoCard = ({
             if (state.match(/inactive|background/)) {
                 try {
                     player.pause();
-                } catch (_) {}
+                } catch {
+                    /* ignore pause errors */
+                }
             }
         });
         return () => sub.remove();
@@ -413,7 +419,7 @@ const HomeBannerSection = () => {
     useEffect(() => {
         startAutoSlide();
         return () => stopAutoSlide();
-    }, [sortedBanners.length]);
+    }, [sortedBanners.length, startAutoSlide, stopAutoSlide]);
 
     const onViewableItemsChanged = useRef(
         ({ viewableItems }: { viewableItems: ViewToken[] }) => {

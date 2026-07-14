@@ -52,7 +52,7 @@ const AnimatedItem: React.FC<{
                 { cancelable: true },
             );
         },
-        [task.title],
+        [task.title, onRequestDelete, opacity, t, translateX],
     );
 
     return (

@@ -36,7 +36,7 @@ export const Skeleton: React.FC<SkeletonProps> = ({
         pulseAnimation.start();
 
         return () => pulseAnimation.stop();
-    }, []);
+    }, [opacity]);
 
     return (
         <Animated.View

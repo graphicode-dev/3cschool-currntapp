@@ -11,7 +11,7 @@ import {
 import { ImageBackground } from "expo-image";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import React, { useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import {
     Animated,
     Image,
@@ -64,7 +64,7 @@ function Bubble({
                 useNativeDriver: true,
             }),
         ]).start();
-    }, []);
+    }, [aOpac, aScale, delay]);
 
     const sz = hs(size);
 
@@ -119,14 +119,14 @@ export default function SplashScreen() {
     const titleTranslate = useRef(new Animated.Value(-20)).current;
     const skipOpacity = useRef(new Animated.Value(0)).current;
 
-    const navigateDependingOnAuth = () => {
+    const navigateDependingOnAuth = useCallback(() => {
         const { isAuthenticated } = useAuthStore.getState();
         if (isAuthenticated) {
             router.push("/(app)/(tabs)/home");
         } else {
             router.push("/(auth)/login");
         }
-    };
+    }, []);
 
     useEffect(() => {
         Animated.parallel([
@@ -152,7 +152,7 @@ export default function SplashScreen() {
             await new Promise((r) => setTimeout(r, 3000));
             navigateDependingOnAuth();
         })();
-    }, []);
+    }, [navigateDependingOnAuth, skipOpacity, titleOpacity, titleTranslate]);
 
     return (
         <ImageBackground source={Images.splashBg} style={styles.container}>

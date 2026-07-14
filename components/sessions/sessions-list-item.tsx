@@ -49,41 +49,6 @@ function fmtTime(timeStr: string) {
     }
 }
 
-function getStatusBadgeStyle(
-    status: "upcoming" | "completed" | "current" | null,
-) {
-    switch (status) {
-        case "upcoming":
-            return {
-                backgroundColor: "#fef3c7",
-                borderColor: "#f59e0b",
-                textColor: "#f59e0b",
-                label: "Upcoming",
-            };
-        case "current":
-            return {
-                backgroundColor: "#f0f9ff",
-                borderColor: "#3b82f6",
-                textColor: "#3b82f6",
-                label: "Current",
-            };
-        case "completed":
-            return {
-                backgroundColor: "#f0fdf4",
-                borderColor: "#22c55e",
-                textColor: "#22c55e",
-                label: "Completed",
-            };
-        default:
-            return {
-                backgroundColor: "#f3f4f6",
-                borderColor: "#9ca3af",
-                textColor: "#9ca3af",
-                label: "Pending",
-            };
-    }
-}
-
 const SessionsListItem = ({ groupId, session, isUpcoming = false }: Props) => {
     const { t } = useLanguage();
     const [isJoining, setIsJoining] = useState(false);
@@ -91,7 +56,6 @@ const SessionsListItem = ({ groupId, session, isUpcoming = false }: Props) => {
         session.session_info?.title ?? `Session #${session.session_number}`;
     const hasRecording = !!session.recording_url;
     const hasJoin = !!session.api_join_url;
-    const statusStyle = getStatusBadgeStyle(session.session_status);
 
     return (
         <View style={styles.container}>

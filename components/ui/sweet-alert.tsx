@@ -61,7 +61,7 @@ const SweetAlert: React.FC<SweetAlertProps> = ({
                 }),
             ]).start();
         }
-    }, [visible]);
+    }, [visible, fadeAnim, scaleAnim]);
 
     const getColors = () => {
         switch (type) {

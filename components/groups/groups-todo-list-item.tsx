@@ -48,7 +48,7 @@ const GroupsTasksListItem: React.FC<Props> = ({
                 useNativeDriver: true,
             }),
         ]).start();
-    }, []);
+    }, [index, mountOpacity, mountY]);
 
     // Checkbox bounce
     const checkScale = useRef(new Animated.Value(1)).current;

@@ -57,21 +57,22 @@ export function DonutChart({
     );
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+    const nextSessionTime = nextSessionDate?.getTime();
+
     useEffect(() => {
-        if (!nextSessionDate) {
+        if (nextSessionTime == null) {
             setMsLeft(-1);
             return;
         }
         const tick = () => {
-            const newMsLeft = nextSessionDate.getTime() - Date.now();
-            setMsLeft(newMsLeft);
+            setMsLeft(nextSessionTime - Date.now());
         };
         tick();
         intervalRef.current = setInterval(tick, 60_000);
         return () => {
             if (intervalRef.current) clearInterval(intervalRef.current);
         };
-    }, [nextSessionDate?.getTime()]);
+    }, [nextSessionTime]);
 
     // Center always shows countdown — never the session count
     const { top, bottom } = nextSessionDate

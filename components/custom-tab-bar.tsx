@@ -7,7 +7,6 @@ import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect } from "react";
 import {
-    Dimensions,
     Platform,
     StyleSheet,
     TouchableOpacity,
@@ -18,7 +17,6 @@ import {
 import { useLanguage } from "@/contexts/language-context";
 import { moderateScale } from "@/utils";
 import Animated, {
-    interpolateColor,
     useAnimatedStyle,
     useSharedValue,
     withSpring,
@@ -134,23 +132,13 @@ function AnimatedTabItem({
     tabItemMinWidth: number;
 }) {
     const { t } = useLanguage();
-    const progress = useSharedValue(isFocused ? 1 : 0);
     const dotScale = useSharedValue(isFocused ? 1 : 0);
     const dotOpacity = useSharedValue(isFocused ? 1 : 0);
 
     useEffect(() => {
-        progress.value = withTiming(isFocused ? 1 : 0, { duration: 250 });
         dotScale.value = withSpring(isFocused ? 1 : 0, SPRING_CONFIG);
         dotOpacity.value = withTiming(isFocused ? 1 : 0, { duration: 200 });
-    }, [isFocused]);
-
-    const animatedLabelStyle = useAnimatedStyle(() => ({
-        color: interpolateColor(
-            progress.value,
-            [0, 1],
-            [defaultColor, selectedColor],
-        ),
-    }));
+    }, [isFocused, dotScale, dotOpacity]);
 
     const animatedDotStyle = useAnimatedStyle(() => ({
         transform: [{ scale: dotScale.value }],
@@ -205,7 +193,7 @@ function AnimatedCenterDot({ isActive }: { isActive: boolean }) {
     useEffect(() => {
         dotScale.value = withSpring(isActive ? 1 : 0, SPRING_CONFIG);
         dotOpacity.value = withTiming(isActive ? 1 : 0, { duration: 200 });
-    }, [isActive]);
+    }, [isActive, dotScale, dotOpacity]);
 
     const animatedStyle = useAnimatedStyle(() => ({
         transform: [{ scale: dotScale.value }],

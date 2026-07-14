@@ -48,7 +48,7 @@ const GroupsMyTasks: React.FC = () => {
 
         addTask(trimmed);
         setInputValue("");
-    }, [inputValue, addTask]);
+    }, [inputValue, addTask, addBtnScale]);
 
     return (
         <KeyboardAvoidingView

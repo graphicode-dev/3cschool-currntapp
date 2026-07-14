@@ -3,7 +3,6 @@ import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useCallback, useRef, useState } from "react";
 import {
-    Dimensions,
     FlatList,
     StyleSheet,
     View,
@@ -44,7 +43,7 @@ function Dot({ isActive }: { isActive: boolean }) {
         opacity.value = withTiming(isActive ? 1 : 0.5, {
             duration: ANIMATION_DURATION,
         });
-    }, [isActive]);
+    }, [isActive, width, opacity]);
 
     const animatedStyle = useAnimatedStyle(() => ({
         width: width.value,
@@ -123,7 +122,7 @@ const Carousel = ({
                 });
             }
         },
-        [sources.length],
+        [sources.length, SLIDE_WIDTH],
     );
 
     React.useEffect(() => {
@@ -144,6 +143,7 @@ const Carousel = ({
         activeIndex,
         sources.length,
         initialIndex,
+        SLIDE_WIDTH,
     ]);
 
     const renderItem = useCallback(

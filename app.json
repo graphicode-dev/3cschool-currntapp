@@ -8,15 +8,15 @@
     ],
     "name": "3c",
     "slug": "3c",
-    "version": "1.0.1",
-    "orientation": "default",
+    "version": "1.0.2",
+    "orientation": "portrait",
     "icon": "./assets/icon/ios-adaptive-light-icon.png",
     "userInterfaceStyle": "automatic",
     "ios": {
       "requireFullScreen": false,
       "supportsTablet": true,
       "bundleIdentifier": "3cschool",
-      "buildNumber": "3",
+      "buildNumber": "4",
       "icon": {
         "dark": "./assets/icon/ios-adaptive-dark-icon.png",
         "light": "./assets/icon/ios-adaptive-light-icon.png"
@@ -71,6 +71,8 @@
         }
       ],
       "expo-font",
+      "expo-image",
+      "expo-web-browser",
       "./withRemoveInvalidScheme.js"
     ],
     "experiments": {

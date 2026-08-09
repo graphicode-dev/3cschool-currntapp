@@ -2,6 +2,8 @@ import { applyRTL, loadSavedLanguage } from "@/i18n";
 import Providers from "@/providers";
 import { tokenService } from "@/services/auth/tokenService";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Sentry from "@sentry/react-native";
+import { isRunningInExpoGo } from "expo";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -10,9 +12,20 @@ import { useEffect, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
 
+Sentry.init({
+    dsn: "https://ee7123341869cb33cc367394ff18e836@o4511881600368640.ingest.us.sentry.io/4511881604169728",
+    tracesSampleRate: 1.0,
+    integrations: [
+        Sentry.expoRouterIntegration({
+            enableTimeToInitialDisplay: !isRunningInExpoGo(),
+        }),
+    ],
+    enableNativeFramesTracking: !isRunningInExpoGo(),
+});
+
 SplashScreen.preventAutoHideAsync();
 
-export default function RootLayout() {
+function RootLayout() {
     const enableClearStorage = false;
 
     // Both must be true before we render — prevents screens from firing
@@ -79,3 +92,5 @@ export default function RootLayout() {
         </GestureHandlerRootView>
     );
 }
+
+export default Sentry.wrap(RootLayout);

@@ -11,7 +11,6 @@ export const authApi = {
             throw new Error(res.message);
         }
 
-        // Extract user from successful response
         const responseData = res.data as any;
         const user = responseData?.data?.token
             ? responseData.data

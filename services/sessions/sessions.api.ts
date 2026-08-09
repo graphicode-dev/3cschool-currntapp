@@ -17,7 +17,7 @@
 
 import { ApiResponse } from "@/services/api";
 import { api } from "@/services/api/client";
-import { AllSessionsResponse, GroupSessionsResponse } from "./sessions.types";
+import { AllSessionsResponse, GroupSessionsResponse, Session } from "./sessions.types";
 
 const BASE_URL = "/groups";
 
@@ -40,13 +40,17 @@ export const sessionsApi = {
             throw response.error;
         }
 
-        if (!response.data?.data) {
-            throw new Error("No data returned from server");
+        const rawData = response.data?.data ?? response.data;
+        if (!rawData) {
+            return {
+                upcoming: [],
+                past: [],
+                total_upcoming: 0,
+                total_past: 0,
+            };
         }
 
-        const rawData = response.data.data;
-        
-        // Normalize the data if backend returns an array
+        // Normalize the data if backend returns a raw array
         if (Array.isArray(rawData)) {
             return {
                 upcoming: rawData,
@@ -56,12 +60,29 @@ export const sessionsApi = {
             };
         }
 
-        // Normalize if backend returns snake_case or standard keys
+        // Extract upcoming sessions array flexibly
+        const upcomingList: Session[] =
+            rawData.upcoming ??
+            rawData.upcoming_sessions ??
+            rawData.active_sessions ??
+            rawData.active ??
+            rawData.sessions ??
+            [];
+
+        // Extract past sessions array flexibly
+        const pastList: Session[] =
+            rawData.past ??
+            rawData.past_sessions ??
+            rawData.completed_sessions ??
+            rawData.completed ??
+            rawData.history ??
+            [];
+
         return {
-            upcoming: rawData.upcoming ?? rawData.upcoming_sessions ?? [],
-            past: rawData.past ?? rawData.past_sessions ?? [],
-            total_upcoming: rawData.total_upcoming ?? rawData.upcoming?.length ?? rawData.upcoming_sessions?.length ?? 0,
-            total_past: rawData.total_past ?? rawData.past?.length ?? rawData.past_sessions?.length ?? 0,
+            upcoming: upcomingList,
+            past: pastList,
+            total_upcoming: rawData.total_upcoming ?? upcomingList.length,
+            total_past: rawData.total_past ?? pastList.length,
         };
     },
 
@@ -81,13 +102,16 @@ export const sessionsApi = {
             throw response.error;
         }
 
-        if (!response.data?.data) {
-            throw new Error("No data returned from server");
+        const rawData = response.data?.data ?? response.data;
+        if (!rawData) {
+            return {
+                group_id: Number(groupId),
+                group_name: "Group",
+                sessions: [],
+            };
         }
 
-        const rawData = response.data.data;
-
-        // Normalize if backend returns an array
+        // Normalize if backend returns a raw array
         if (Array.isArray(rawData)) {
             return {
                 group_id: Number(groupId),
@@ -96,10 +120,15 @@ export const sessionsApi = {
             };
         }
 
+        const sessionsList =
+            rawData.sessions ??
+            rawData.data ??
+            (Array.isArray(rawData) ? rawData : []);
+
         return {
             group_id: rawData.group_id ?? Number(groupId),
             group_name: rawData.group_name ?? "Group",
-            sessions: rawData.sessions ?? [],
+            sessions: Array.isArray(sessionsList) ? sessionsList : [],
         };
     },
 };

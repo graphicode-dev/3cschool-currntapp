@@ -120,11 +120,20 @@ const NotificationProviderInner: React.FC<{ children: ReactNode }> = ({
             setExpoPushToken(token);
 
             await notificationsApi.savePushToken(token);
-        } catch (error) {
-            console.error(
-                "[NotificationProvider] Failed to register push token:",
-                error,
-            );
+        } catch (error: any) {
+            const isEntitlementError =
+                error?.message?.includes("aps-environment") ||
+                error?.message?.includes("entitlement");
+            if (isEntitlementError) {
+                console.warn(
+                    "[NotificationProvider] Push notifications not active on device: missing iOS aps-environment entitlement.",
+                );
+            } else {
+                console.warn(
+                    "[NotificationProvider] Failed to register push token:",
+                    error?.message || error,
+                );
+            }
         }
     };
 

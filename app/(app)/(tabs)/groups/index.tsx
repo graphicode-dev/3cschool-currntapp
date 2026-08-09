@@ -27,46 +27,60 @@ import { StyleSheet, View } from "react-native";
 
 // ─── Banner session picker ────────────────────────────────────────────────────
 
+// Helper to safely parse dates across JS engines (iOS Hermes / JSC / Web)
+function parseSessionDate(s: Session): Date | null {
+    if (!s || !s.start_date) return null;
+
+    try {
+        const rawDate = String(s.start_date).trim();
+        const rawTime = s.start_time ? String(s.start_time).trim() : "";
+
+        // Case 1: start_date already contains time (e.g. "2026-08-10 15:00:00" or "2026-08-10T15:00:00")
+        if (rawDate.includes(" ") || rawDate.includes("T")) {
+            const isoStr = rawDate.replace(" ", "T");
+            const d = new Date(isoStr);
+            if (!isNaN(d.getTime())) return d;
+        }
+
+        // Case 2: start_date is "YYYY-MM-DD" and start_time is "HH:mm" or "HH:mm:ss"
+        if (rawTime) {
+            const combinedStr = `${rawDate}T${rawTime}`;
+            const d = new Date(combinedStr);
+            if (!isNaN(d.getTime())) return d;
+        }
+
+        // Fallback: try parsing rawDate directly
+        const d = new Date(rawDate);
+        return isNaN(d.getTime()) ? null : d;
+    } catch {
+        return null;
+    }
+}
+
 function pickBannerSession(upcoming: Session[]): Session | null {
-    if (!upcoming.length) return null;
+    if (!upcoming?.length) return null;
 
     const now = new Date();
 
-    // Helper to safely parse dates across JS engines (iOS JSC)
-    const parseSafe = (s: Session) => {
-        if (s.start_date.includes(" ") && s.start_date.includes(":")) {
-            return new Date(s.start_date.replace(" ", "T"));
-        }
-        return new Date(`${s.start_date}T${s.start_time}`);
-    };
-
     // 1. Prefer ongoing (started within the past 3 h and not yet finished)
     const ongoing = upcoming.find((s) => {
-        try {
-            const start = parseSafe(s);
-            const ms = now.getTime() - start.getTime();
-            return ms >= 0 && ms < 3 * 60 * 60 * 1000;
-        } catch {
-            return false;
-        }
+        const start = parseSessionDate(s);
+        if (!start) return false;
+        const ms = now.getTime() - start.getTime();
+        return ms >= 0 && ms < 3 * 60 * 60 * 1000;
     });
     if (ongoing) return ongoing;
 
     // 2. Earliest future session
     const future = upcoming
         .filter((s) => {
-            try {
-                return parseSafe(s) > now;
-            } catch {
-                return false;
-            }
+            const start = parseSessionDate(s);
+            return start ? start > now : false;
         })
         .sort((a, b) => {
-            try {
-                return parseSafe(a).getTime() - parseSafe(b).getTime();
-            } catch {
-                return 0;
-            }
+            const dateA = parseSessionDate(a)?.getTime() ?? 0;
+            const dateB = parseSessionDate(b)?.getTime() ?? 0;
+            return dateA - dateB;
         });
 
     return future[0] ?? upcoming[0];
@@ -118,45 +132,23 @@ export default function GroupsScreen() {
     const nextSessionDate = useMemo(() => {
         const now = Date.now();
 
-        // Helper to safely parse dates across JS engines (iOS JSC)
-        const parseSafe = (s: Session) => {
-            if (s.start_date.includes(" ") && s.start_date.includes(":")) {
-                return new Date(s.start_date.replace(" ", "T"));
-            }
-            return new Date(`${s.start_date}T${s.start_time}`);
-        };
-
         const future = (sessionsData?.upcoming ?? [])
             .filter((s) => {
-                try {
-                    const sessionDate = parseSafe(s);
-                    const sessionTime = sessionDate.getTime();
-                    // Must be valid date to be future
-                    if (isNaN(sessionTime)) return false;
-                    return sessionTime > now;
-                } catch (error) {
-                    console.error(`❌ Invalid date for session ${s.id}:`, {
-                        start_date: s.start_date,
-                        start_time: s.start_time,
-                        error,
-                    });
-                    return false;
-                }
+                const sessionDate = parseSessionDate(s);
+                if (!sessionDate) return false;
+                return sessionDate.getTime() > now;
             })
             .sort((a, b) => {
-                const dateA = parseSafe(a).getTime();
-                const dateB = parseSafe(b).getTime();
-                return (isNaN(dateA) ? 0 : dateA) - (isNaN(dateB) ? 0 : dateB);
+                const dateA = parseSessionDate(a)?.getTime() ?? 0;
+                const dateB = parseSessionDate(b)?.getTime() ?? 0;
+                return dateA - dateB;
             });
 
         if (!future.length) {
-            console.error("❌ No future sessions found");
             return undefined;
         }
 
-        const nextSession = parseSafe(future[0]);
-        // Double check it's a valid date object before returning
-        return isNaN(nextSession.getTime()) ? undefined : nextSession;
+        return parseSessionDate(future[0]) ?? undefined;
     }, [sessionsData?.upcoming]);
 
     return (

@@ -16,6 +16,9 @@
         },
         "production": {
             "autoIncrement": true,
+            "env": {
+                "SENTRY_ALLOW_FAILURE": "true"
+            },
             "android": {
                 "buildType": "app-bundle"
             },

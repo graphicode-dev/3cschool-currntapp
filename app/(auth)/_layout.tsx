@@ -7,6 +7,18 @@ export default function AuthLayout() {
     const [shouldRedirect, setShouldRedirect] = useState(false);
 
     useEffect(() => {
+        // Safety timeout to ensure _hasHydrated is forced to true
+        // so the layout never hangs on return null
+        const timer = setTimeout(() => {
+            if (!useAuthStore.getState()._hasHydrated) {
+                useAuthStore.setState({ _hasHydrated: true });
+            }
+        }, 500);
+
+        return () => clearTimeout(timer);
+    }, []);
+
+    useEffect(() => {
         if (_hasHydrated && isAuthenticated) {
             // Add a small delay to ensure auth state is fully settled
             const timer = setTimeout(() => {

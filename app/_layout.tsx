@@ -33,7 +33,7 @@ function RootLayout() {
     const [directionReady, setDirectionReady] = useState(false);
     const [tokenReady, setTokenReady] = useState(false);
 
-    const [fontsLoaded] = useFonts({
+    const [fontsLoaded, fontError] = useFonts({
         "Poppins-Regular": require("@/assets/fonts/Poppins/Poppins-Regular.ttf"),
         "Poppins-Medium": require("@/assets/fonts/Poppins/Poppins-Medium.ttf"),
         "Poppins-SemiBold": require("@/assets/fonts/Poppins/Poppins-SemiBold.ttf"),
@@ -42,6 +42,18 @@ function RootLayout() {
         "Tajawal-Medium": require("@/assets/fonts/Tajawal/Tajawal-Medium.ttf"),
         "Tajawal-Bold": require("@/assets/fonts/Tajawal/Tajawal-Bold.ttf"),
     });
+
+    const isReady = (fontsLoaded || !!fontError) && directionReady && tokenReady;
+
+    // Safety fallback: Ensure RootLayout forces rendering after 1s even if something hangs
+    const [safetyReady, setSafetyReady] = useState(false);
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setSafetyReady(true);
+            SplashScreen.hideAsync();
+        }, 1000);
+        return () => clearTimeout(timer);
+    }, []);
 
     // Hydrate auth token from SecureStore into the in-memory cache so that
     // the synchronous Axios interceptor always finds it on cold start.
@@ -69,14 +81,14 @@ function RootLayout() {
     }, []);
 
     useEffect(() => {
-        if (fontsLoaded && directionReady && tokenReady) {
+        if (isReady) {
             SplashScreen.hideAsync();
         }
-    }, [fontsLoaded, directionReady, tokenReady]);
+    }, [isReady]);
 
     if (enableClearStorage) AsyncStorage.clear();
 
-    if (!fontsLoaded || !directionReady || !tokenReady) return null;
+    if (!isReady && !safetyReady) return null;
 
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>

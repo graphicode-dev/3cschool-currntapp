@@ -16,7 +16,7 @@
       "requireFullScreen": false,
       "supportsTablet": true,
       "bundleIdentifier": "3cschool",
-      "buildNumber": "6",
+      "buildNumber": "9",
       "icon": {
         "dark": "./assets/icon/ios-adaptive-dark-icon.png",
         "light": "./assets/icon/ios-adaptive-light-icon.png"

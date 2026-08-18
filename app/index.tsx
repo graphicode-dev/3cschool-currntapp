@@ -122,9 +122,9 @@ export default function SplashScreen() {
     const navigateDependingOnAuth = useCallback(() => {
         const { isAuthenticated } = useAuthStore.getState();
         if (isAuthenticated) {
-            router.push("/(app)/(tabs)/home");
+            router.replace("/(app)/(tabs)/home");
         } else {
-            router.push("/(auth)/login");
+            router.replace("/(auth)/login");
         }
     }, []);
 

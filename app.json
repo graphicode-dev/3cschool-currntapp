@@ -94,7 +94,7 @@
       },
       "apiUrl": "https://3cschool.net/api",
       "projectName": "3cschool",
-      "envMode": "development",
+      "envMode": "production",
       "auth": {
         "cookieExpiresDays": "7",
         "tokenKey": "3cschool_token",

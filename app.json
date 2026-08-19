@@ -15,8 +15,8 @@
     "ios": {
       "requireFullScreen": false,
       "supportsTablet": true,
-      "bundleIdentifier": "3cschool",
-      "buildNumber": "9",
+      "bundleIdentifier": "com.c3school.app",
+      "buildNumber": "11",
       "icon": {
         "dark": "./assets/icon/ios-adaptive-dark-icon.png",
         "light": "./assets/icon/ios-adaptive-light-icon.png"
@@ -51,14 +51,6 @@
           "dark": {
             "backgroundColor": "#000000"
           }
-        }
-      ],
-      [
-        "expo-notifications",
-        {
-          "icon": "./assets/icon/notification.png",
-          "color": "#ffffff",
-          "defaultChannel": "default"
         }
       ],
       "expo-localization",

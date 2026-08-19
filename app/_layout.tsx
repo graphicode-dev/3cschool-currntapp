@@ -15,11 +15,6 @@ import "react-native-reanimated";
 Sentry.init({
     dsn: "https://ee7123341869cb33cc367394ff18e836@o4511881600368640.ingest.us.sentry.io/4511881604169728",
     tracesSampleRate: 1.0,
-    integrations: [
-        Sentry.expoRouterIntegration({
-            enableTimeToInitialDisplay: !isRunningInExpoGo(),
-        }),
-    ],
     enableNativeFramesTracking: !isRunningInExpoGo(),
 });
 

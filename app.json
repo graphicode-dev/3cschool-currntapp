@@ -16,7 +16,7 @@
       "requireFullScreen": false,
       "supportsTablet": true,
       "bundleIdentifier": "3cschool",
-      "buildNumber": "16",
+      "buildNumber": "17",
       "icon": {
         "dark": "./assets/icon/ios-adaptive-dark-icon.png",
         "light": "./assets/icon/ios-adaptive-light-icon.png"
@@ -40,6 +40,14 @@
       "versionCode": 14
     },
     "plugins": [
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon/notification.png",
+          "color": "#ffffff",
+          "defaultChannel": "default"
+        }
+      ],
       "expo-router",
       [
         "expo-splash-screen",

@@ -39,50 +39,50 @@
       "package": "app.c3school.current",
       "versionCode": 14
     },
-    "plugins": [
-      [
-        "expo-notifications",
-        {
-          "icon": "./assets/icon/notification.png",
-          "color": "#ffffff",
-          "defaultChannel": "default"
-        }
-      ],
-      "expo-router",
-      [
-        "expo-splash-screen",
-        {
-          "image": "./assets/icon/splash-icon.png",
-          "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
-          "dark": {
-            "backgroundColor": "#000000"
-          }
-        }
-      ],
-      "expo-localization",
-      "expo-secure-store",
-      [
-        "expo-video",
-        {
-          "supportsBackgroundPlayback": false,
-          "supportsPictureInPicture": true
-        }
-      ],
-      "expo-font",
-      "expo-image",
-      "expo-web-browser",
-      "./withRemoveInvalidScheme.js",
-      [
-        "@sentry/react-native/expo",
-        {
-          "organization": "gostack-1h",
-          "project": "react-native",
-          "url": "https://sentry.io/"
-        }
-      ]
-    ],
+"plugins": [
+  [
+    "expo-notifications",
+    {
+      "icon": "./assets/icon/notification.png",
+      "color": "#ffffff",
+      "defaultChannel": "default"
+    }
+  ],
+  "expo-router",
+  [
+    "expo-splash-screen",
+    {
+      "image": "./assets/icon/splash-icon.png",
+      "imageWidth": 200,
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff",
+      "dark": {
+        "backgroundColor": "#000000"
+      }
+    }
+  ],
+  "expo-localization",
+  "expo-secure-store",
+  [
+    "expo-video",
+    {
+      "supportsBackgroundPlayback": false,
+      "supportsPictureInPicture": false
+    }
+  ],
+  "expo-font",
+  "expo-image",
+  "expo-web-browser",
+  "./withRemoveInvalidScheme.js",
+  [
+    "@sentry/react-native/expo",
+    {
+      "organization": "gostack-1h",
+      "project": "react-native",
+      "url": "https://sentry.io/"
+    }
+  ]
+],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
